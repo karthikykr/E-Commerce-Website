@@ -1,39 +1,193 @@
 const express = require('express');
+const { body, validationResult } = require('express-validator');
+const { Category, Product } = require('../models');
+const adminAuth = require('../middleware/adminAuth');
+
 const router = express.Router();
 
 // @route   GET /api/categories
 // @desc    Get all categories
 // @access  Public
-router.get('/', (req, res) => {
-  res.json({ message: 'Get all categories endpoint - Coming soon' });
+router.get('/', async (req, res) => {
+  try {
+    const categories = await Category.find({ isActive: true })
+      .populate('productsCount')
+      .sort('sortOrder name');
+
+    res.json({
+      success: true,
+      data: categories
+    });
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching categories'
+    });
+  }
 });
 
 // @route   GET /api/categories/:id
 // @desc    Get category by ID
 // @access  Public
-router.get('/:id', (req, res) => {
-  res.json({ message: `Get category ${req.params.id} endpoint - Coming soon` });
+router.get('/:id', async (req, res) => {
+  try {
+    const category = await Category.findOne({
+      $or: [
+        { _id: req.params.id },
+        { slug: req.params.id }
+      ],
+      isActive: true
+    }).populate('productsCount');
+
+    if (!category) {
+      return res.status(404).json({
+        success: false,
+        message: 'Category not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: category
+    });
+  } catch (error) {
+    console.error('Error fetching category:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching category'
+    });
+  }
 });
 
 // @route   POST /api/categories
 // @desc    Create a new category
 // @access  Private (Admin only)
-router.post('/', (req, res) => {
-  res.json({ message: 'Create category endpoint - Coming soon' });
+router.post('/', [
+  adminAuth,
+  body('name').notEmpty().withMessage('Category name is required'),
+  body('description').optional().isLength({ max: 500 }).withMessage('Description cannot exceed 500 characters')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation errors',
+        errors: errors.array()
+      });
+    }
+
+    const category = new Category(req.body);
+    await category.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'Category created successfully',
+      data: category
+    });
+  } catch (error) {
+    console.error('Error creating category:', error);
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'Category with this slug already exists'
+      });
+    }
+    res.status(500).json({
+      success: false,
+      message: 'Server error while creating category'
+    });
+  }
 });
 
 // @route   PUT /api/categories/:id
 // @desc    Update category
 // @access  Private (Admin only)
-router.put('/:id', (req, res) => {
-  res.json({ message: `Update category ${req.params.id} endpoint - Coming soon` });
+router.put('/:id', [
+  adminAuth,
+  body('name').optional().notEmpty().withMessage('Category name cannot be empty'),
+  body('description').optional().isLength({ max: 500 }).withMessage('Description cannot exceed 500 characters')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation errors',
+        errors: errors.array()
+      });
+    }
+
+    const category = await Category.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (!category) {
+      return res.status(404).json({
+        success: false,
+        message: 'Category not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Category updated successfully',
+      data: category
+    });
+  } catch (error) {
+    console.error('Error updating category:', error);
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'Category with this slug already exists'
+      });
+    }
+    res.status(500).json({
+      success: false,
+      message: 'Server error while updating category'
+    });
+  }
 });
 
 // @route   DELETE /api/categories/:id
-// @desc    Delete category
+// @desc    Delete category (soft delete)
 // @access  Private (Admin only)
-router.delete('/:id', (req, res) => {
-  res.json({ message: `Delete category ${req.params.id} endpoint - Coming soon` });
+router.delete('/:id', adminAuth, async (req, res) => {
+  try {
+    const category = await Category.findById(req.params.id);
+    if (!category) {
+      return res.status(404).json({
+        success: false,
+        message: 'Category not found'
+      });
+    }
+
+    // Check if category has products
+    const productCount = await Product.countDocuments({ category: req.params.id, isActive: true });
+    if (productCount > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete category with active products'
+      });
+    }
+
+    // Soft delete by setting isActive to false
+    await Category.findByIdAndUpdate(req.params.id, { isActive: false });
+
+    res.json({
+      success: true,
+      message: 'Category deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting category:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while deleting category'
+    });
+  }
 });
 
 module.exports = router;
