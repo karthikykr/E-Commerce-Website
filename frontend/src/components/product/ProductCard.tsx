@@ -1,10 +1,43 @@
 'use client';
 
 import Link from 'next/link';
-import { Product } from '@/types';
 import { Button } from '@/components/ui/Button';
+import { ProductCardWrapper } from '@/components/ui/Card';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
+import { useToast } from '@/components/ui/Toast';
+import { formatPriceWithDiscount } from '@/utils/currency';
+
+interface Product {
+  _id: string;
+  name: string;
+  description: string;
+  shortDescription?: string;
+  price: number;
+  originalPrice?: number;
+  category: {
+    _id: string;
+    name: string;
+    slug: string;
+  };
+  images: Array<{
+    url: string;
+    alt: string;
+    isPrimary: boolean;
+  }>;
+  inStock: boolean;
+  stockQuantity: number;
+  weight: {
+    value: number;
+    unit: string;
+  };
+  origin: string;
+  tags: string[];
+  rating: number;
+  reviewCount: number;
+  isFeatured: boolean;
+  discountPercentage?: number;
+}
 
 interface ProductCardProps {
   product: Product;
@@ -13,17 +46,32 @@ interface ProductCardProps {
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addToCart, isLoading: cartLoading } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist, isLoading: wishlistLoading } = useWishlist();
+  const { addToast } = useToast();
 
-  const discountPercentage = product.originalPrice
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-    : 0;
+  const priceInfo = formatPriceWithDiscount(product.price, product.originalPrice);
+
+  const productId = product._id;
+  const primaryImage = product.images?.find(img => img.isPrimary) || product.images?.[0];
+  const weightDisplay = `${product.weight.value}${product.weight.unit}`;
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const success = await addToCart(product.id, 1);
+    const success = await addToCart(productId, 1);
     if (success) {
-      alert(`Added ${product.name} to cart!`);
+      addToast({
+        type: 'success',
+        title: 'Added to Cart!',
+        message: `${product.name} has been added to your cart.`,
+        duration: 3000,
+      });
+    } else {
+      addToast({
+        type: 'error',
+        title: 'Failed to Add',
+        message: 'Could not add item to cart. Please try again.',
+        duration: 3000,
+      });
     }
   };
 
@@ -31,40 +79,66 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (isInWishlist(product.id)) {
-      const success = await removeFromWishlist(product.id);
+    if (isInWishlist(productId)) {
+      const success = await removeFromWishlist(productId);
       if (success) {
-        alert(`Removed ${product.name} from wishlist!`);
+        addToast({
+          type: 'info',
+          title: 'Removed from Wishlist',
+          message: `${product.name} has been removed from your wishlist.`,
+          duration: 3000,
+        });
       }
     } else {
-      const success = await addToWishlist(product.id);
+      const success = await addToWishlist(productId);
       if (success) {
-        alert(`Added ${product.name} to wishlist!`);
+        addToast({
+          type: 'success',
+          title: 'Added to Wishlist!',
+          message: `${product.name} has been added to your wishlist.`,
+          duration: 3000,
+        });
       }
     }
   };
 
   return (
-    <Link href={`/products/${product.id}`}>
-      <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden group">
+    <ProductCardWrapper featured={product.isFeatured} className="hover-lift animate-fade-in-up">
+      <Link href={`/products/${productId}`} className="block">
         {/* Product Image */}
-        <div className="relative h-48 bg-gray-100 flex items-center justify-center">
-          {/* Placeholder for product image */}
-          <div className="text-6xl">
-            {product.category.image}
-          </div>
+        <div className="relative h-56 bg-gradient-to-br from-orange-50 via-amber-50 to-red-50 flex items-center justify-center overflow-hidden">
+          {primaryImage ? (
+            <img
+              src={primaryImage.url}
+              alt={primaryImage.alt || product.name}
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+            />
+          ) : (
+            <div className="text-6xl group-hover:scale-110 transition-transform duration-300">
+              🌶️
+            </div>
+          )}
 
           {/* Discount Badge */}
-          {discountPercentage > 0 && (
-            <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-md text-sm font-semibold">
-              -{discountPercentage}%
+          {priceInfo.hasDiscount && (
+            <div className="absolute top-3 left-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
+              -{priceInfo.discountPercentage}%
+            </div>
+          )}
+
+          {/* Featured Badge */}
+          {product.isFeatured && (
+            <div className="absolute top-3 left-3 bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
+              ⭐ Featured
             </div>
           )}
 
           {/* Stock Status */}
           {!product.inStock && (
-            <div className="absolute top-2 right-2 bg-gray-500 text-white px-2 py-1 rounded-md text-sm font-semibold">
-              Out of Stock
+            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+              <div className="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-semibold">
+                Out of Stock
+              </div>
             </div>
           )}
 
@@ -72,17 +146,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <button
             onClick={handleToggleWishlist}
             disabled={wishlistLoading}
-            className={`absolute top-2 right-2 p-2 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-gray-50 ${
+            className={`absolute top-3 right-3 p-2 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-gray-50 hover:scale-110 ${
               wishlistLoading ? 'cursor-not-allowed' : ''
             }`}
           >
             <svg
               className={`h-5 w-5 transition-colors ${
-                isInWishlist(product.id)
+                isInWishlist(productId)
                   ? 'text-red-500 fill-current'
                   : 'text-gray-600 hover:text-red-500'
               }`}
-              fill={isInWishlist(product.id) ? "currentColor" : "none"}
+              fill={isInWishlist(productId) ? "currentColor" : "none"}
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
@@ -92,24 +166,31 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </div>
 
         {/* Product Info */}
-        <div className="p-4">
+        <div className="p-6">
           {/* Category */}
-          <p className="text-sm text-orange-600 font-medium mb-1">
-            {product.category.name}
-          </p>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm text-orange-600 font-semibold bg-orange-50 px-2 py-1 rounded-full">
+              {product.category.name}
+            </span>
+            {product.stockQuantity <= 10 && product.inStock && (
+              <span className="text-xs text-red-600 font-medium">
+                Only {product.stockQuantity} left!
+              </span>
+            )}
+          </div>
 
           {/* Product Name */}
-          <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+          <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors">
             {product.name}
           </h3>
 
           {/* Description */}
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-            {product.description}
+          <p className="text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
+            {product.shortDescription || product.description}
           </p>
 
           {/* Rating */}
-          <div className="flex items-center mb-3">
+          <div className="flex items-center mb-4">
             <div className="flex items-center">
               {[...Array(5)].map((_, i) => (
                 <svg
@@ -124,44 +205,63 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 </svg>
               ))}
             </div>
-            <span className="ml-2 text-sm text-gray-600">
-              {product.rating} ({product.reviewCount})
+            <span className="ml-2 text-sm text-gray-600 font-medium">
+              {product.rating.toFixed(1)} ({product.reviewCount})
             </span>
           </div>
 
           {/* Price */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2">
-              <span className="text-xl font-bold text-gray-900">
-                ${product.price}
+              <span className="text-2xl font-bold text-gray-900">
+                {priceInfo.price}
               </span>
-              {product.originalPrice && (
+              {priceInfo.hasDiscount && priceInfo.originalPrice && (
                 <span className="text-sm text-gray-500 line-through">
-                  ${product.originalPrice}
+                  {priceInfo.originalPrice}
                 </span>
               )}
             </div>
-            <span className="text-sm text-gray-500">
-              {product.weight}
+            <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+              {weightDisplay}
             </span>
           </div>
 
-          {/* Origin */}
-          <p className="text-xs text-gray-500 mb-3">
-            Origin: {product.origin}
-          </p>
+          {/* Origin & Tags */}
+          <div className="mb-4">
+            <p className="text-xs text-gray-500 mb-2">
+              📍 Origin: {product.origin}
+            </p>
+            {product.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {product.tags.slice(0, 2).map((tag, index) => (
+                  <span key={index} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Add to Cart Button */}
           <Button
             onClick={handleAddToCart}
             disabled={!product.inStock || cartLoading}
-            className="w-full"
-            variant={product.inStock ? 'primary' : 'secondary'}
+            variant="gradient"
+            size="lg"
+            fullWidth
+            loading={cartLoading}
+            icon={!cartLoading && product.inStock ? (
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h8" />
+              </svg>
+            ) : undefined}
+            className="shadow-glow hover:shadow-glow-lg"
           >
-            {cartLoading ? 'Adding...' : product.inStock ? 'Add to Cart' : 'Out of Stock'}
+            {product.inStock ? 'Add to Cart' : 'Out of Stock'}
           </Button>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </ProductCardWrapper>
   );
 };

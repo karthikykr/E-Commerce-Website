@@ -40,8 +40,9 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Helper function to make authenticated API calls
   const makeAuthenticatedRequest = async (url: string, options: RequestInit = {}) => {
-    const token = Cookies.get('auth-token');
-    return fetch(url, {
+    const token = Cookies.get('auth-token') || localStorage.getItem('token');
+    const backendUrl = url.startsWith('/api/') ? `http://localhost:5001${url}` : url;
+    return fetch(backendUrl, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
@@ -155,7 +156,8 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Load wishlist when user changes
   useEffect(() => {
     if (user) {
-      refreshWishlist();
+      // Wishlist API will be implemented later
+      console.log('Wishlist: User logged in');
     } else {
       clearWishlist();
     }

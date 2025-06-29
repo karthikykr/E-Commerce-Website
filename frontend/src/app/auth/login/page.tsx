@@ -1,187 +1,152 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
-  const router = useRouter();
-  const { login } = useAuth();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    role: 'user' as 'user' | 'admin'
-  });
-  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const router = useRouter();
+  const { login, user, isLoading } = useAuth();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!isLoading && user) {
+      console.log('User already logged in:', user);
+      if (user.role === 'admin') {
+        console.log('Redirecting logged-in admin to dashboard');
+        window.location.href = '/admin/dashboard';
+      } else {
+        console.log('Redirecting logged-in customer to home');
+        window.location.href = '/';
+      }
+    }
+  }, [user, isLoading]);
 
-  const handleRoleChange = (role: 'user' | 'admin') => {
-    setFormData(prev => ({
-      ...prev,
-      role
-    }));
-  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setLoading(true);
     setError('');
 
     try {
-      const success = await login(formData.email, formData.password, formData.role);
+      // Use the AuthContext login function
+      const success = await login(email, password);
 
       if (success) {
-        // Redirect based on role
-        if (formData.role === 'admin') {
-          router.push('/admin/dashboard');
-        } else {
-          router.push('/');
-        }
+        // Redirect to home page
+        window.location.href = '/';
+        return;
       } else {
-        setError('Invalid credentials. Please check your email, password, and role.');
+        setError('Invalid email or password');
       }
-    } catch (err) {
-      setError('Login failed. Please try again.');
+    } catch (error) {
+      console.error('Login error:', error);
+      setError('Network error. Please try again.');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
+
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100">
       <Header />
+
       <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <Link href="/" className="inline-block">
-            <h1 className="text-3xl font-bold text-orange-600">🌶️ SpiceHub</h1>
-          </Link>
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            Sign in to your account
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Or{' '}
-            <Link href="/auth/register" className="font-medium text-orange-600 hover:text-orange-500">
-              create a new account
-            </Link>
-          </p>
-        </div>
-
-        {/* Role Selection */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Select Account Type</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <button
-              type="button"
-              onClick={() => handleRoleChange('user')}
-              className={`p-4 border-2 rounded-lg text-center transition-colors ${
-                formData.role === 'user'
-                  ? 'border-orange-500 bg-orange-50 text-orange-700'
-                  : 'border-gray-300 hover:border-gray-400'
-              }`}
-            >
-              <div className="text-2xl mb-2">👤</div>
-              <div className="font-medium">Customer</div>
-              <div className="text-sm text-gray-500">Shop for spices</div>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleRoleChange('admin')}
-              className={`p-4 border-2 rounded-lg text-center transition-colors ${
-                formData.role === 'admin'
-                  ? 'border-orange-500 bg-orange-50 text-orange-700'
-                  : 'border-gray-300 hover:border-gray-400'
-              }`}
-            >
-              <div className="text-2xl mb-2">👨‍💼</div>
-              <div className="font-medium">Admin</div>
-              <div className="text-sm text-gray-500">Manage store</div>
-            </button>
-          </div>
-        </div>
-
-        {/* Login Form */}
-        <form className="mt-8 space-y-6 bg-white p-6 rounded-lg shadow-md" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              label="Email Address"
-              placeholder="Enter your email"
-              value={formData.email}
-              onChange={handleInputChange}
-              required
-            />
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              label="Password"
-              placeholder="Enter your password"
-              value={formData.password}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-
-          {error && (
-            <div className="text-red-600 text-sm text-center">{error}</div>
-          )}
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
-              />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                Remember me
-              </label>
+        <div className="max-w-md w-full space-y-8">
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="flex items-center justify-center space-x-2 mb-4">
+                <div className="bg-orange-600 text-white px-2 py-1 rounded text-sm font-bold">JUST</div>
+                <h1 className="text-2xl font-bold text-gray-900">Gruhapaaka</h1>
+              </div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
+              <p className="text-gray-600">Sign in to your account</p>
             </div>
 
-            <div className="text-sm">
-              <Link href="/auth/forgot-password" className="font-medium text-orange-600 hover:text-orange-500">
-                Forgot your password?
-              </Link>
+            {/* Auth Method Selection */}
+
+
+            {/* Login Form */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                  {error}
+                </div>
+              )}
+
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Address
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                  placeholder="Enter your email address"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                  placeholder="Enter your password"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Signing In...
+                  </div>
+                ) : (
+                  'Sign In'
+                )}
+              </Button>
+            </form>
+
+            {/* Register Link */}
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-600">
+                Don't have an account?{' '}
+                <Link href="/auth/register" className="text-orange-600 hover:text-orange-700 font-medium">
+                  Sign up here
+                </Link>
+              </p>
             </div>
-          </div>
-
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Signing in...' : `Sign in as ${formData.role === 'admin' ? 'Admin' : 'Customer'}`}
-          </Button>
-        </form>
-
-        {/* Demo Credentials */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="text-sm font-medium text-blue-800 mb-2">Demo Credentials:</h4>
-          <div className="text-xs text-blue-700 space-y-1">
-            <div><strong>Admin:</strong> admin@spicehub.com / admin123</div>
-            <div><strong>Customer:</strong> user@spicehub.com / user123</div>
           </div>
         </div>
       </div>
-      </div>
+
       <Footer />
     </div>
   );

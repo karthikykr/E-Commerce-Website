@@ -1,220 +1,365 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
 import { useAuth } from '@/contexts/AuthContext';
-import { products } from '@/data/products';
-import { Button } from '@/components/ui/Button';
+import { AdminLayout } from '@/components/admin/AdminLayout';
+import { useAdminAPI } from '@/hooks/useAdminAPI';
+import { formatCurrency } from '@/utils/currency';
 import Link from 'next/link';
 
+interface DashboardStats {
+  totalOrders: number;
+  pendingOrders: number;
+  processingOrders: number;
+  shippedOrders: number;
+  deliveredOrders: number;
+  cancelledOrders: number;
+  totalRevenue: number;
+}
+
+interface RecentOrder {
+  _id: string;
+  user: {
+    name: string;
+    email: string;
+  };
+  total: number;
+  orderStatus: string;
+  createdAt: string;
+}
+
+interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  stockQuantity: number;
+  category: {
+    name: string;
+  };
+  isActive: boolean;
+  createdAt: string;
+}
+
 export default function AdminDashboard() {
-  const { user } = useAuth();
+  const { user, isLoading, isAdmin } = useAuth();
   const router = useRouter();
+  const { getDashboardStats, getRecentActivity, loading: apiLoading } = useAdminAPI();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) {
-      router.push('/auth/login');
-    } else if (user.role !== 'admin') {
-      router.push('/');
+    if (!isLoading) {
+      if (!user) {
+        router.push('/auth/login');
+      } else if (!isAdmin) {
+        router.push('/');
+      }
     }
-  }, [user, router]);
+  }, [user, router, isLoading, isAdmin]);
 
-  if (!user || user.role !== 'admin') {
+  useEffect(() => {
+    if (user && isAdmin) {
+      fetchDashboardData();
+    }
+  }, [user, isAdmin]);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+
+      // Fetch dashboard statistics
+      const statsResponse = await getDashboardStats();
+      if (statsResponse.success) {
+        const data = statsResponse.data;
+        setStats({
+          totalOrders: data.orders.total,
+          pendingOrders: data.orders.pending,
+          processingOrders: data.orders.processing,
+          shippedOrders: data.orders.shipped,
+          deliveredOrders: data.orders.delivered,
+          cancelledOrders: data.orders.cancelled,
+          totalRevenue: data.revenue.total
+        });
+        setRecentOrders(data.recentOrders);
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Loading...</h1>
+          <p className="text-gray-600">Please wait while we verify your credentials.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Redirecting...</h1>
+          <p className="text-gray-600">Redirecting to login page...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (user.role !== 'admin') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
           <p className="text-gray-600 mb-8">You need admin privileges to access this page.</p>
-          <Link href="/">
-            <Button>Go Home</Button>
+          <Link href="/" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+            Go Home
           </Link>
         </div>
       </div>
     );
   }
 
-  const totalProducts = products.length;
-  const inStockProducts = products.filter(p => p.inStock).length;
-  const outOfStockProducts = totalProducts - inStockProducts;
-  const totalRevenue = 125000; // Mock data
-  const totalOrders = 1250; // Mock data
+
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
-          <p className="text-gray-600">Welcome back, {user.name}! Here's what's happening with your store.</p>
+    <AdminLayout title="Dashboard">
+      <div className="space-y-6">
+        {/* Welcome Section */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome back, {user.name}!</h2>
+          <p className="text-gray-600">Here's what's happening with your store today.</p>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-blue-100 text-blue-600">
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-white rounded-lg shadow-sm p-6 animate-pulse">
+                <div className="flex items-center">
+                  <div className="p-3 rounded-full bg-gray-200 w-12 h-12"></div>
+                  <div className="ml-4 flex-1">
+                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-8 bg-gray-200 rounded"></div>
+                  </div>
+                </div>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Products</p>
-                <p className="text-2xl font-bold text-gray-900">{totalProducts}</p>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+              <div className="flex items-center">
+                <div className="p-3 rounded-lg bg-blue-50 text-blue-600">
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                  </svg>
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-500">Total Orders</p>
+                  <p className="text-3xl font-bold text-gray-900">{stats?.totalOrders || 0}</p>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-green-100 text-green-600">
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">In Stock</p>
-                <p className="text-2xl font-bold text-gray-900">{inStockProducts}</p>
+            <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+              <div className="flex items-center">
+                <div className="p-3 rounded-lg bg-yellow-50 text-yellow-600">
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-500">Pending Orders</p>
+                  <p className="text-3xl font-bold text-gray-900">{stats?.pendingOrders || 0}</p>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-red-100 text-red-600">
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Out of Stock</p>
-                <p className="text-2xl font-bold text-gray-900">{outOfStockProducts}</p>
+            <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+              <div className="flex items-center">
+                <div className="p-3 rounded-lg bg-green-50 text-green-600">
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-500">Delivered Orders</p>
+                  <p className="text-3xl font-bold text-gray-900">{stats?.deliveredOrders || 0}</p>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-yellow-100 text-yellow-600">
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                </svg>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                <p className="text-2xl font-bold text-gray-900">${totalRevenue.toLocaleString()}</p>
+            <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+              <div className="flex items-center">
+                <div className="p-3 rounded-lg bg-purple-50 text-purple-600">
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                  </svg>
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-500">Total Revenue</p>
+                  <p className="text-3xl font-bold text-gray-900">{formatCurrency(stats?.totalRevenue || 0)}</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
+        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Button className="w-full">Add New Product</Button>
-            <Button variant="outline" className="w-full">Manage Inventory</Button>
-            <Button variant="outline" className="w-full">View Orders</Button>
-            <Button variant="outline" className="w-full">Customer Support</Button>
+            <Link href="/admin/products/add" className="block">
+              <div className="p-4 border border-gray-200 rounded-lg hover:border-orange-300 hover:bg-orange-50 transition-colors cursor-pointer">
+                <div className="flex items-center">
+                  <div className="p-2 bg-orange-100 rounded-lg">
+                    <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                  </div>
+                  <span className="ml-3 text-sm font-medium text-gray-900">Add Product</span>
+                </div>
+              </div>
+            </Link>
+            <Link href="/admin/products" className="block">
+              <div className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors cursor-pointer">
+                <div className="flex items-center">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                  </div>
+                  <span className="ml-3 text-sm font-medium text-gray-900">Manage Products</span>
+                </div>
+              </div>
+            </Link>
+            <Link href="/admin/orders" className="block">
+              <div className="p-4 border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors cursor-pointer">
+                <div className="flex items-center">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                  </div>
+                  <span className="ml-3 text-sm font-medium text-gray-900">View Orders</span>
+                </div>
+              </div>
+            </Link>
+            <Link href="/admin/categories" className="block">
+              <div className="p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors cursor-pointer">
+                <div className="flex items-center">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                    </svg>
+                  </div>
+                  <span className="ml-3 text-sm font-medium text-gray-900">Categories</span>
+                </div>
+              </div>
+            </Link>
           </div>
         </div>
 
-        {/* Recent Products */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">Recent Products</h2>
-            <Button variant="outline" size="sm">View All</Button>
+        {/* Recent Orders */}
+        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-gray-900">Recent Orders</h3>
+            <Link href="/admin/orders" className="text-sm text-orange-600 hover:text-orange-700 font-medium">
+              View All Orders →
+            </Link>
           </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Product
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Category
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Price
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Stock
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {products.slice(0, 5).map((product) => (
-                  <tr key={product.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="text-2xl mr-3">{product.category.image}</div>
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                          <div className="text-sm text-gray-500">{product.weight}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {product.category.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ${product.price}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {product.stockQuantity}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        product.inStock 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {product.inStock ? 'In Stock' : 'Out of Stock'}
-                      </span>
-                    </td>
+          {loading ? (
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="flex items-center space-x-4">
+                    <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : recentOrders.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Order ID
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Customer
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Total
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Date
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {recentOrders.map((order) => (
+                    <tr key={order._id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="px-4 py-4 text-sm font-medium text-gray-900">
+                        #{order._id.slice(-6)}
+                      </td>
+                      <td className="px-4 py-4">
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">{order.user.name}</div>
+                          <div className="text-sm text-gray-500">{order.user.email}</div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-sm font-medium text-gray-900">
+                        {formatCurrency(order.total)}
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                          order.orderStatus === 'delivered'
+                            ? 'bg-green-100 text-green-700'
+                            : order.orderStatus === 'shipped'
+                            ? 'bg-blue-100 text-blue-700'
+                            : order.orderStatus === 'processing'
+                            ? 'bg-yellow-100 text-yellow-700'
+                            : order.orderStatus === 'cancelled'
+                            ? 'bg-red-100 text-red-700'
+                            : 'bg-gray-100 text-gray-700'
+                        }`}>
+                          {order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-500">
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              <h3 className="mt-2 text-sm font-medium text-gray-900">No orders</h3>
+              <p className="mt-1 text-sm text-gray-500">Get started by creating your first product.</p>
+            </div>
+          )}
         </div>
-
-        {/* Recent Activity */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Activity</h2>
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <div className="h-2 w-2 bg-green-500 rounded-full"></div>
-              <p className="text-sm text-gray-600">New order #1234 received - $45.99</p>
-              <span className="text-xs text-gray-400">2 minutes ago</span>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
-              <p className="text-sm text-gray-600">Product "Organic Turmeric" updated</p>
-              <span className="text-xs text-gray-400">15 minutes ago</span>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="h-2 w-2 bg-yellow-500 rounded-full"></div>
-              <p className="text-sm text-gray-600">Low stock alert: Ceylon Cinnamon (5 left)</p>
-              <span className="text-xs text-gray-400">1 hour ago</span>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="h-2 w-2 bg-green-500 rounded-full"></div>
-              <p className="text-sm text-gray-600">New customer registered: john@example.com</p>
-              <span className="text-xs text-gray-400">2 hours ago</span>
-            </div>
-          </div>
-        </div>
-      </main>
-
-      <Footer />
-    </div>
+      </div>
+    </AdminLayout>
   );
 }

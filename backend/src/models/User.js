@@ -26,7 +26,7 @@ const addressSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-    default: 'USA'
+    default: 'India'
   }
 });
 

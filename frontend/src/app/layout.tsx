@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
+import { ToastProvider } from "@/components/ui/Toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SpiceHub - Premium Spices Online Store",
-  description: "Discover the finest collection of authentic spices, herbs, and spice blends. Fresh, aromatic, and sourced directly from farms.",
+  title: "Gruhapaaka - Authentic Homemade Food Products",
+  description: "Indulge in elegant homemade food products, made with the finest ingredients and traditional recipes. Authentic, Pure, Homemade.",
 };
 
 export default function RootLayout({
@@ -30,13 +31,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>
-          <CartProvider>
-            <WishlistProvider>
-              {children}
-            </WishlistProvider>
-          </CartProvider>
-        </AuthProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <CartProvider>
+              <WishlistProvider>
+                {children}
+              </WishlistProvider>
+            </CartProvider>
+          </AuthProvider>
+        </ToastProvider>
       </body>
     </html>
   );

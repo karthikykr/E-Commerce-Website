@@ -50,6 +50,41 @@ const categories = [
     description: 'Aromatic seeds for cooking and garnishing',
     image: '/images/categories/seeds.jpg',
     sortOrder: 5
+  },
+  {
+    name: 'Indian Masalas',
+    slug: 'indian-masalas',
+    description: 'Authentic Indian spice mixes and masalas',
+    image: '/images/categories/indian-masalas.jpg',
+    sortOrder: 6
+  },
+  {
+    name: 'International Spices',
+    slug: 'international-spices',
+    description: 'Exotic spices from around the world',
+    image: '/images/categories/international-spices.jpg',
+    sortOrder: 7
+  },
+  {
+    name: 'Organic Spices',
+    slug: 'organic-spices',
+    description: 'Certified organic spices and herbs',
+    image: '/images/categories/organic-spices.jpg',
+    sortOrder: 8
+  },
+  {
+    name: 'Tea & Beverages',
+    slug: 'tea-beverages',
+    description: 'Spiced teas and beverage mixes',
+    image: '/images/categories/tea-beverages.jpg',
+    sortOrder: 9
+  },
+  {
+    name: 'Cooking Essentials',
+    slug: 'cooking-essentials',
+    description: 'Essential ingredients for Indian cooking',
+    image: '/images/categories/cooking-essentials.jpg',
+    sortOrder: 10
   }
 ];
 
@@ -123,26 +158,22 @@ const seedData = async () => {
 
     // Create products
     const products = [
+      // Ground Spices
       {
         name: 'Organic Turmeric Powder',
         slug: 'organic-turmeric-powder',
         description: 'Premium organic turmeric powder with high curcumin content. Perfect for curries, golden milk, and health supplements.',
         shortDescription: 'Premium organic turmeric powder with high curcumin content.',
-        price: 12.99,
-        originalPrice: 15.99,
+        price: 1079,
+        originalPrice: 1329,
         category: createdCategories[1]._id, // Ground Spices
-        images: [
-          { url: '/images/products/turmeric.jpg', alt: 'Organic Turmeric Powder', isPrimary: true }
-        ],
+        images: [{ url: '/images/products/turmeric.jpg', alt: 'Organic Turmeric Powder', isPrimary: true }],
         stockQuantity: 50,
         weight: { value: 100, unit: 'g' },
         origin: 'India',
         tags: ['organic', 'anti-inflammatory', 'golden milk'],
         isFeatured: true,
-        nutritionalInfo: {
-          calories: 354,
-          protein: 7.8,
-          carbohydrates: 64.9,
+        nutritionalInfo: { calories: 354, protein: 7.8, carbohydrates: 64.9,
           fat: 9.9,
           fiber: 21.1
         },
@@ -154,8 +185,8 @@ const seedData = async () => {
         slug: 'ceylon-cinnamon-sticks',
         description: 'Authentic Ceylon cinnamon sticks from Sri Lanka. Sweet and delicate flavor perfect for baking and beverages.',
         shortDescription: 'Authentic Ceylon cinnamon sticks from Sri Lanka.',
-        price: 18.99,
-        originalPrice: 22.99,
+        price: 1579,
+        originalPrice: 1909,
         category: createdCategories[0]._id, // Whole Spices
         images: [
           { url: '/images/products/cinnamon.jpg', alt: 'Ceylon Cinnamon Sticks', isPrimary: true }
@@ -173,7 +204,7 @@ const seedData = async () => {
         slug: 'garam-masala-blend',
         description: 'Traditional Indian spice blend with cardamom, cinnamon, cloves, and more. Perfect for curries and rice dishes.',
         shortDescription: 'Traditional Indian spice blend for authentic flavors.',
-        price: 14.99,
+        price: 1249,
         category: createdCategories[2]._id, // Spice Blends
         images: [
           { url: '/images/products/garam-masala.jpg', alt: 'Garam Masala Blend', isPrimary: true }
@@ -191,7 +222,7 @@ const seedData = async () => {
         slug: 'black-peppercorns',
         description: 'Premium whole black peppercorns from Kerala, India. Bold and pungent flavor for seasoning and cooking.',
         shortDescription: 'Premium whole black peppercorns from Kerala.',
-        price: 16.99,
+        price: 1419,
         category: createdCategories[0]._id, // Whole Spices
         images: [
           { url: '/images/products/black-pepper.jpg', alt: 'Black Peppercorns', isPrimary: true }
@@ -208,7 +239,7 @@ const seedData = async () => {
         slug: 'dried-oregano',
         description: 'Mediterranean dried oregano with intense flavor. Perfect for pizza, pasta, and Mediterranean dishes.',
         shortDescription: 'Mediterranean dried oregano with intense flavor.',
-        price: 8.99,
+        price: 749,
         category: createdCategories[3]._id, // Herbs
         images: [
           { url: '/images/products/oregano.jpg', alt: 'Dried Oregano', isPrimary: true }
@@ -225,7 +256,7 @@ const seedData = async () => {
         slug: 'cumin-seeds',
         description: 'Aromatic cumin seeds with earthy flavor. Essential for Indian, Mexican, and Middle Eastern cuisines.',
         shortDescription: 'Aromatic cumin seeds with earthy flavor.',
-        price: 11.99,
+        price: 999,
         category: createdCategories[4]._id, // Seeds
         images: [
           { url: '/images/products/cumin-seeds.jpg', alt: 'Cumin Seeds', isPrimary: true }
@@ -241,6 +272,34 @@ const seedData = async () => {
 
     const createdProducts = await Product.create(products);
     console.log('Products created:', createdProducts.length);
+
+    // Create admin user
+    const adminUser = {
+      name: 'Admin User',
+      email: 'admin@spicestore.com',
+      password: 'admin123',
+      authMethod: 'email',
+      role: 'admin',
+      phone: '+91-9999999999',
+      address: {
+        street: '123 Admin Street',
+        city: 'Mumbai',
+        state: 'Maharashtra',
+        zipCode: '400001',
+        country: 'India'
+      },
+      emailVerified: true,
+      isActive: true
+    };
+
+    const admin = new User(adminUser);
+    await admin.save();
+    console.log('Admin user created successfully');
+    console.log('=================================');
+    console.log('ADMIN CREDENTIALS:');
+    console.log('Email: admin@spicestore.com');
+    console.log('Password: admin123');
+    console.log('=================================');
 
     console.log('Database seeded successfully!');
     process.exit(0);

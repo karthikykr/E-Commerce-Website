@@ -10,11 +10,22 @@ const router = express.Router();
 // @desc    Register a new user (customers only)
 // @access  Public
 router.post('/register', [
-  body('name').notEmpty().withMessage('Name is required'),
-  body('authMethod').isIn(['email', 'mobile']).withMessage('Auth method must be email or mobile'),
+  body('firstName').notEmpty().withMessage('First name is required'),
+  body('lastName').notEmpty().withMessage('Last name is required'),
+  body('email').isEmail().withMessage('Please enter a valid email'),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-  body('email').optional().isEmail().withMessage('Please enter a valid email'),
-  body('mobile').optional().matches(/^[6-9]\d{9}$/).withMessage('Please enter a valid 10-digit mobile number')
+  body('confirmPassword').custom((value, { req }) => {
+    if (value !== req.body.password) {
+      throw new Error('Passwords do not match');
+    }
+    return true;
+  }),
+  body('phone').optional().matches(/^\+?[\d\s\-\(\)]+$/).withMessage('Please enter a valid phone number'),
+  body('address.street').optional().notEmpty().withMessage('Street address is required if address is provided'),
+  body('address.city').optional().notEmpty().withMessage('City is required if address is provided'),
+  body('address.state').optional().notEmpty().withMessage('State is required if address is provided'),
+  body('address.zipCode').optional().notEmpty().withMessage('ZIP code is required if address is provided'),
+  body('address.country').optional().notEmpty().withMessage('Country is required if address is provided')
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -26,49 +37,36 @@ router.post('/register', [
       });
     }
 
-    const { name, authMethod, password, email, mobile, phone, address } = req.body;
+    const { firstName, lastName, email, password, phone, address } = req.body;
 
     // Check if user already exists
-    let existingUser;
-    if (authMethod === 'email') {
-      if (!email) {
-        return res.status(400).json({
-          success: false,
-          message: 'Email is required for email authentication'
-        });
-      }
-      existingUser = await User.findOne({ email, authMethod: 'email' });
-    } else if (authMethod === 'mobile') {
-      if (!mobile) {
-        return res.status(400).json({
-          success: false,
-          message: 'Mobile number is required for mobile authentication'
-        });
-      }
-      existingUser = await User.findOne({ mobile, authMethod: 'mobile' });
-    }
-
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: 'User already exists with this credential'
+        message: 'User already exists with this email address'
       });
     }
 
     // Create new user
     const userData = {
-      name,
-      authMethod,
+      name: `${firstName} ${lastName}`,
+      email,
       password,
+      authMethod: 'email',
       role: 'user',
-      phone,
-      address
+      phone
     };
 
-    if (authMethod === 'email') {
-      userData.email = email;
-    } else if (authMethod === 'mobile') {
-      userData.mobile = mobile;
+    // Add address if provided
+    if (address && address.street) {
+      userData.address = {
+        street: address.street,
+        city: address.city,
+        state: address.state,
+        zipCode: address.zipCode,
+        country: address.country || 'India'
+      };
     }
 
     const user = new User(userData);
@@ -88,8 +86,11 @@ router.post('/register', [
         user: {
           id: user._id,
           name: user.name,
+          firstName,
+          lastName,
           email: user.email,
-          mobile: user.mobile,
+          phone: user.phone,
+          address: user.address,
           role: user.role,
           authMethod: user.authMethod
         },
@@ -106,12 +107,11 @@ router.post('/register', [
 });
 
 // @route   POST /api/auth/login
-// @desc    Role-based login (admin, email, mobile)
+// @desc    User login with email and password
 // @access  Public
 router.post('/login', [
-  body('identifier').notEmpty().withMessage('Login identifier is required'),
-  body('password').notEmpty().withMessage('Password is required'),
-  body('authMethod').isIn(['email', 'mobile', 'admin']).withMessage('Invalid auth method')
+  body('email').isEmail().withMessage('Please enter a valid email'),
+  body('password').notEmpty().withMessage('Password is required')
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -123,17 +123,10 @@ router.post('/login', [
       });
     }
 
-    const { identifier, password, authMethod } = req.body;
+    const { email, password } = req.body;
 
-    // Find user based on auth method
-    let user;
-    if (authMethod === 'email') {
-      user = await User.findOne({ email: identifier, authMethod: 'email' }).select('+password');
-    } else if (authMethod === 'mobile') {
-      user = await User.findOne({ mobile: identifier, authMethod: 'mobile' }).select('+password');
-    } else if (authMethod === 'admin') {
-      user = await User.findOne({ adminId: identifier, authMethod: 'admin', role: 'admin' }).select('+password');
-    }
+    // Find user by email
+    const user = await User.findOne({ email }).select('+password');
 
     if (!user) {
       return res.status(401).json({
@@ -178,10 +171,11 @@ router.post('/login', [
           id: user._id,
           name: user.name,
           email: user.email,
-          mobile: user.mobile,
-          adminId: user.adminId,
+          phone: user.phone,
+          address: user.address,
           role: user.role,
-          authMethod: user.authMethod
+          authMethod: user.authMethod,
+          lastLogin: user.lastLogin
         },
         token
       }
