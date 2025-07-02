@@ -15,7 +15,10 @@ const app = express();
 
 // Middleware
 app.use(helmet()); // Security headers
-app.use(cors()); // Enable CORS
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  credentials: true
+})); // Enable CORS
 app.use(morgan('combined')); // Logging
 app.use(express.json({ limit: '10mb' })); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
@@ -26,6 +29,17 @@ app.use('/api/products', require('./routes/products'));
 app.use('/api/categories', require('./routes/categories'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/users', require('./routes/users'));
+app.use('/api/cart', require('./routes/cart'));
+app.use('/api/wishlist', require('./routes/wishlist'));
+app.use('/api/reviews', require('./routes/reviews'));
+app.use('/api/coupons', require('./routes/coupons'));
+app.use('/api/notifications', require('./routes/notifications'));
+
+// Admin routes
+app.use('/api/admin', require('./routes/admin'));
+app.use('/api/admin/products', require('./routes/adminProducts'));
+app.use('/api/admin/orders', require('./routes/adminOrders'));
+app.use('/api/admin/categories', require('./routes/adminCategories'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

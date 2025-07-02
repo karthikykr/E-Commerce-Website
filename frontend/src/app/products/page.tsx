@@ -5,15 +5,68 @@ import { useSearchParams } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { ProductCard } from '@/components/product/ProductCard';
-import { products, categories } from '@/data/products';
+import { ProductGridSkeleton } from '@/components/ui/Skeleton';
+import { SearchInput } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { useToast } from '@/components/ui/Toast';
+
+interface Product {
+  _id: string;
+  name: string;
+  description: string;
+  shortDescription?: string;
+  price: number;
+  originalPrice?: number;
+  category: {
+    _id: string;
+    name: string;
+    slug: string;
+  };
+  images: Array<{
+    url: string;
+    alt: string;
+    isPrimary: boolean;
+  }>;
+  inStock: boolean;
+  stockQuantity: number;
+  weight: {
+    value: number;
+    unit: string;
+  };
+  origin: string;
+  tags: string[];
+  rating: number;
+  reviewCount: number;
+  isFeatured: boolean;
+  discountPercentage?: number;
+}
+
+interface Category {
+  _id: string;
+  name: string;
+  slug: string;
+  description: string;
+  image?: string;
+}
 
 export default function ProductsPage() {
   const searchParams = useSearchParams();
+  const { addToast } = useToast();
+
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('name');
   const [showInStockOnly, setShowInStockOnly] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Fetch products and categories
+  useEffect(() => {
+    fetchProducts();
+    fetchCategories();
+  }, []);
 
   // Get search query from URL parameters
   useEffect(() => {
@@ -32,9 +85,45 @@ export default function ProductsPage() {
     }
   }, [searchParams]);
 
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch('http://localhost:5001/api/products');
+      const data = await response.json();
+
+      if (data.success) {
+        setProducts(data.data.products || []);
+      } else {
+        throw new Error(data.message || 'Failed to fetch products');
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      addToast({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to load products. Please try again.',
+        duration: 5000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('http://localhost:5001/api/categories');
+      const data = await response.json();
+
+      if (data.success) {
+        setCategories(data.data.categories || []);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
   // Filter and sort products
   const filteredAndSortedProducts = useMemo(() => {
-    let filtered = products;
+    let filtered = products || [];
 
     // Filter by search query
     if (searchQuery) {
@@ -50,7 +139,7 @@ export default function ProductsPage() {
 
     // Filter by category
     if (selectedCategory !== 'all') {
-      filtered = filtered.filter(product => product.category.id === selectedCategory);
+      filtered = filtered.filter(product => product.category._id === selectedCategory);
     }
 
     // Filter by stock
@@ -67,15 +156,15 @@ export default function ProductsPage() {
           return b.price - a.price;
         case 'rating':
           return b.rating - a.rating;
-        case 'newest':
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        default:
+        case 'name':
           return a.name.localeCompare(b.name);
+        default:
+          return 0;
       }
     });
 
     return sorted;
-  }, [selectedCategory, sortBy, showInStockOnly, searchQuery]);
+  }, [products, selectedCategory, sortBy, showInStockOnly, searchQuery]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -137,7 +226,7 @@ export default function ProductsPage() {
               >
                 <option value="all">All Categories</option>
                 {categories.map(category => (
-                  <option key={category.id} value={category.id}>
+                  <option key={category._id} value={category._id}>
                     {category.name}
                   </option>
                 ))}
@@ -195,17 +284,21 @@ export default function ProductsPage() {
         </div>
 
         {/* Results Count */}
-        <div className="mb-6">
-          <p className="text-gray-600">
-            Showing {filteredAndSortedProducts.length} of {products.length} products
-          </p>
-        </div>
+        {!isLoading && (
+          <div className="mb-6">
+            <p className="text-gray-600">
+              Showing {filteredAndSortedProducts.length} of {products.length} products
+            </p>
+          </div>
+        )}
 
         {/* Products Grid */}
-        {filteredAndSortedProducts.length > 0 ? (
+        {isLoading ? (
+          <ProductGridSkeleton count={8} />
+        ) : filteredAndSortedProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredAndSortedProducts.map(product => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product._id} product={product} />
             ))}
           </div>
         ) : (

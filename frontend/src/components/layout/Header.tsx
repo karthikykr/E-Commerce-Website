@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
+import { SearchInput } from '@/components/ui/Input';
 import { SearchSuggestions } from '@/components/ui/SearchSuggestions';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
@@ -23,43 +24,74 @@ export const Header = () => {
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleSearch = () => setIsSearchOpen(!isSearchOpen);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      // Navigate to products page with search query
-      router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery(''); // Clear search after navigation
-      setIsSearchOpen(false); // Close mobile search
+  // Close mobile menu when screen size changes
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsMenuOpen(false);
+        setIsSearchOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const handleSearch = (query: string) => {
+    if (query.trim()) {
+      router.push(`/products?search=${encodeURIComponent(query.trim())}`);
+      setSearchQuery('');
+      setIsSearchOpen(false);
     }
   };
 
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSearch(searchQuery);
+  };
+
   return (
-    <header className="bg-white shadow-sm border-b sticky top-0 z-50">
+    <header className="bg-gradient-to-r from-orange-50 to-amber-50 shadow-lg border-b border-orange-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href="/" className="flex items-center">
-              <h1 className="text-2xl font-bold text-orange-600">🌶️ SpiceHub</h1>
+            <Link href="/" className="flex items-center group">
+              <div className="flex items-center space-x-3">
+                <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white px-3 py-1.5 rounded-lg text-sm font-bold shadow-md transform group-hover:scale-105 transition-transform duration-200">
+                  JUST
+                </div>
+                <div className="flex flex-col">
+                  <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-700 to-red-700 bg-clip-text text-transparent">
+                    Gruhapaaka
+                  </h1>
+                  <span className="text-xs text-orange-600 font-medium -mt-1">Fresh Spices</span>
+                </div>
+              </div>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
-            <Link href="/" className="text-gray-700 hover:text-orange-600 transition-colors">
-              Home
+            <Link href="/" className="relative text-gray-700 hover:text-orange-600 transition-all duration-200 font-medium px-2 py-1 rounded-md hover:bg-orange-50 group">
+              <span>Home</span>
+              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-orange-600 to-red-600 group-hover:w-full transition-all duration-300"></div>
             </Link>
-            <Link href="/products" className="text-gray-700 hover:text-orange-600 transition-colors">
-              Products
+            <Link href="/products" className="relative text-gray-700 hover:text-orange-600 transition-all duration-200 font-medium px-2 py-1 rounded-md hover:bg-orange-50 group">
+              <span>Products</span>
+              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-orange-600 to-red-600 group-hover:w-full transition-all duration-300"></div>
             </Link>
-            <Link href="/categories" className="text-gray-700 hover:text-orange-600 transition-colors">
-              Categories
+            <Link href="/categories" className="relative text-gray-700 hover:text-orange-600 transition-all duration-200 font-medium px-2 py-1 rounded-md hover:bg-orange-50 group">
+              <span>Categories</span>
+              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-orange-600 to-red-600 group-hover:w-full transition-all duration-300"></div>
             </Link>
-            <Link href="/about" className="text-gray-700 hover:text-orange-600 transition-colors">
-              About
+            <Link href="/about" className="relative text-gray-700 hover:text-orange-600 transition-all duration-200 font-medium px-2 py-1 rounded-md hover:bg-orange-50 group">
+              <span>About</span>
+              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-orange-600 to-red-600 group-hover:w-full transition-all duration-300"></div>
             </Link>
-            <Link href="/contact" className="text-gray-700 hover:text-orange-600 transition-colors">
-              Contact
+            <Link href="/contact" className="relative text-gray-700 hover:text-orange-600 transition-all duration-200 font-medium px-2 py-1 rounded-md hover:bg-orange-50 group">
+              <span>Contact</span>
+              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-orange-600 to-red-600 group-hover:w-full transition-all duration-300"></div>
             </Link>
           </nav>
 
@@ -69,20 +101,28 @@ export const Header = () => {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search for spices..."
+                  placeholder="Search for fresh spices, herbs & more..."
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
                     setShowSuggestions(e.target.value.length > 1);
                   }}
                   onFocus={() => setShowSuggestions(searchQuery.length > 1)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full pl-12 pr-4 py-3 border-2 border-orange-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-400 bg-white shadow-sm transition-all duration-200 placeholder-gray-500"
                 />
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
+                <button
+                  type="submit"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-orange-600 hover:text-orange-700 transition-colors"
+                >
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </button>
                 <SearchSuggestions
                   searchQuery={searchQuery}
                   onSelect={(suggestion) => {
@@ -109,26 +149,26 @@ export const Header = () => {
             </button>
 
             {/* Cart Icon */}
-            <Link href="/cart" className="relative p-2 text-gray-600 hover:text-orange-600 transition-colors">
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <Link href="/cart" className="relative p-3 text-gray-600 hover:text-orange-600 transition-all duration-200 rounded-lg hover:bg-orange-50 group">
+              <svg className="h-6 w-6 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
               </svg>
               {/* Cart Badge */}
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-orange-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
-                  {cartCount}
+                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-orange-600 to-red-600 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center animate-bounce shadow-lg font-bold">
+                  {cartCount > 99 ? '99+' : cartCount}
                 </span>
               )}
             </Link>
 
             {/* Wishlist Icon */}
-            <Link href="/wishlist" className="relative p-2 text-gray-600 hover:text-orange-600">
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <Link href="/wishlist" className="relative p-3 text-gray-600 hover:text-red-500 transition-all duration-200 rounded-lg hover:bg-red-50 group">
+              <svg className="h-6 w-6 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
               {wishlistCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {wishlistCount}
+                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center shadow-lg font-bold">
+                  {wishlistCount > 99 ? '99+' : wishlistCount}
                 </span>
               )}
             </Link>
@@ -138,48 +178,70 @@ export const Header = () => {
               <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="flex items-center space-x-3 p-2 rounded-xl hover:bg-orange-50 transition-all duration-200 border border-transparent hover:border-orange-200 group"
                 >
-                  <div className="h-8 w-8 bg-orange-600 rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm font-semibold">
+                  <div className="h-10 w-10 bg-gradient-to-r from-orange-600 to-red-600 rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-200">
+                    <span className="text-white text-sm font-bold">
                       {user.name.charAt(0).toUpperCase()}
                     </span>
                   </div>
-                  <span className="hidden md:block text-gray-700 font-medium">{user.name}</span>
-                  <svg className="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="hidden md:block text-left">
+                    <span className="block text-gray-700 font-semibold text-sm">{user.name}</span>
+                    <span className="block text-orange-600 text-xs font-medium">
+                      {user.role === 'admin' ? 'Admin' : 'Customer'}
+                    </span>
+                  </div>
+                  <svg className="h-4 w-4 text-gray-500 group-hover:text-orange-600 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
 
                 {/* User Dropdown Menu */}
                 {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                    <div className="px-4 py-2 border-b border-gray-200">
-                      <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                      <p className="text-sm text-gray-500">{user.email}</p>
-                      <span className="inline-block mt-1 px-2 py-1 text-xs bg-orange-100 text-orange-800 rounded-full">
-                        {user.role === 'admin' ? 'Admin' : 'Customer'}
+                  <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-xl border border-orange-100 py-2 z-50 animate-in slide-in-from-top-2 duration-200">
+                    <div className="px-4 py-3 border-b border-orange-100 bg-gradient-to-r from-orange-50 to-amber-50">
+                      <p className="text-sm font-semibold text-gray-900">{user.name}</p>
+                      <p className="text-sm text-gray-600">{user.email}</p>
+                      <span className="inline-block mt-2 px-3 py-1 text-xs bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-full font-medium shadow-sm">
+                        {user.role === 'admin' ? '👑 Admin' : '👤 Customer'}
                       </span>
                     </div>
-                    <Link href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      My Profile
-                    </Link>
-                    <Link href="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      My Orders
-                    </Link>
-                    <Link href="/wishlist" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      Wishlist
-                    </Link>
-                    {user.role === 'admin' && (
-                      <Link href="/admin/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                        Admin Dashboard
+                    <div className="py-1">
+                      <Link href="/profile" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors duration-150">
+                        <svg className="h-4 w-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        My Profile
                       </Link>
-                    )}
-                    <div className="border-t border-gray-200 mt-2 pt-2">
+                      <Link href="/orders" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors duration-150">
+                        <svg className="h-4 w-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                        My Orders
+                      </Link>
+                      <Link href="/wishlist" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors duration-150">
+                        <svg className="h-4 w-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                        Wishlist
+                      </Link>
+                      {user.role === 'admin' && (
+                        <Link href="/admin/dashboard" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors duration-150">
+                          <svg className="h-4 w-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                          </svg>
+                          Admin Dashboard
+                        </Link>
+                      )}
+                    </div>
+                    <div className="border-t border-orange-100 mt-1 pt-1">
                       <button
                         onClick={logout}
-                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                        className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors duration-150"
                       >
+                        <svg className="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
                         Sign Out
                       </button>
                     </div>
@@ -187,12 +249,23 @@ export const Header = () => {
                 )}
               </div>
             ) : (
-              <div className="hidden sm:flex items-center space-x-2">
+              <div className="hidden sm:flex items-center space-x-3">
                 <Link href="/auth/login">
-                  <Button variant="outline" size="sm">Login</Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-orange-300 text-orange-700 hover:bg-orange-50 hover:border-orange-400 transition-all duration-200 font-medium"
+                  >
+                    Login
+                  </Button>
                 </Link>
                 <Link href="/auth/register">
-                  <Button size="sm">Sign Up</Button>
+                  <Button
+                    size="sm"
+                    className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white shadow-md hover:shadow-lg transition-all duration-200 font-medium"
+                  >
+                    Sign Up
+                  </Button>
                 </Link>
               </div>
             )}

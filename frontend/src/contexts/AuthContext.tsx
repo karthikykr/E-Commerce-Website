@@ -6,17 +6,27 @@ import { User } from '@/types';
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string, role: 'admin' | 'user') => Promise<boolean>;
+  login: (email: string, password: string, role?: 'admin' | 'user') => Promise<boolean>;
   register: (userData: RegisterData) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
+  isAdmin: boolean;
 }
 
 interface RegisterData {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
+  confirmPassword: string;
   phone?: string;
+  address?: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,11 +43,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const isAdmin = user?.role === 'admin';
+
+  // Debug user state changes
+  useEffect(() => {
+    console.log('AuthContext - user state changed:', user);
+  }, [user]);
+
   // Check for existing session on mount
   useEffect(() => {
-    const token = Cookies.get('auth-token');
-    const userData = Cookies.get('user-data');
-    
+    let token = Cookies.get('auth-token');
+    let userData = Cookies.get('user-data');
+
+    // Fallback to localStorage if cookies are not available
+    if (!token || !userData) {
+      token = localStorage.getItem('token');
+      userData = localStorage.getItem('user');
+    }
+
     if (token && userData) {
       try {
         const parsedUser = JSON.parse(userData);
@@ -46,42 +69,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Error parsing user data:', error);
         Cookies.remove('auth-token');
         Cookies.remove('user-data');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
       }
     }
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string, role: 'admin' | 'user'): Promise<boolean> => {
+  const login = async (email: string, password: string, role: 'admin' | 'user' = 'user'): Promise<boolean> => {
     setIsLoading(true);
-    
+
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('http://localhost:5001/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password, role }),
+        body: JSON.stringify({
+          email,
+          password
+        }),
       });
 
       const data = await response.json();
 
       if (response.ok && data.success) {
         const userData: User = {
-          id: data.user.id,
-          email: data.user.email,
-          name: data.user.name,
-          role: data.user.role,
-          phone: data.user.phone,
-          createdAt: new Date(data.user.createdAt),
-          updatedAt: new Date(data.user.updatedAt),
+          id: data.data.user._id || data.data.user.id,
+          email: data.data.user.email || data.data.user.mobile || data.data.user.adminId,
+          name: data.data.user.name,
+          role: data.data.user.role,
+          phone: data.data.user.phone || data.data.user.mobile,
+          createdAt: new Date(data.data.user.createdAt || Date.now()),
+          updatedAt: new Date(data.data.user.updatedAt || Date.now()),
         };
 
         setUser(userData);
-        
-        // Store in cookies
-        Cookies.set('auth-token', data.token, { expires: 7 }); // 7 days
+
+        // Store in both cookies and localStorage for compatibility
+        Cookies.set('auth-token', data.data.token, { expires: 7 }); // 7 days
         Cookies.set('user-data', JSON.stringify(userData), { expires: 7 });
-        
+        localStorage.setItem('token', data.data.token);
+        localStorage.setItem('user', JSON.stringify(userData));
+
         return true;
       } else {
         console.error('Login failed:', data.message);
@@ -99,7 +129,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     
     try {
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch('http://localhost:5001/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -128,6 +158,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     Cookies.remove('auth-token');
     Cookies.remove('user-data');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     window.location.href = '/';
   };
 
@@ -137,6 +169,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     register,
     logout,
     isLoading,
+    isAdmin,
   };
 
   return (

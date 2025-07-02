@@ -13,11 +13,19 @@ export default function RegisterPage() {
   const router = useRouter();
   const { register } = useAuth();
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     confirmPassword: '',
     phone: '',
+    address: {
+      street: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      country: 'India'
+    },
     agreeToTerms: false
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -42,8 +50,12 @@ export default function RegisterPage() {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = 'First name is required';
+    }
+
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = 'Last name is required';
     }
 
     if (!formData.email.trim()) {
@@ -81,10 +93,13 @@ export default function RegisterPage() {
 
     try {
       const success = await register({
-        name: formData.name,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
+        confirmPassword: formData.confirmPassword,
         phone: formData.phone,
+        address: formData.address.street ? formData.address : undefined,
       });
 
       if (success) {
@@ -123,17 +138,31 @@ export default function RegisterPage() {
         {/* Registration Form */}
         <form className="mt-8 space-y-6 bg-white p-6 rounded-lg shadow-md" onSubmit={handleSubmit}>
           <div className="space-y-4">
-            <Input
-              id="name"
-              name="name"
-              type="text"
-              label="Full Name"
-              placeholder="Enter your full name"
-              value={formData.name}
-              onChange={handleInputChange}
-              error={errors.name}
-              required
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                id="firstName"
+                name="firstName"
+                type="text"
+                label="First Name"
+                placeholder="Enter your first name"
+                value={formData.firstName}
+                onChange={handleInputChange}
+                error={errors.firstName}
+                required
+              />
+
+              <Input
+                id="lastName"
+                name="lastName"
+                type="text"
+                label="Last Name"
+                placeholder="Enter your last name"
+                value={formData.lastName}
+                onChange={handleInputChange}
+                error={errors.lastName}
+                required
+              />
+            </div>
 
             <Input
               id="email"
@@ -156,6 +185,65 @@ export default function RegisterPage() {
               value={formData.phone}
               onChange={handleInputChange}
             />
+
+            {/* Address Section */}
+            <div className="border-t border-gray-200 pt-4">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Address (Optional)</h3>
+
+              <Input
+                id="address.street"
+                name="address.street"
+                type="text"
+                label="Street Address"
+                placeholder="Enter your street address"
+                value={formData.address.street}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  address: { ...prev.address, street: e.target.value }
+                }))}
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <Input
+                  id="address.city"
+                  name="address.city"
+                  type="text"
+                  label="City"
+                  placeholder="City"
+                  value={formData.address.city}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    address: { ...prev.address, city: e.target.value }
+                  }))}
+                />
+
+                <Input
+                  id="address.state"
+                  name="address.state"
+                  type="text"
+                  label="State"
+                  placeholder="State"
+                  value={formData.address.state}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    address: { ...prev.address, state: e.target.value }
+                  }))}
+                />
+
+                <Input
+                  id="address.zipCode"
+                  name="address.zipCode"
+                  type="text"
+                  label="ZIP Code"
+                  placeholder="ZIP Code"
+                  value={formData.address.zipCode}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    address: { ...prev.address, zipCode: e.target.value }
+                  }))}
+                />
+              </div>
+            </div>
 
             <Input
               id="password"

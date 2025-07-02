@@ -8,6 +8,7 @@ import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
+import { formatCurrency } from '@/utils/currency';
 
 export default function CartPage() {
   const { user } = useAuth();
@@ -115,7 +116,7 @@ export default function CartPage() {
                       {/* Item Total */}
                       <div className="text-right">
                         <p className="text-lg font-semibold text-gray-900">
-                          ${item.total.toFixed(2)}
+                          {formatCurrency(item.total)}
                         </p>
                         <button
                           onClick={() => removeFromCart(item.productId)}
@@ -139,29 +140,29 @@ export default function CartPage() {
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subtotal ({cartCount} items)</span>
-                    <span className="font-medium">${cartTotal.toFixed(2)}</span>
+                    <span className="font-medium">{formatCurrency(cartTotal)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Shipping</span>
                     <span className="font-medium">
-                      {cartTotal >= 50 ? 'Free' : '$5.99'}
+                      {cartTotal >= 2000 ? 'Free' : formatCurrency(99)}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Tax</span>
-                    <span className="font-medium">${(cartTotal * 0.08).toFixed(2)}</span>
+                    <span className="text-gray-600">Tax (GST)</span>
+                    <span className="font-medium">{formatCurrency(cartTotal * 0.18)}</span>
                   </div>
                   <div className="border-t border-gray-200 pt-3">
                     <div className="flex justify-between">
                       <span className="text-lg font-semibold">Total</span>
                       <span className="text-lg font-semibold">
-                        ${(cartTotal + (cartTotal >= 50 ? 0 : 5.99) + cartTotal * 0.08).toFixed(2)}
+                        {formatCurrency(cartTotal + (cartTotal >= 2000 ? 0 : 99) + cartTotal * 0.18)}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {cartTotal >= 50 ? (
+                {cartTotal >= 2000 ? (
                   <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
                     <p className="text-sm text-green-700">
                       🎉 You qualify for free shipping!
@@ -170,14 +171,16 @@ export default function CartPage() {
                 ) : (
                   <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
                     <p className="text-sm text-orange-700">
-                      Add ${(50 - cartTotal).toFixed(2)} more for free shipping
+                      Add {formatCurrency(2000 - cartTotal)} more for free shipping
                     </p>
                   </div>
                 )}
 
-                <Button className="w-full mb-3" size="lg">
-                  Proceed to Checkout
-                </Button>
+                <Link href="/checkout">
+                  <Button className="w-full mb-3" size="lg" variant="gradient">
+                    Proceed to Checkout
+                  </Button>
+                </Link>
                 
                 <Link href="/products">
                   <Button variant="outline" className="w-full">

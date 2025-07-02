@@ -43,8 +43,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Helper function to make authenticated API calls
   const makeAuthenticatedRequest = async (url: string, options: RequestInit = {}) => {
-    const token = Cookies.get('auth-token');
-    return fetch(url, {
+    const token = Cookies.get('auth-token') || localStorage.getItem('token');
+    const backendUrl = url.startsWith('/api/') ? `http://localhost:5001${url}` : url;
+    return fetch(backendUrl, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
