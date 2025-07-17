@@ -126,7 +126,7 @@ export default function CheckoutPage() {
         billingAddress: shippingAddress, // Using same as shipping for now
       };
 
-      const response = await fetch('http://localhost:5001/api/orders', {
+      const response = await fetch('http://localhost:5000/api/orders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

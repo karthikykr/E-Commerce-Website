@@ -59,7 +59,7 @@ export default function Home() {
     const fetchData = async () => {
       try {
         // Fetch all products from backend
-        const productsResponse = await fetch('http://localhost:5001/api/products?limit=8');
+        const productsResponse = await fetch('http://localhost:5000/api/products?limit=8');
         if (productsResponse.ok) {
           const productsData = await productsResponse.json();
           const allProducts = productsData.data?.products || [];
@@ -73,7 +73,7 @@ export default function Home() {
         }
 
         // Fetch categories from backend
-        const categoriesResponse = await fetch('http://localhost:5001/api/categories');
+        const categoriesResponse = await fetch('http://localhost:5000/api/categories');
         if (categoriesResponse.ok) {
           const categoriesData = await categoriesResponse.json();
           setCategories(categoriesData.data?.categories?.slice(0, 3) || []);

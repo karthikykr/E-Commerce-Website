@@ -87,7 +87,7 @@ export default function ProductsPage() {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/products');
+      const response = await fetch('http://localhost:5000/api/products');
       const data = await response.json();
 
       if (data.success) {
@@ -110,7 +110,7 @@ export default function ProductsPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/categories');
+      const response = await fetch('http://localhost:5000/api/categories');
       const data = await response.json();
 
       if (data.success) {

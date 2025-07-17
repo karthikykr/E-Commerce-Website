@@ -44,7 +44,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Helper function to make authenticated API calls
   const makeAuthenticatedRequest = async (url: string, options: RequestInit = {}) => {
     const token = Cookies.get('auth-token') || localStorage.getItem('token');
-    const backendUrl = url.startsWith('/api/') ? `http://localhost:5001${url}` : url;
+    const backendUrl = url.startsWith('/api/') ? `http://localhost:5000${url}` : url;
     return fetch(backendUrl, {
       ...options,
       headers: {
@@ -69,12 +69,18 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await makeAuthenticatedRequest('/api/cart');
       const data = await response.json();
 
-      if (data.success) {
-        setCartItems(data.cart.items);
-        setCartCount(data.cart.totalItems);
-        setCartTotal(data.cart.totalAmount);
+      if (data.success && data.cart) {
+        setCartItems(data.cart.items || []);
+        setCartCount(data.cart.totalItems || 0);
+        setCartTotal(data.cart.totalAmount || 0);
       } else {
-        console.error('Failed to fetch cart:', data.message);
+        // If no cart exists or failed to fetch, initialize empty cart
+        setCartItems([]);
+        setCartCount(0);
+        setCartTotal(0);
+        if (!data.success) {
+          console.error('Failed to fetch cart:', data.message);
+        }
       }
     } catch (error) {
       console.error('Error fetching cart:', error);

@@ -42,8 +42,11 @@ export default function LoginPage() {
       const success = await login(email, password);
 
       if (success) {
-        // Redirect to home page
-        window.location.href = '/';
+        // The AuthContext will handle the redirect based on user role
+        // Just wait a moment for the context to update
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
         return;
       } else {
         setError('Invalid email or password');

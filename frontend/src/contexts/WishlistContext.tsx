@@ -41,7 +41,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Helper function to make authenticated API calls
   const makeAuthenticatedRequest = async (url: string, options: RequestInit = {}) => {
     const token = Cookies.get('auth-token') || localStorage.getItem('token');
-    const backendUrl = url.startsWith('/api/') ? `http://localhost:5001${url}` : url;
+    const backendUrl = url.startsWith('/api/') ? `http://localhost:5000${url}` : url;
     return fetch(backendUrl, {
       ...options,
       headers: {
@@ -65,11 +65,16 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const response = await makeAuthenticatedRequest('/api/wishlist');
       const data = await response.json();
 
-      if (data.success) {
-        setWishlistItems(data.wishlist.items);
-        setWishlistCount(data.wishlist.totalItems);
+      if (data.success && data.wishlist) {
+        setWishlistItems(data.wishlist.items || []);
+        setWishlistCount(data.wishlist.totalItems || 0);
       } else {
-        console.error('Failed to fetch wishlist:', data.message);
+        // If no wishlist exists or failed to fetch, initialize empty wishlist
+        setWishlistItems([]);
+        setWishlistCount(0);
+        if (!data.success) {
+          console.error('Failed to fetch wishlist:', data.message);
+        }
       }
     } catch (error) {
       console.error('Error fetching wishlist:', error);

@@ -8,8 +8,16 @@ const connectDB = require('./config/database');
 // Load environment variables
 dotenv.config();
 
-// Connect to MongoDB
-connectDB();
+// Connect to MongoDB (with error handling)
+if (process.env.MONGODB_URI) {
+  connectDB().catch(err => {
+    console.log('⚠️  MongoDB connection failed, running without database:', err.message);
+    console.log('💡 Install and start MongoDB to enable full functionality');
+  });
+} else {
+  console.log('⚠️  No MongoDB URI found, running without database');
+  console.log('💡 Add MONGODB_URI to .env file to enable database features');
+}
 
 const app = express();
 

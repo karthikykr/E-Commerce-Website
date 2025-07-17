@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
-import { SearchInput } from '@/components/ui/Input';
-import { SearchSuggestions } from '@/components/ui/SearchSuggestions';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
@@ -16,20 +15,15 @@ export const Header = () => {
   const { wishlistCount } = useWishlist();
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-  const toggleSearch = () => setIsSearchOpen(!isSearchOpen);
 
   // Close mobile menu when screen size changes
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
         setIsMenuOpen(false);
-        setIsSearchOpen(false);
       }
     };
 
@@ -37,18 +31,7 @@ export const Header = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handleSearch = (query: string) => {
-    if (query.trim()) {
-      router.push(`/products?search=${encodeURIComponent(query.trim())}`);
-      setSearchQuery('');
-      setIsSearchOpen(false);
-    }
-  };
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    handleSearch(searchQuery);
-  };
 
   return (
     <header className="bg-gradient-to-r from-orange-50 to-amber-50 shadow-lg border-b border-orange-200 sticky top-0 z-50">
@@ -95,63 +78,16 @@ export const Header = () => {
             </Link>
           </nav>
 
-          {/* Search Bar (Desktop) */}
-          <div className="hidden lg:flex flex-1 max-w-lg mx-8">
-            <form onSubmit={handleSearch} className="w-full">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search for fresh spices, herbs & more..."
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setShowSuggestions(e.target.value.length > 1);
-                  }}
-                  onFocus={() => setShowSuggestions(searchQuery.length > 1)}
-                  className="w-full pl-12 pr-4 py-3 border-2 border-orange-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-400 bg-white shadow-sm transition-all duration-200 placeholder-gray-500"
-                />
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                <button
-                  type="submit"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-orange-600 hover:text-orange-700 transition-colors"
-                >
-                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </button>
-                <SearchSuggestions
-                  searchQuery={searchQuery}
-                  onSelect={(suggestion) => {
-                    setSearchQuery(suggestion);
-                    setShowSuggestions(false);
-                  }}
-                  isVisible={showSuggestions}
-                  onClose={() => setShowSuggestions(false)}
-                />
-              </div>
-            </form>
-          </div>
+
 
           {/* Right Side Icons & Buttons */}
           <div className="flex items-center space-x-4">
-            {/* Search Icon (Mobile) */}
-            <button
-              onClick={toggleSearch}
-              className="lg:hidden p-2 text-gray-600 hover:text-orange-600"
-            >
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </button>
 
-            {/* Cart Icon */}
+
+            {/* Cart Icon - Flipkart Style */}
             <Link href="/cart" className="relative p-3 text-gray-600 hover:text-orange-600 transition-all duration-200 rounded-lg hover:bg-orange-50 group">
-              <svg className="h-6 w-6 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
+              <svg className="h-6 w-6 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
               </svg>
               {/* Cart Badge */}
               {cartCount > 0 && (
@@ -207,11 +143,11 @@ export const Header = () => {
                       </span>
                     </div>
                     <div className="py-1">
-                      <Link href="/profile" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors duration-150">
+                      <Link href={user.role === 'admin' ? '/admin/dashboard' : '/customer/dashboard'} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors duration-150">
                         <svg className="h-4 w-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
-                        My Profile
+                        {user.role === 'admin' ? 'Admin Dashboard' : 'My Dashboard'}
                       </Link>
                       <Link href="/orders" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors duration-150">
                         <svg className="h-4 w-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -226,12 +162,21 @@ export const Header = () => {
                         Wishlist
                       </Link>
                       {user.role === 'admin' && (
-                        <Link href="/admin/dashboard" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors duration-150">
-                          <svg className="h-4 w-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                          </svg>
-                          Admin Dashboard
-                        </Link>
+                        <>
+                          <div className="border-t border-orange-100 my-1"></div>
+                          <Link href="/admin/products" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors duration-150">
+                            <svg className="h-4 w-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                            </svg>
+                            Manage Products
+                          </Link>
+                          <Link href="/admin/orders" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors duration-150">
+                            <svg className="h-4 w-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            Manage Orders
+                          </Link>
+                        </>
                       )}
                     </div>
                     <div className="border-t border-orange-100 mt-1 pt-1">
@@ -286,27 +231,7 @@ export const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Search Bar */}
-        {isSearchOpen && (
-          <div className="lg:hidden py-4 border-t">
-            <form onSubmit={handleSearch}>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search for spices..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                />
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-              </div>
-            </form>
-          </div>
-        )}
+
 
         {/* Mobile Menu */}
         {isMenuOpen && (
@@ -337,16 +262,22 @@ export const Header = () => {
                         {user.role === 'admin' ? 'Admin' : 'Customer'}
                       </span>
                     </div>
-                    <Link href="/profile" className="text-gray-700 hover:text-orange-600 transition-colors py-2">
-                      My Profile
+                    <Link href={user.role === 'admin' ? '/admin/dashboard' : '/customer/dashboard'} className="text-gray-700 hover:text-orange-600 transition-colors py-2">
+                      {user.role === 'admin' ? 'Admin Dashboard' : 'My Dashboard'}
                     </Link>
                     <Link href="/orders" className="text-gray-700 hover:text-orange-600 transition-colors py-2">
                       My Orders
                     </Link>
                     {user.role === 'admin' && (
-                      <Link href="/admin/dashboard" className="text-gray-700 hover:text-orange-600 transition-colors py-2">
-                        Admin Dashboard
-                      </Link>
+                      <>
+                        <div className="border-t border-gray-200 my-2"></div>
+                        <Link href="/admin/products" className="text-gray-700 hover:text-orange-600 transition-colors py-2">
+                          Manage Products
+                        </Link>
+                        <Link href="/admin/orders" className="text-gray-700 hover:text-orange-600 transition-colors py-2">
+                          Manage Orders
+                        </Link>
+                      </>
                     )}
                     <button
                       onClick={logout}

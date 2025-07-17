@@ -103,7 +103,10 @@ export default function RegisterPage() {
       });
 
       if (success) {
-        router.push('/');
+        // The AuthContext will handle the redirect to customer dashboard
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
       } else {
         setErrors({ general: 'Registration failed. Please try again.' });
       }

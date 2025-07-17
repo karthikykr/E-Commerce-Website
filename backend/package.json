@@ -6,9 +6,15 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
+    "start-safe": "node start-server.js",
     "build": "echo 'No build step required for Node.js'",
     "seed": "node src/scripts/seedData.js",
-    "reset-db": "node src/scripts/resetDatabase.js"
+    "reset-db": "node src/scripts/resetDatabase.js",
+    "test-connection": "node test-connection.js",
+    "test-api": "node api-test.js",
+    "check-mongodb": "node check-mongodb.js",
+    "setup-db": "node setup-database.js",
+    "create-admin": "node create-admin.js"
   },
   "dependencies": {
     "axios": "^1.10.0",

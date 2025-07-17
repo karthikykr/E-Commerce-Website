@@ -24,12 +24,16 @@ export default function AddProduct() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
+    shortDescription: '',
     price: '',
     category: '',
     stockQuantity: '',
+    weight: { value: '', unit: 'g' },
     images: [{ url: '', alt: '' }],
     specifications: [{ key: '', value: '' }],
-    isActive: true
+    tags: '',
+    isActive: true,
+    isFeatured: false
   });
 
   useEffect(() => {
@@ -50,10 +54,10 @@ export default function AddProduct() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/categories');
+      const response = await fetch('http://localhost:5000/api/categories');
       const data = await response.json();
       if (data.success) {
-        setCategories(data.data.categories);
+        setCategories(data.data.categories || data.data);
       }
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -62,10 +66,22 @@ export default function AddProduct() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
-    }));
+
+    if (name.startsWith('weight.')) {
+      const weightField = name.split('.')[1];
+      setFormData(prev => ({
+        ...prev,
+        weight: {
+          ...prev.weight,
+          [weightField]: value
+        }
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+      }));
+    }
   };
 
   const handleImageChange = (index: number, field: 'url' | 'alt', value: string) => {
@@ -121,18 +137,36 @@ export default function AddProduct() {
       const filteredImages = formData.images.filter(img => img.url.trim() !== '');
       const filteredSpecs = formData.specifications.filter(spec => spec.key.trim() !== '' && spec.value.trim() !== '');
 
+      // Generate slug from name
+      const generateSlug = (name: string) => {
+        return name
+          .toLowerCase()
+          .replace(/[^a-z0-9 -]/g, '')
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-')
+          .trim();
+      };
+
       const productData = {
         name: formData.name,
+        slug: generateSlug(formData.name),
         description: formData.description,
+        shortDescription: formData.shortDescription || formData.description.substring(0, 100),
         price: parseFloat(formData.price),
         category: formData.category,
         stockQuantity: parseInt(formData.stockQuantity),
-        images: filteredImages,
+        weight: {
+          value: parseFloat(formData.weight.value) || 100,
+          unit: formData.weight.unit || 'g'
+        },
+        images: filteredImages.length > 0 ? filteredImages : [{ url: 'https://via.placeholder.com/500', alt: formData.name }],
         specifications: filteredSpecs,
-        isActive: formData.isActive
+        tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '') : [],
+        isActive: formData.isActive,
+        isFeatured: formData.isFeatured || false
       };
 
-      const response = await fetch('http://localhost:5001/api/products', {
+      const response = await fetch('http://localhost:5000/api/products', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -273,6 +307,36 @@ export default function AddProduct() {
               />
             </div>
 
+            <div>
+              <label htmlFor="shortDescription" className="block text-sm font-medium text-gray-700 mb-2">
+                Short Description
+              </label>
+              <textarea
+                id="shortDescription"
+                name="shortDescription"
+                rows={2}
+                value={formData.shortDescription}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="Enter short description (optional)"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-2">
+                Tags
+              </label>
+              <input
+                type="text"
+                id="tags"
+                name="tags"
+                value={formData.tags}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="Enter tags separated by commas (e.g., organic, spice, premium)"
+              />
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
@@ -307,6 +371,75 @@ export default function AddProduct() {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   placeholder="0"
                 />
+              </div>
+            </div>
+
+            {/* Weight Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="weight.value" className="block text-sm font-medium text-gray-700 mb-2">
+                  Weight Value
+                </label>
+                <input
+                  type="number"
+                  id="weight.value"
+                  name="weight.value"
+                  min="0"
+                  step="0.1"
+                  value={formData.weight.value}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="100"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="weight.unit" className="block text-sm font-medium text-gray-700 mb-2">
+                  Weight Unit
+                </label>
+                <select
+                  id="weight.unit"
+                  name="weight.unit"
+                  value={formData.weight.unit}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                >
+                  <option value="g">Grams (g)</option>
+                  <option value="kg">Kilograms (kg)</option>
+                  <option value="ml">Milliliters (ml)</option>
+                  <option value="l">Liters (l)</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Checkboxes */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="isActive"
+                  name="isActive"
+                  checked={formData.isActive}
+                  onChange={handleInputChange}
+                  className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+                />
+                <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
+                  Product is Active
+                </label>
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="isFeatured"
+                  name="isFeatured"
+                  checked={formData.isFeatured}
+                  onChange={handleInputChange}
+                  className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+                />
+                <label htmlFor="isFeatured" className="ml-2 block text-sm text-gray-900">
+                  Featured Product
+                </label>
               </div>
             </div>
 
@@ -396,20 +529,7 @@ export default function AddProduct() {
               </button>
             </div>
 
-            {/* Status */}
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="isActive"
-                name="isActive"
-                checked={formData.isActive}
-                onChange={handleInputChange}
-                className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
-              />
-              <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
-                Product is active and visible to customers
-              </label>
-            </div>
+
 
             {/* Submit Buttons */}
             <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">

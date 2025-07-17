@@ -79,7 +79,7 @@ export default function AccountPage() {
   const fetchOrders = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('http://localhost:5001/api/orders', {
+      const response = await fetch('http://localhost:5000/api/orders', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },

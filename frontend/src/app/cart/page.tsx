@@ -15,25 +15,7 @@ export default function CartPage() {
   const { cartItems, cartTotal, cartCount, updateQuantity, removeFromCart, isLoading } = useCart();
   const router = useRouter();
 
-  useEffect(() => {
-    if (!user) {
-      router.push('/auth/login');
-    }
-  }, [user, router]);
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Please Login</h1>
-          <p className="text-gray-600 mb-8">You need to be logged in to view your cart.</p>
-          <Link href="/auth/login">
-            <Button>Login</Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  // Remove the login requirement - allow guest users to view cart
 
   const handleQuantityChange = async (productId: string, newQuantity: number) => {
     if (newQuantity < 1) {

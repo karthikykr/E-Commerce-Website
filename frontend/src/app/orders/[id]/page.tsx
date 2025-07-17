@@ -79,7 +79,7 @@ export default function OrderDetailsPage() {
   const fetchOrder = async (orderId: string) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`http://localhost:5001/api/orders/${orderId}`, {
+      const response = await fetch(`http://localhost:5000/api/orders/${orderId}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },

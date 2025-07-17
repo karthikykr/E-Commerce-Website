@@ -29,7 +29,7 @@ export const useAdminAPI = () => {
     setError(null);
 
     try {
-      const response = await fetch(`http://localhost:5001/api/admin${endpoint}`, {
+      const response = await fetch(`http://localhost:5000/api/admin${endpoint}`, {
         ...options,
         headers: {
           ...getAuthHeaders(),
