@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/components/ui/Toast';
+import { useToast } from '@/contexts/ToastContext';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');

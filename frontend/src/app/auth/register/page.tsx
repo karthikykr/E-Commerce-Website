@@ -103,10 +103,11 @@ export default function RegisterPage() {
       });
 
       if (success) {
-        // The AuthContext will handle the redirect to customer dashboard
-        setTimeout(() => {
-          window.location.reload();
-        }, 100);
+        // Show success message briefly, then AuthContext will handle the redirect
+        setErrors({ general: '' });
+        setLoading(false);
+        // AuthContext login function will handle the redirect automatically
+        // No need to manually redirect here
       } else {
         setErrors({ general: 'Registration failed. Please try again.' });
       }

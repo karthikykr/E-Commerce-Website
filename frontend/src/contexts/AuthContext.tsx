@@ -117,7 +117,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (userData.role === 'admin') {
             window.location.href = '/admin/dashboard';
           } else {
-            window.location.href = '/customer/dashboard';
+            window.location.href = '/';
           }
         }, 100);
 

@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/Input';
 import { Card, CardHeader, CardBody } from '@/components/ui/Card';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
-import { useToast } from '@/components/ui/Toast';
+import { useToast } from '@/contexts/ToastContext';
 import { StripePayment } from '@/components/payment/StripePayment';
 import { formatOrderSummary, formatCurrency } from '@/utils/currency';
 
@@ -37,7 +37,7 @@ interface PaymentMethod {
 export default function CheckoutPage() {
   const { user } = useAuth();
   const { cartItems, cartTotal, cartCount, clearCart } = useCart();
-  const { addToast } = useToast();
+  const { showToast } = useToast();
   const router = useRouter();
   
   const [currentStep, setCurrentStep] = useState(1);
@@ -139,10 +139,9 @@ export default function CheckoutPage() {
 
       if (data.success) {
         clearCart();
-        addToast({
+        showToast({
           type: 'success',
-          title: 'Order Placed Successfully!',
-          message: `Your order #${data.data.order.orderNumber} has been placed.`,
+          message: `Order placed successfully! Your order #${data.data.order.orderNumber} has been placed.`,
           duration: 5000,
         });
         router.push(`/orders/${data.data.order._id}`);
@@ -151,10 +150,9 @@ export default function CheckoutPage() {
       }
     } catch (error) {
       console.error('Order placement error:', error);
-      addToast({
+      showToast({
         type: 'error',
-        title: 'Order Failed',
-        message: 'There was an error placing your order. Please try again.',
+        message: 'Order failed. There was an error placing your order. Please try again.',
         duration: 5000,
       });
     } finally {

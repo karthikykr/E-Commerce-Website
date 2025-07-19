@@ -8,7 +8,7 @@ import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardBody } from '@/components/ui/Card';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/components/ui/Toast';
+import { useToast } from '@/contexts/ToastContext';
 
 interface OrderItem {
   product: {
@@ -60,7 +60,7 @@ export default function OrderDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
-  const { addToast } = useToast();
+  const { showToast } = useToast();
   
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -93,9 +93,8 @@ export default function OrderDetailsPage() {
       }
     } catch (error) {
       console.error('Error fetching order:', error);
-      addToast({
+      showToast({
         type: 'error',
-        title: 'Error',
         message: 'Failed to load order details.',
         duration: 5000,
       });

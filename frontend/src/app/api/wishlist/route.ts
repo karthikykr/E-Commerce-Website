@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// DELETE - Remove item from wishlist
+// DELETE - Remove item from wishlist or clear entire wishlist
 export async function DELETE(request: NextRequest) {
   try {
     const user = verifyToken(request);
@@ -133,20 +133,20 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const productId = searchParams.get('productId');
 
-    if (!productId) {
-      return NextResponse.json(
-        { success: false, message: 'Product ID is required' },
-        { status: 400 }
-      );
-    }
-
     if (!userWishlists[user.userId]) {
-      return NextResponse.json(
-        { success: false, message: 'Wishlist not found' },
-        { status: 404 }
-      );
+      userWishlists[user.userId] = [];
     }
 
+    // If no productId provided, clear entire wishlist
+    if (!productId) {
+      userWishlists[user.userId] = [];
+      return NextResponse.json({
+        success: true,
+        message: 'Wishlist cleared successfully'
+      });
+    }
+
+    // Remove specific item from wishlist
     const itemIndex = userWishlists[user.userId].findIndex(item => item.productId === productId);
     if (itemIndex === -1) {
       return NextResponse.json(

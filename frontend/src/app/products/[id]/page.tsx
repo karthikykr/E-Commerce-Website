@@ -8,6 +8,8 @@ import { Footer } from '@/components/layout/Footer';
 import { ProductCard } from '@/components/product/ProductCard';
 import { Button } from '@/components/ui/Button';
 import { products } from '@/data/products';
+import { useCart } from '@/contexts/CartContext';
+import { useWishlist } from '@/contexts/WishlistContext';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -42,12 +44,28 @@ export default function ProductDetailPage() {
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
 
-  const handleAddToCart = () => {
-    alert(`Added ${quantity} x ${product.name} to cart!`);
+  const { addToCart, isLoading: cartLoading } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist, isLoading: wishlistLoading } = useWishlist();
+
+  const handleAddToCart = async () => {
+    const success = await addToCart(product.id, quantity);
+    if (success) {
+      alert(`Added ${quantity} x ${product.name} to cart!`);
+    }
   };
 
-  const handleAddToWishlist = () => {
-    alert(`Added ${product.name} to wishlist!`);
+  const handleAddToWishlist = async () => {
+    if (isInWishlist(product.id)) {
+      const success = await removeFromWishlist(product.id);
+      if (success) {
+        alert(`Removed ${product.name} from wishlist!`);
+      }
+    } else {
+      const success = await addToWishlist(product.id);
+      if (success) {
+        alert(`Added ${product.name} to wishlist!`);
+      }
+    }
   };
 
   return (
@@ -180,8 +198,18 @@ export default function ProductDetailPage() {
                     <Button onClick={handleAddToCart} className="flex-1" size="lg">
                       Add to Cart - ${(product.price * quantity).toFixed(2)}
                     </Button>
-                    <Button onClick={handleAddToWishlist} variant="outline" size="lg">
-                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <Button
+                      onClick={handleAddToWishlist}
+                      variant="outline"
+                      size="lg"
+                      disabled={wishlistLoading}
+                    >
+                      <svg
+                        className={`h-5 w-5 ${isInWishlist(product.id) ? 'text-red-500 fill-current' : ''}`}
+                        fill={isInWishlist(product.id) ? 'currentColor' : 'none'}
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                       </svg>
                     </Button>

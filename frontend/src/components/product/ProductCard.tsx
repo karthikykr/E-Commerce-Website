@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { ProductCardWrapper } from '@/components/ui/Card';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
-import { useToast } from '@/components/ui/Toast';
+import { useToast } from '@/contexts/ToastContext';
 import { formatPriceWithDiscount } from '@/utils/currency';
 
 interface Product {
@@ -46,7 +46,7 @@ interface ProductCardProps {
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addToCart, isLoading: cartLoading } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist, isLoading: wishlistLoading } = useWishlist();
-  const { addToast } = useToast();
+  const { showToast } = useToast();
 
   const priceInfo = formatPriceWithDiscount(product.price, product.originalPrice);
 
@@ -59,16 +59,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     e.stopPropagation();
     const success = await addToCart(productId, 1);
     if (success) {
-      addToast({
+      showToast({
         type: 'success',
-        title: 'Added to Cart!',
         message: `${product.name} has been added to your cart.`,
         duration: 3000,
       });
     } else {
-      addToast({
+      showToast({
         type: 'error',
-        title: 'Failed to Add',
         message: 'Could not add item to cart. Please try again.',
         duration: 3000,
       });
@@ -82,9 +80,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     if (isInWishlist(productId)) {
       const success = await removeFromWishlist(productId);
       if (success) {
-        addToast({
+        showToast({
           type: 'info',
-          title: 'Removed from Wishlist',
           message: `${product.name} has been removed from your wishlist.`,
           duration: 3000,
         });
@@ -92,9 +89,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     } else {
       const success = await addToWishlist(productId);
       if (success) {
-        addToast({
+        showToast({
           type: 'success',
-          title: 'Added to Wishlist!',
           message: `${product.name} has been added to your wishlist.`,
           duration: 3000,
         });

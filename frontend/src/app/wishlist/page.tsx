@@ -9,11 +9,13 @@ import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
+import { useToast } from '@/contexts/ToastContext';
 
 export default function WishlistPage() {
   const { user } = useAuth();
-  const { wishlistItems, wishlistCount, removeFromWishlist, isLoading: wishlistLoading } = useWishlist();
+  const { wishlistItems, wishlistCount, removeFromWishlist, clearWishlist, isLoading: wishlistLoading } = useWishlist();
   const { addToCart, isLoading: cartLoading } = useCart();
+  const { showCartToast, showToast } = useToast();
   const router = useRouter();
 
   useEffect(() => {
@@ -39,14 +41,41 @@ export default function WishlistPage() {
   const handleAddToCart = async (productId: string, productName: string) => {
     const success = await addToCart(productId, 1);
     if (success) {
-      alert(`Added ${productName} to cart!`);
+      showCartToast(`Added ${productName} to cart!`);
+    }
+  };
+
+  const handleMoveToCart = async (productId: string, productName: string) => {
+    const addSuccess = await addToCart(productId, 1);
+    if (addSuccess) {
+      const removeSuccess = await removeFromWishlist(productId);
+      if (removeSuccess) {
+        showCartToast(`Moved ${productName} to cart!`);
+      }
     }
   };
 
   const handleRemoveFromWishlist = async (productId: string, productName: string) => {
     const success = await removeFromWishlist(productId);
     if (success) {
-      alert(`Removed ${productName} from wishlist!`);
+      showToast({
+        type: 'info',
+        message: `Removed ${productName} from wishlist!`,
+        duration: 3000
+      });
+    }
+  };
+
+  const handleClearWishlist = async () => {
+    if (window.confirm('Are you sure you want to clear your entire wishlist?')) {
+      const success = await clearWishlist();
+      if (success) {
+        showToast({
+          type: 'info',
+          message: 'Wishlist cleared successfully',
+          duration: 3000
+        });
+      }
     }
   };
 
@@ -55,11 +84,25 @@ export default function WishlistPage() {
       <Header />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Wishlist</h1>
-          <p className="text-gray-600">
-            {wishlistCount > 0 ? `${wishlistCount} item${wishlistCount !== 1 ? 's' : ''} in your wishlist` : 'Your wishlist is empty'}
-          </p>
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">My Wishlist</h1>
+            <p className="text-gray-600">
+              {wishlistCount > 0 ? `${wishlistCount} item${wishlistCount !== 1 ? 's' : ''} in your wishlist` : 'Your wishlist is empty'}
+            </p>
+          </div>
+          {wishlistCount > 0 && (
+            <button
+              onClick={handleClearWishlist}
+              disabled={wishlistLoading}
+              className="text-sm text-red-600 hover:text-red-700 disabled:opacity-50 flex items-center space-x-1 px-3 py-2 border border-red-300 rounded-md hover:bg-red-50"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              <span>Clear Wishlist</span>
+            </button>
+          )}
         </div>
 
         {wishlistItems.length === 0 ? (
@@ -73,8 +116,8 @@ export default function WishlistPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {wishlistItems.map((item) => (
-              <div key={item.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+            {wishlistItems.map((item, index) => (
+              <div key={item.productId || item.id || `wishlist-item-${index}`} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                 {/* Product Image */}
                 <div className="relative h-48 bg-gray-100 flex items-center justify-center">
                   <div className="text-6xl">{item.product?.category?.image || '🌶️'}</div>
@@ -157,20 +200,43 @@ export default function WishlistPage() {
                   
                   {/* Actions */}
                   <div className="space-y-2">
-                    <Button
-                      onClick={() => handleAddToCart(item.productId, item.product?.name || 'Product')}
-                      disabled={!item.product?.inStock || cartLoading}
-                      className="w-full"
-                      variant={item.product?.inStock ? 'primary' : 'secondary'}
-                    >
-                      {cartLoading ? 'Adding...' : item.product?.inStock ? 'Add to Cart' : 'Out of Stock'}
-                    </Button>
-                    
-                    <Link href={`/products/${item.productId}`}>
-                      <Button variant="outline" className="w-full">
-                        View Details
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        onClick={() => handleAddToCart(item.productId, item.product?.name || 'Product')}
+                        disabled={!item.product?.inStock || cartLoading}
+                        variant={item.product?.inStock ? 'primary' : 'secondary'}
+                        size="sm"
+                      >
+                        {cartLoading ? 'Adding...' : item.product?.inStock ? 'Add to Cart' : 'Out of Stock'}
                       </Button>
-                    </Link>
+
+                      <Button
+                        onClick={() => handleMoveToCart(item.productId, item.product?.name || 'Product')}
+                        disabled={!item.product?.inStock || cartLoading || wishlistLoading}
+                        variant="outline"
+                        size="sm"
+                      >
+                        Move to Cart
+                      </Button>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <Link href={`/products/${item.productId}`}>
+                        <Button variant="outline" className="w-full" size="sm">
+                          View Details
+                        </Button>
+                      </Link>
+
+                      <Button
+                        onClick={() => handleRemoveFromWishlist(item.productId, item.product?.name || 'Product')}
+                        disabled={wishlistLoading}
+                        variant="outline"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700 border-red-300 hover:border-red-400"
+                      >
+                        Remove
+                      </Button>
+                    </div>
                   </div>
                   
                   {/* Added Date */}

@@ -5,7 +5,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
-import { useToast } from '@/components/ui/Toast';
+import { useToast } from '@/contexts/ToastContext';
 
 interface Product {
   _id: string;
@@ -54,7 +54,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
   
   const { addToCart, isLoading: cartLoading } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist, isLoading: wishlistLoading } = useWishlist();
-  const { addToast } = useToast();
+  const { showToast } = useToast();
 
   if (!product) return null;
 
@@ -65,17 +65,15 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
   const handleAddToCart = async () => {
     const success = await addToCart(product._id, quantity);
     if (success) {
-      addToast({
+      showToast({
         type: 'success',
-        title: 'Added to Cart!',
-        message: `${quantity}x ${product.name} added to your cart.`,
+        message: `Added ${quantity}x ${product.name} to your cart!`,
         duration: 3000,
       });
       onClose();
     } else {
-      addToast({
+      showToast({
         type: 'error',
-        title: 'Failed to Add',
         message: 'Could not add item to cart. Please try again.',
         duration: 3000,
       });
@@ -86,9 +84,8 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
     if (isInWishlist(product._id)) {
       const success = await removeFromWishlist(product._id);
       if (success) {
-        addToast({
+        showToast({
           type: 'info',
-          title: 'Removed from Wishlist',
           message: `${product.name} removed from wishlist.`,
           duration: 3000,
         });
@@ -96,10 +93,9 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
     } else {
       const success = await addToWishlist(product._id);
       if (success) {
-        addToast({
+        showToast({
           type: 'success',
-          title: 'Added to Wishlist!',
-          message: `${product.name} added to wishlist.`,
+          message: `${product.name} added to wishlist!`,
           duration: 3000,
         });
       }

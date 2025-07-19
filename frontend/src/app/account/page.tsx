@@ -12,7 +12,7 @@ import { ProfileSkeleton, OrderHistorySkeleton } from '@/components/ui/Skeleton'
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
-import { useToast } from '@/components/ui/Toast';
+import { useToast } from '@/contexts/ToastContext';
 
 interface Order {
   _id: string;

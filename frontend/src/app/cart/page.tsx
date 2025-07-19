@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Header } from '@/components/layout/Header';
@@ -8,22 +8,55 @@ import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
+import { useToast } from '@/contexts/ToastContext';
 import { formatCurrency } from '@/utils/currency';
 
 export default function CartPage() {
   const { user } = useAuth();
-  const { cartItems, cartTotal, cartCount, updateQuantity, removeFromCart, isLoading } = useCart();
+  const { cartItems, cartTotal, cartCount, removeFromCart, clearCart, isLoading } = useCart();
+  const { showToast } = useToast();
   const router = useRouter();
 
   // Remove the login requirement - allow guest users to view cart
 
-  const handleQuantityChange = async (productId: string, newQuantity: number) => {
-    if (newQuantity < 1) {
-      await removeFromCart(productId);
+
+
+  const handleRemoveFromCart = useCallback(async (productId: string, productName?: string) => {
+    const success = await removeFromCart(productId);
+
+    if (success) {
+      showToast({
+        type: 'info',
+        message: `${productName || 'Item'} removed from cart`,
+        duration: 3000
+      });
     } else {
-      await updateQuantity(productId, newQuantity);
+      showToast({
+        type: 'error',
+        message: 'Failed to remove item from cart',
+        duration: 3000
+      });
     }
-  };
+  }, [removeFromCart, showToast]);
+
+  const handleClearCart = useCallback(async () => {
+    if (window.confirm('Are you sure you want to clear your entire cart?')) {
+      const success = await clearCart();
+      if (success) {
+        showToast({
+          type: 'info',
+          message: 'Cart cleared successfully',
+          duration: 3000
+        });
+      } else {
+        showToast({
+          type: 'error',
+          message: 'Failed to clear cart',
+          duration: 3000
+        });
+      }
+    }
+  }, [clearCart, showToast]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -51,12 +84,22 @@ export default function CartPage() {
             {/* Cart Items */}
             <div className="lg:col-span-2">
               <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                <div className="p-6 border-b border-gray-200">
+                <div className="p-6 border-b border-gray-200 flex justify-between items-center">
                   <h2 className="text-lg font-semibold text-gray-900">Cart Items</h2>
+                  <button
+                    onClick={handleClearCart}
+                    disabled={isLoading}
+                    className="text-sm text-red-600 hover:text-red-700 disabled:opacity-50 flex items-center space-x-1"
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    <span>Clear Cart</span>
+                  </button>
                 </div>
                 <div className="divide-y divide-gray-200">
-                  {cartItems.map((item) => (
-                    <div key={item.id} className="p-6 flex items-center space-x-4">
+                  {cartItems.map((item, index) => (
+                    <div key={item.id || item.productId || index} className="p-6 flex items-center space-x-4">
                       {/* Product Image */}
                       <div className="flex-shrink-0 w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center">
                         <div className="text-3xl">{item.product?.category?.image || '🌶️'}</div>
@@ -72,27 +115,18 @@ export default function CartPage() {
                         <p className="text-sm text-gray-500">{item.product?.category?.name}</p>
                         <p className="text-sm text-gray-500">{item.product?.weight}</p>
                         <p className="text-lg font-semibold text-gray-900 mt-1">
-                          ${item.product?.price || 0}
+                          {formatCurrency(item.product?.price || 0)}
                         </p>
                       </div>
 
-                      {/* Quantity Controls */}
-                      <div className="flex items-center space-x-3">
-                        <button
-                          onClick={() => handleQuantityChange(item.productId, item.quantity - 1)}
-                          disabled={isLoading}
-                          className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 disabled:opacity-50"
-                        >
-                          -
-                        </button>
-                        <span className="w-8 text-center font-medium">{item.quantity}</span>
-                        <button
-                          onClick={() => handleQuantityChange(item.productId, item.quantity + 1)}
-                          disabled={isLoading || item.quantity >= (item.product?.stockQuantity || 0)}
-                          className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 disabled:opacity-50"
-                        >
-                          +
-                        </button>
+                      {/* Quantity Display Only */}
+                      <div className="flex items-center">
+                        <div className="flex flex-col items-center">
+                          <div className="w-16 h-10 flex items-center justify-center border-2 border-gray-300 rounded-lg bg-gray-50">
+                            <span className="text-lg font-semibold text-gray-800">{item.quantity}</span>
+                          </div>
+                          <span className="text-xs text-gray-500 mt-1">qty</span>
+                        </div>
                       </div>
 
                       {/* Item Total */}
@@ -101,11 +135,14 @@ export default function CartPage() {
                           {formatCurrency(item.total)}
                         </p>
                         <button
-                          onClick={() => removeFromCart(item.productId)}
+                          onClick={() => handleRemoveFromCart(item.productId, item.product?.name)}
                           disabled={isLoading}
-                          className="text-sm text-red-600 hover:text-red-700 disabled:opacity-50"
+                          className="text-sm text-red-600 hover:text-red-700 disabled:opacity-50 flex items-center space-x-1"
                         >
-                          Remove
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          <span>Remove</span>
                         </button>
                       </div>
                     </div>

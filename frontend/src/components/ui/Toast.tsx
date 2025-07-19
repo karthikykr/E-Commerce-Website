@@ -14,6 +14,9 @@ interface ToastContextType {
   toasts: Toast[];
   addToast: (toast: Omit<Toast, 'id'>) => void;
   removeToast: (id: string) => void;
+  showToast: (toast: Omit<Toast, 'id'>) => void;
+  showCartToast: (message: string) => void;
+  showWishlistToast: (message: string) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -21,7 +24,26 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 export const useToast = () => {
   const context = useContext(ToastContext);
   if (!context) {
-    throw new Error('useToast must be used within a ToastProvider');
+    // Provide a fallback implementation instead of throwing an error
+    console.warn('useToast is being used outside of ToastProvider. Using fallback implementation.');
+    return {
+      toasts: [],
+      addToast: (toast: Omit<Toast, 'id'>) => {
+        console.log('Toast (fallback):', toast.title, toast.message);
+      },
+      removeToast: (id: string) => {
+        console.log('Remove toast (fallback):', id);
+      },
+      showToast: (toast: Omit<Toast, 'id'>) => {
+        console.log('Toast (fallback):', toast.title, toast.message);
+      },
+      showCartToast: (message: string) => {
+        console.log('Cart toast (fallback):', message);
+      },
+      showWishlistToast: (message: string) => {
+        console.log('Wishlist toast (fallback):', message);
+      }
+    };
   }
   return context;
 };
@@ -45,8 +67,26 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setToasts(prev => prev.filter(toast => toast.id !== id));
   }, []);
 
+  const showToast = addToast; // Alias for compatibility
+  const showCartToast = (message: string) => {
+    addToast({
+      type: 'success',
+      title: 'Added to Cart',
+      message,
+      duration: 4000
+    });
+  };
+  const showWishlistToast = (message: string) => {
+    addToast({
+      type: 'success',
+      title: 'Added to Wishlist',
+      message,
+      duration: 4000
+    });
+  };
+
   return (
-    <ToastContext.Provider value={{ toasts, addToast, removeToast }}>
+    <ToastContext.Provider value={{ toasts, addToast, removeToast, showToast, showCartToast, showWishlistToast }}>
       {children}
       <ToastContainer />
     </ToastContext.Provider>
