@@ -10,41 +10,41 @@ export default function About() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-orange-600 via-red-600 to-orange-700 text-white py-20">
+      {/* Hero Section - Mobile Responsive */}
+      <section className="relative bg-gradient-to-br from-orange-600 via-red-600 to-orange-700 text-white py-12 sm:py-16 lg:py-20">
         <div className="absolute inset-0 bg-black opacity-20"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-orange-100 bg-clip-text text-transparent">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-white to-orange-100 bg-clip-text text-transparent">
             About Gruhapaaka
           </h1>
-          <p className="text-xl md:text-2xl mb-8 text-orange-100 max-w-3xl mx-auto leading-relaxed">
-            Your trusted partner in bringing authentic flavors and premium spices to your kitchen
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-6 sm:mb-8 text-orange-100 max-w-3xl mx-auto leading-relaxed px-4">
+            Your trusted partner in bringing authentic homemade food products and traditional flavors to your kitchen
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/products" className="bg-white text-orange-600 hover:bg-orange-50 px-8 py-3 text-lg font-semibold rounded-lg transition-colors duration-200 text-center">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
+            <Link href="/products" className="bg-white text-orange-600 hover:bg-orange-50 px-6 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg font-semibold rounded-lg transition-colors duration-200 text-center">
               Explore Our Products
             </Link>
-            <Link href="/contact" className="border-2 border-white text-white hover:bg-white hover:text-orange-600 px-8 py-3 text-lg font-semibold rounded-lg transition-colors duration-200 text-center">
+            <Link href="/contact" className="border-2 border-white text-white hover:bg-white hover:text-orange-600 px-6 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg font-semibold rounded-lg transition-colors duration-200 text-center">
               Get In Touch
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Our Story Section */}
-      <section className="py-16 bg-white">
+      {/* Our Story Section - Mobile Responsive */}
+      <section className="py-12 sm:py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
             <div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-6">Our Story</h2>
-              <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-                Founded with a passion for authentic flavors, <span className="font-semibold text-orange-600">Gruhapaaka</span> began as a dream to bring the finest spices and culinary ingredients directly to your kitchen. Our name, derived from Sanskrit, means "home cooking" - reflecting our commitment to enhancing every meal you prepare.
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">Our Story</h2>
+              <p className="text-base sm:text-lg text-gray-700 mb-4 sm:mb-6 leading-relaxed">
+                Founded with a passion for authentic flavors, <span className="font-semibold text-orange-600">Gruhapaaka</span> began as a dream to bring the finest homemade food products and traditional recipes directly to your kitchen. Our name, derived from Sanskrit, means "home cooking" - reflecting our commitment to enhancing every meal you prepare.
               </p>
-              <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-                We believe that great cooking starts with great ingredients. That's why we source our spices directly from trusted farmers and suppliers, ensuring that every product meets our high standards for quality, freshness, and authenticity.
+              <p className="text-base sm:text-lg text-gray-700 mb-4 sm:mb-6 leading-relaxed">
+                We believe that great cooking starts with great ingredients. That's why we work with home cooks and traditional recipe keepers, ensuring that every product meets our high standards for quality, freshness, and authenticity.
               </p>
-              <p className="text-lg text-gray-700 leading-relaxed">
-                From traditional Indian masalas to international spice blends, we curate a collection that celebrates the diversity of global cuisine while maintaining the authentic taste that makes each dish special.
+              <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
+                From traditional Indian pickles to homemade chutneys and powders, we curate a collection that celebrates the diversity of home cooking while maintaining the authentic taste that makes each dish special.
               </p>
             </div>
             <div className="relative">
@@ -72,7 +72,7 @@ export default function About() {
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Mission & Vision</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Dedicated to bringing authentic flavors and premium quality to every kitchen
+              Dedicated to bringing authentic homemade food products and traditional flavors to every kitchen
             </p>
           </div>
           
@@ -85,7 +85,7 @@ export default function About() {
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Our Mission</h3>
               <p className="text-gray-700 leading-relaxed">
-                To provide the highest quality spices, herbs, and culinary ingredients that inspire home cooks and professional chefs alike. We are committed to sourcing ethically, supporting local farmers, and delivering exceptional products that enhance every culinary creation.
+                To provide the highest quality homemade food products and traditional recipes that inspire home cooks and food enthusiasts alike. We are committed to preserving authentic flavors, supporting home-based food artisans, and delivering exceptional products that enhance every culinary creation.
               </p>
             </div>
             
@@ -98,7 +98,7 @@ export default function About() {
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Our Vision</h3>
               <p className="text-gray-700 leading-relaxed">
-                To become the most trusted name in premium spices and culinary ingredients, creating a global community of food enthusiasts who appreciate authentic flavors and quality. We envision a world where every meal is an opportunity to explore new tastes and celebrate culinary traditions.
+                To become the most trusted name in authentic homemade food products, creating a global community of food enthusiasts who appreciate traditional flavors and quality. We envision a world where every meal is an opportunity to explore authentic tastes and celebrate home cooking traditions.
               </p>
             </div>
           </div>
@@ -148,7 +148,7 @@ export default function About() {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">Sustainability</h3>
               <p className="text-gray-600">
-                We support sustainable farming practices and work directly with farmers to ensure fair trade.
+                We support sustainable practices and work directly with home-based food artisans to ensure fair trade and quality.
               </p>
             </div>
             

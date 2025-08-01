@@ -126,12 +126,12 @@ router.post('/login', [
     const { email, password } = req.body;
 
     // Check for hardcoded admin credentials
-    if (email === 'admin@123.com' && password === 'admin123') {
+    if ((email === 'admin@123.com' || email === 'kaushikbshetty1@gmail.com') && password === 'admin123') {
       // Create admin user object
       const adminUser = {
-        _id: 'admin-hardcoded-id',
-        name: 'Admin User',
-        email: 'admin@123.com',
+        _id: email === 'admin@123.com' ? 'admin-hardcoded-id' : 'admin-kaushik-id',
+        name: email === 'admin@123.com' ? 'Admin User' : 'Kaushik B Shetty',
+        email: email,
         role: 'admin',
         authMethod: 'email',
         isActive: true,

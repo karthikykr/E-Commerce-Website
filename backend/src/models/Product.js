@@ -239,6 +239,6 @@ productSchema.index({ category: 1, isActive: 1 });
 productSchema.index({ price: 1 });
 productSchema.index({ rating: -1 });
 productSchema.index({ createdAt: -1 });
-productSchema.index({ slug: 1 });
+// slug already has unique index
 
 module.exports = mongoose.model('Product', productSchema);

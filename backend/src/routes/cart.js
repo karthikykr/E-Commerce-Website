@@ -153,22 +153,28 @@ router.put('/', [
       });
     }
 
-    // If quantity > 0, check stock availability
-    if (quantity > 0) {
-      const product = await Product.findById(productId);
-      if (!product) {
-        return res.status(404).json({
-          success: false,
-          message: 'Product not found'
-        });
-      }
+    // Validate minimum quantity
+    if (quantity < 1) {
+      return res.status(400).json({
+        success: false,
+        message: 'Quantity must be at least 1. Use delete endpoint to remove items.'
+      });
+    }
 
-      if (product.stockQuantity < quantity) {
-        return res.status(400).json({
-          success: false,
-          message: 'Insufficient stock available'
-        });
-      }
+    // Check stock availability
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+    }
+
+    if (product.stockQuantity < quantity) {
+      return res.status(400).json({
+        success: false,
+        message: 'Insufficient stock available'
+      });
     }
 
     // Update item quantity

@@ -21,6 +21,7 @@ interface Product {
     alt: string;
   }>;
   isActive: boolean;
+  isFeatured: boolean;
   createdAt: string;
 }
 
@@ -50,7 +51,7 @@ export default function AdminProducts() {
   const fetchProducts = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/products', {
+      const response = await fetch('http://localhost:5000/api/admin/products', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -73,7 +74,7 @@ export default function AdminProducts() {
   const toggleProductStatus = async (productId: string, currentStatus: boolean) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/products/${productId}`, {
+      const response = await fetch(`http://localhost:5000/api/admin/products/${productId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -84,8 +85,8 @@ export default function AdminProducts() {
 
       const data = await response.json();
       if (data.success) {
-        setProducts(products.map(product => 
-          product._id === productId 
+        setProducts(products.map(product =>
+          product._id === productId
             ? { ...product, isActive: !currentStatus }
             : product
         ));
@@ -98,6 +99,32 @@ export default function AdminProducts() {
     }
   };
 
+  const toggleFeaturedStatus = async (productId: string, currentFeatured: boolean) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/admin/products/${productId}/feature`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setProducts(products.map(product =>
+          product._id === productId
+            ? { ...product, isFeatured: !currentFeatured }
+            : product
+        ));
+      } else {
+        setError('Failed to update featured status');
+      }
+    } catch (error) {
+      console.error('Error updating featured status:', error);
+      setError('Network error while updating featured status');
+    }
+  };
+
   const deleteProduct = async (productId: string) => {
     if (!confirm('Are you sure you want to delete this product?')) {
       return;
@@ -105,7 +132,7 @@ export default function AdminProducts() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/products/${productId}`, {
+      const response = await fetch(`http://localhost:5000/api/admin/products/${productId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -202,6 +229,9 @@ export default function AdminProducts() {
                       Status
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Featured
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -253,12 +283,38 @@ export default function AdminProducts() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          product.isActive 
+                          product.isActive
                             ? 'bg-green-100 text-green-800'
                             : 'bg-red-100 text-red-800'
                         }`}>
                           {product.isActive ? 'Active' : 'Inactive'}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <button
+                          onClick={() => toggleFeaturedStatus(product._id, product.isFeatured)}
+                          className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                            product.isFeatured
+                              ? 'bg-orange-100 text-orange-800 hover:bg-orange-200'
+                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          }`}
+                        >
+                          {product.isFeatured ? (
+                            <>
+                              <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                              </svg>
+                              Remove from Homepage
+                            </>
+                          ) : (
+                            <>
+                              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                              </svg>
+                              Add to Homepage
+                            </>
+                          )}
+                        </button>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex items-center space-x-3">

@@ -43,8 +43,14 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Helper function to make authenticated API calls
   const makeAuthenticatedRequest = async (url: string, options: RequestInit = {}) => {
     const token = Cookies.get('auth-token') || localStorage.getItem('token');
+
+    if (!token) {
+      throw new Error('No authentication token found. Please login again.');
+    }
+
     const backendUrl = url.startsWith('/api/') ? `http://localhost:5000${url}` : url;
-    return fetch(backendUrl, {
+
+    const response = await fetch(backendUrl, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
@@ -52,6 +58,18 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         ...options.headers,
       },
     });
+
+    // Handle authentication errors
+    if (response.status === 401) {
+      // Token might be expired or invalid
+      Cookies.remove('auth-token');
+      Cookies.remove('user-data');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      throw new Error('Authentication failed. Please login again.');
+    }
+
+    return response;
   };
 
   // Fetch wishlist data from backend
@@ -68,8 +86,20 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const data = await response.json();
 
       if (data.success && data.data && data.data.wishlist) {
-        setWishlistItems(data.data.wishlist.items || []);
-        setWishlistCount(data.data.wishlist.items ? data.data.wishlist.items.length : 0);
+        // Transform backend data structure to match frontend expectations
+        const transformedItems = (data.data.wishlist.items || []).map((item: any) => ({
+          id: item._id || item.id || `${item.product._id || item.product.id}_${Date.now()}`,
+          productId: item.product._id || item.product.id,
+          product: {
+            ...item.product,
+            id: item.product._id || item.product.id,
+            inStock: item.product.stockQuantity > 0
+          },
+          addedAt: item.addedAt
+        }));
+
+        setWishlistItems(transformedItems);
+        setWishlistCount(transformedItems.length);
       } else {
         // If no wishlist exists or failed to fetch, initialize empty wishlist
         setWishlistItems([]);
@@ -78,8 +108,19 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           console.error('Failed to fetch wishlist:', data.message);
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching wishlist:', error);
+      // Set empty state on error
+      setWishlistItems([]);
+      setWishlistCount(0);
+
+      // Show error toast for network issues
+      if (error.message && (error.message.includes('fetch') || error.message.includes('network'))) {
+        showToast({
+          message: 'Unable to load wishlist. Please check your connection.',
+          type: 'error'
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -130,10 +171,13 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
         return false;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding to wishlist:', error);
+      const errorMessage = error.message.includes('authentication') || error.message.includes('login')
+        ? 'Please login again to manage your wishlist'
+        : 'Failed to add item to wishlist';
       showToast({
-        message: 'Failed to add item to wishlist',
+        message: errorMessage,
         type: 'error'
       });
       return false;
@@ -168,10 +212,13 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         });
         return false;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error removing from wishlist:', error);
+      const errorMessage = error.message.includes('authentication') || error.message.includes('login')
+        ? 'Please login again to manage your wishlist'
+        : 'Failed to remove item from wishlist';
       showToast({
-        message: 'Failed to remove item from wishlist',
+        message: errorMessage,
         type: 'error'
       });
       return false;
@@ -182,7 +229,11 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Check if item is in wishlist
   const isInWishlist = (productId: string): boolean => {
-    return wishlistItems.some(item => item.productId === productId);
+    return wishlistItems.some(item =>
+      item.productId === productId ||
+      item.product?.id === productId ||
+      item.product?._id === productId
+    );
   };
 
   // Clear wishlist

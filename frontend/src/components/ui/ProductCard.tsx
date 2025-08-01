@@ -71,7 +71,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     
     setIsAddingToCart(true);
     try {
-      await addToCart(product._id, 1);
+      await addToCart(product.id || product._id, 1);
       // You could add a toast notification here
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -86,10 +86,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     
     setIsTogglingWishlist(true);
     try {
-      if (isInWishlist(product._id)) {
-        await removeFromWishlist(product._id);
+      const productId = product.id || product._id;
+      if (isInWishlist(productId)) {
+        await removeFromWishlist(productId);
       } else {
-        await addToWishlist(product._id);
+        await addToWishlist(productId);
       }
     } catch (error) {
       console.error('Error toggling wishlist:', error);
@@ -104,25 +105,25 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     : 0;
 
   return (
-    <div className={`group relative bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden ${className}`}>
+    <div className={`group relative bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden ${className}`}>
       {/* Discount Badge */}
       {discountPercentage > 0 && (
-        <div className="absolute top-3 left-3 z-10 bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
+        <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 bg-red-500 text-white px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-bold shadow-lg">
           {discountPercentage}% OFF
         </div>
       )}
 
-      {/* Wishlist Button */}
+      {/* Wishlist Button - Enhanced for mobile touch */}
       <button
         onClick={handleToggleWishlist}
         disabled={isTogglingWishlist}
-        className="absolute top-3 right-3 z-10 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all duration-200 disabled:opacity-50"
+        className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10 w-11 h-11 sm:w-10 sm:h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all duration-200 disabled:opacity-50 touch-manipulation"
       >
         <svg
           className={`w-5 h-5 transition-colors duration-200 ${
-            isInWishlist(product._id) ? 'text-red-500 fill-current' : 'text-gray-400'
+            isInWishlist(product.id || product._id) ? 'text-red-500 fill-current' : 'text-gray-400'
           }`}
-          fill={isInWishlist(product._id) ? 'currentColor' : 'none'}
+          fill={isInWishlist(product.id || product._id) ? 'currentColor' : 'none'}
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
@@ -136,60 +137,61 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       </button>
 
       <Link href={`/products/${product.slug}`}>
-        {/* Product Image */}
-        <div className="relative h-64 bg-gradient-to-br from-orange-100 to-red-100 overflow-hidden">
+        {/* Product Image - Enhanced responsive sizing */}
+        <div className="relative h-44 sm:h-48 md:h-56 lg:h-64 bg-orange-100 overflow-hidden">
           {primaryImage?.url ? (
             <Image
               src={primaryImage.url}
               alt={primaryImage.alt || product.name}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              priority={false}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <span className="text-6xl opacity-50">🌶️</span>
+              <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl opacity-50">🌶️</span>
             </div>
           )}
-          
+
           {/* Stock Status Overlay */}
           {!product.inStock && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-              <span className="text-white font-bold text-lg">Out of Stock</span>
+              <span className="text-white font-bold text-sm sm:text-base md:text-lg">Out of Stock</span>
             </div>
           )}
         </div>
 
-        {/* Product Info */}
-        <div className="p-6">
+        {/* Product Info - Enhanced mobile spacing */}
+        <div className="p-3 sm:p-4 md:p-5 lg:p-6">
           {/* Category */}
-          <p className="text-sm text-orange-600 font-medium mb-2">
+          <p className="text-xs sm:text-sm text-orange-600 font-medium mb-1.5 sm:mb-2">
             {product.category.name}
           </p>
 
           {/* Product Name */}
-          <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors duration-200">
+          <h3 className="text-sm sm:text-base md:text-lg font-bold text-gray-900 mb-1.5 sm:mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors duration-200 leading-tight">
             {product.name}
           </h3>
 
           {/* Description */}
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+          <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3 line-clamp-2 leading-relaxed">
             {product.shortDescription || product.description}
           </p>
 
           {/* Weight */}
-          <p className="text-sm text-gray-500 mb-3">
+          <p className="text-xs sm:text-sm text-gray-500 mb-2 sm:mb-3 font-medium">
             {product.weight.value} {product.weight.unit}
           </p>
 
           {/* Rating */}
           {product.rating && (
-            <div className="flex items-center mb-3">
+            <div className="flex items-center mb-2 sm:mb-3">
               <div className="flex items-center">
                 {[...Array(5)].map((_, i) => (
                   <svg
                     key={i}
-                    className={`w-4 h-4 ${
+                    className={`w-3 h-3 sm:w-4 sm:h-4 ${
                       i < Math.floor(product.rating!) ? 'text-yellow-400' : 'text-gray-300'
                     }`}
                     fill="currentColor"
@@ -199,20 +201,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   </svg>
                 ))}
               </div>
-              <span className="text-sm text-gray-600 ml-2">
+              <span className="text-xs sm:text-sm text-gray-600 ml-1.5 sm:ml-2">
                 {product.rating} ({product.reviewCount || 0})
               </span>
             </div>
           )}
 
           {/* Price */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-2">
-              <span className="text-xl font-bold text-orange-600">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <div className="flex items-center space-x-1.5 sm:space-x-2">
+              <span className="text-base sm:text-lg md:text-xl font-bold text-orange-600">
                 {formatPrice(product.price)}
               </span>
               {product.originalPrice && product.originalPrice > product.price && (
-                <span className="text-sm text-gray-500 line-through">
+                <span className="text-xs sm:text-sm text-gray-500 line-through">
                   {formatPrice(product.originalPrice)}
                 </span>
               )}
@@ -221,27 +223,29 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         </div>
       </Link>
 
-      {/* Add to Cart Button */}
+      {/* Add to Cart Button - Enhanced mobile touch target */}
       {showQuickAdd && (
-        <div className="p-6 pt-0">
+        <div className="p-3 sm:p-4 md:p-5 lg:p-6 pt-0">
           <Button
             onClick={handleAddToCart}
             disabled={!product.inStock || isAddingToCart}
-            className={`w-full py-3 rounded-xl font-semibold transition-all duration-200 ${
+            size="md"
+            fullWidth
+            className={`min-h-[48px] sm:min-h-[44px] rounded-xl font-semibold transition-all duration-200 touch-manipulation ${
               product.inStock
-                ? 'bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white shadow-lg hover:shadow-xl'
+                ? 'bg-orange-600 hover:bg-orange-700 text-white shadow-lg hover:shadow-xl'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }`}
           >
             {isAddingToCart ? (
               <div className="flex items-center justify-center">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Adding...
+                <span className="text-sm sm:text-base">Adding...</span>
               </div>
             ) : product.inStock ? (
-              'Add to Cart'
+              <span className="text-sm sm:text-base">Add to Cart</span>
             ) : (
-              'Out of Stock'
+              <span className="text-sm sm:text-base">Out of Stock</span>
             )}
           </Button>
         </div>

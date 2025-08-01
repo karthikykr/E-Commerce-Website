@@ -63,7 +63,7 @@ export default function ContactPage() {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Contact Us</h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Get in touch with our team. We're here to help you with any questions about our premium spices and services.
+            Get in touch with our team. We're here to help you with any questions about our homemade food products and services.
           </p>
         </div>
 
@@ -79,13 +79,13 @@ export default function ContactPage() {
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900">Karthik</h2>
                   <p className="text-lg text-orange-600 font-semibold">Chief Executive Officer</p>
-                  <p className="text-gray-600">Founder & CEO of SpiceHub</p>
+                  <p className="text-gray-600">Founder & CEO of Gruhapaaka</p>
                 </div>
               </div>
               <p className="text-gray-700 leading-relaxed">
-                "At SpiceHub, we're passionate about bringing you the finest spices from around the world. 
-                Our commitment to quality and authenticity drives everything we do. I personally oversee 
-                our sourcing process to ensure every spice meets our high standards."
+                "At Gruhapaaka, we're passionate about bringing you the finest homemade food products made with traditional recipes.
+                Our commitment to quality and authenticity drives everything we do. I personally oversee
+                our sourcing process to ensure every product meets our high standards."
               </p>
             </div>
 
@@ -99,8 +99,8 @@ export default function ContactPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H3m2 0h4M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
                   <div>
-                    <h4 className="font-semibold text-gray-900">SpiceHub Inc.</h4>
-                    <p className="text-gray-600">Premium Spice Trading Company</p>
+                    <h4 className="font-semibold text-gray-900">Gruhapaaka Inc.</h4>
+                    <p className="text-gray-600">Authentic Homemade Food Products</p>
                     <p className="text-gray-600">Est. 2020</p>
                   </div>
                 </div>
@@ -112,7 +112,7 @@ export default function ContactPage() {
                   </svg>
                   <div>
                     <h4 className="font-semibold text-gray-900">Headquarters</h4>
-                    <p className="text-gray-600">123 Spice Street</p>
+                    <p className="text-gray-600">123 Home Kitchen Street</p>
                     <p className="text-gray-600">Flavor District, Mumbai 400001</p>
                     <p className="text-gray-600">Maharashtra, India</p>
                   </div>
@@ -136,10 +136,10 @@ export default function ContactPage() {
                   </svg>
                   <div>
                     <h4 className="font-semibold text-gray-900">Email Addresses</h4>
-                    <p className="text-gray-600">General: info@spicehub.com</p>
-                    <p className="text-gray-600">CEO: karthik@spicehub.com</p>
-                    <p className="text-gray-600">Support: support@spicehub.com</p>
-                    <p className="text-gray-600">Sales: sales@spicehub.com</p>
+                    <p className="text-gray-600">General: info@gruhapaaka.com</p>
+                    <p className="text-gray-600">CEO: karthik@gruhapaaka.com</p>
+                    <p className="text-gray-600">Support: support@gruhapaaka.com</p>
+                    <p className="text-gray-600">Sales: sales@gruhapaaka.com</p>
                   </div>
                 </div>
 
@@ -171,7 +171,7 @@ export default function ContactPage() {
                   Call Now
                 </a>
                 <a
-                  href="mailto:info@spicehub.com"
+                  href="mailto:info@gruhapaaka.com"
                   className="flex items-center justify-center p-4 border-2 border-orange-600 text-orange-600 rounded-lg hover:bg-orange-600 hover:text-white transition-colors"
                 >
                   <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -294,7 +294,7 @@ export default function ContactPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
               <p className="text-gray-600">Interactive map would be integrated here</p>
-              <p className="text-sm text-gray-500 mt-2">123 Spice Street, Flavor District, Mumbai 400001</p>
+              <p className="text-sm text-gray-500 mt-2">123 Home Kitchen Street, Flavor District, Mumbai 400001</p>
             </div>
           </div>
         </div>

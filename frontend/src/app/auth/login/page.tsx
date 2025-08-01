@@ -65,33 +65,33 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100">
       <Header />
 
-      <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          <div className="bg-white rounded-2xl shadow-xl p-8">
-            {/* Header */}
-            <div className="text-center mb-8">
-              <div className="flex items-center justify-center space-x-2 mb-4">
-                <div className="bg-orange-600 text-white px-2 py-1 rounded text-sm font-bold">JUST</div>
-                <h1 className="text-2xl font-bold text-gray-900">Gruhapaaka</h1>
+      <div className="flex items-center justify-center py-6 sm:py-8 lg:py-12 px-3 sm:px-4 md:px-6 lg:px-8">
+        <div className="max-w-sm sm:max-w-md w-full space-y-4 sm:space-y-6 lg:space-y-8">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-5 sm:p-6 md:p-8">
+            {/* Header - Enhanced Mobile-First Design */}
+            <div className="text-center mb-6 sm:mb-8">
+              <div className="flex items-center justify-center space-x-2 sm:space-x-3 mb-4 sm:mb-5">
+                <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold shadow-md">JUST</div>
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-orange-700 to-red-700 bg-clip-text text-transparent">Gruhapaaka</h1>
               </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
-              <p className="text-gray-600">Sign in to your account</p>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2 sm:mb-3">Welcome Back</h2>
+              <p className="text-gray-600 text-sm sm:text-base leading-relaxed">Sign in to your account to continue</p>
             </div>
 
             {/* Auth Method Selection */}
 
 
-            {/* Login Form */}
-            <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Login Form - Enhanced Mobile-First Design */}
+            <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm sm:text-base leading-relaxed">
                   {error}
                 </div>
               )}
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address
+                <label htmlFor="email" className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+                  📧 Email Address
                 </label>
                 <input
                   id="email"
@@ -100,14 +100,14 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                  className="w-full px-4 py-3.5 sm:py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 text-base touch-manipulation min-h-[52px] sm:min-h-[48px]"
                   placeholder="Enter your email address"
                 />
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                  Password
+                <label htmlFor="password" className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+                  🔒 Password
                 </label>
                 <input
                   id="password"
@@ -116,7 +116,7 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                  className="w-full px-4 py-3.5 sm:py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 text-base touch-manipulation min-h-[52px] sm:min-h-[48px]"
                   placeholder="Enter your password"
                 />
               </div>
@@ -124,7 +124,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-orange-600 hover:bg-orange-700 text-white py-2.5 sm:py-3 text-base sm:text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <div className="flex items-center justify-center">

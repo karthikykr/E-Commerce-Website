@@ -6,6 +6,7 @@ const Cart = require('./Cart');
 const Wishlist = require('./Wishlist');
 const Coupon = require('./Coupon');
 const Notification = require('./Notification');
+const FeaturedProduct = require('./FeaturedProduct');
 
 module.exports = {
   User,
@@ -15,5 +16,6 @@ module.exports = {
   Cart,
   Wishlist,
   Coupon,
-  Notification
+  Notification,
+  FeaturedProduct
 };

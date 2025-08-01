@@ -58,7 +58,7 @@ export default function AdminOrders() {
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/orders/admin', {
+      const response = await fetch('http://localhost:5000/api/admin/orders', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -80,8 +80,15 @@ export default function AdminOrders() {
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
+      console.log('🔄 Updating order status:', { orderId, newStatus });
+
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5001/api/orders/${orderId}/status`, {
+      if (!token) {
+        setError('No authentication token found. Please log in again.');
+        return;
+      }
+
+      const response = await fetch(`http://localhost:5000/api/admin/orders/${orderId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -90,19 +97,26 @@ export default function AdminOrders() {
         body: JSON.stringify({ orderStatus: newStatus })
       });
 
+      console.log('📡 Response status:', response.status);
+
       const data = await response.json();
+      console.log('📄 Response data:', data);
+
       if (data.success) {
-        setOrders(orders.map(order => 
-          order._id === orderId 
+        console.log('✅ Order status updated successfully');
+        setOrders(orders.map(order =>
+          order._id === orderId
             ? { ...order, orderStatus: newStatus }
             : order
         ));
+        setError(null); // Clear any previous errors
       } else {
-        setError('Failed to update order status');
+        console.error('❌ Update failed:', data.message);
+        setError(`Failed to update order status: ${data.message || 'Unknown error'}`);
       }
     } catch (error) {
-      console.error('Error updating order:', error);
-      setError('Network error while updating order');
+      console.error('❌ Network error updating order:', error);
+      setError('Network error while updating order. Please check your connection.');
     }
   };
 
@@ -190,31 +204,35 @@ export default function AdminOrders() {
                   {orders.map((order) => (
                     <tr key={order._id} className="border-b border-gray-100 hover:bg-gray-50">
                       <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                        #{order._id.slice(-6)}
+                        #{order._id ? order._id.slice(-6) : 'N/A'}
                       </td>
                       <td className="px-6 py-4">
                         <div>
-                          <div className="text-sm font-medium text-gray-900">{order.user.name}</div>
-                          <div className="text-sm text-gray-500">{order.user.email}</div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {order.user?.name || 'Unknown User'}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {order.user?.email || 'No email provided'}
+                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
-                        {order.items.length} item{order.items.length !== 1 ? 's' : ''}
+                        {order.items?.length || 0} item{(order.items?.length || 0) !== 1 ? 's' : ''}
                       </td>
                       <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                        ${order.total.toFixed(2)}
+                        ${(order.total || 0).toFixed(2)}
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(order.orderStatus)}`}>
-                          {order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1)}
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(order.orderStatus || 'pending')}`}>
+                          {(order.orderStatus || 'pending').charAt(0).toUpperCase() + (order.orderStatus || 'pending').slice(1)}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">
-                        {new Date(order.createdAt).toLocaleDateString()}
+                        {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'Unknown date'}
                       </td>
                       <td className="px-6 py-4">
                         <select
-                          value={order.orderStatus}
+                          value={order.orderStatus || 'pending'}
                           onChange={(e) => updateOrderStatus(order._id, e.target.value)}
                           className="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                         >

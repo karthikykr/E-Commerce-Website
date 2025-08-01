@@ -20,24 +20,47 @@ const adminAuth = async (req, res, next) => {
     }
 
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
 
-    // Get user from database
-    const user = await User.findById(decoded.id).select('-password');
+    let user;
 
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid token. User not found.'
-      });
-    }
+    // Handle hardcoded admin users
+    if (decoded.id === 'admin-hardcoded-id') {
+      user = {
+        _id: 'admin-hardcoded-id',
+        name: 'Admin User',
+        email: 'admin@123.com',
+        role: 'admin',
+        isActive: true,
+        authMethod: 'email'
+      };
+    } else if (decoded.id === 'admin-kaushik-id') {
+      user = {
+        _id: 'admin-kaushik-id',
+        name: 'Kaushik B Shetty',
+        email: 'kaushikbshetty1@gmail.com',
+        role: 'admin',
+        isActive: true,
+        authMethod: 'email'
+      };
+    } else {
+      // Get user from database for regular users
+      user = await User.findById(decoded.id).select('-password');
 
-    // Check if user is active
-    if (!user.isActive) {
-      return res.status(401).json({
-        success: false,
-        message: 'Account is deactivated.'
-      });
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid token. User not found.'
+        });
+      }
+
+      // Check if user is active
+      if (!user.isActive) {
+        return res.status(401).json({
+          success: false,
+          message: 'Account is deactivated.'
+        });
+      }
     }
 
     // Check if user has admin role

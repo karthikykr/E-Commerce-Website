@@ -63,7 +63,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
     : 0;
 
   const handleAddToCart = async () => {
-    const success = await addToCart(product._id, quantity);
+    const success = await addToCart(product.id || product._id, quantity);
     if (success) {
       showToast({
         type: 'success',
@@ -81,8 +81,9 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
   };
 
   const handleToggleWishlist = async () => {
-    if (isInWishlist(product._id)) {
-      const success = await removeFromWishlist(product._id);
+    const productId = product.id || product._id;
+    if (isInWishlist(productId)) {
+      const success = await removeFromWishlist(productId);
       if (success) {
         showToast({
           type: 'info',
@@ -91,7 +92,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
         });
       }
     } else {
-      const success = await addToWishlist(product._id);
+      const success = await addToWishlist(productId);
       if (success) {
         showToast({
           type: 'success',
@@ -275,8 +276,8 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
               size="lg"
               icon={
                 <svg
-                  className={`h-5 w-5 ${isInWishlist(product._id) ? 'text-red-500 fill-current' : ''}`}
-                  fill={isInWishlist(product._id) ? "currentColor" : "none"}
+                  className={`h-5 w-5 ${isInWishlist(product.id || product._id) ? 'text-red-500 fill-current' : ''}`}
+                  fill={isInWishlist(product.id || product._id) ? "currentColor" : "none"}
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
@@ -284,7 +285,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                 </svg>
               }
             >
-              {isInWishlist(product._id) ? 'Remove' : 'Wishlist'}
+              {isInWishlist(product.id || product._id) ? 'Remove' : 'Wishlist'}
             </Button>
           </div>
         </div>

@@ -3,6 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
+const path = require('path');
 const connectDB = require('./config/database');
 
 // Load environment variables
@@ -31,6 +32,9 @@ app.use(morgan('combined')); // Logging
 app.use(express.json({ limit: '10mb' })); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
+// Serve static files (uploaded images)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/products', require('./routes/products'));
@@ -42,6 +46,7 @@ app.use('/api/wishlist', require('./routes/wishlist'));
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/coupons', require('./routes/coupons'));
 app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/featured-products', require('./routes/featuredProducts'));
 
 // Admin routes
 app.use('/api/admin', require('./routes/admin'));

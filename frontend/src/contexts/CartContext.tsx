@@ -73,24 +73,57 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       setIsLoading(true);
-      const response = await makeAuthenticatedRequest('/api/cart');
+      // Try backend first for persistent cart data
+      const response = await makeAuthenticatedRequest('http://localhost:5000/api/cart');
       const data = await response.json();
 
-      if (data.success && data.data && data.data.cart) {
-        setCartItems(data.data.cart.items || []);
+      if (data.success && data.data?.cart) {
+        // Transform backend data to frontend format
+        const transformedItems = data.data.cart.items.map((item: any) => ({
+          id: item._id || `${item.product._id}_${Date.now()}`,
+          productId: item.product._id,
+          product: {
+            id: item.product._id,
+            name: item.product.name,
+            price: item.product.price || item.price,
+            images: item.product.images || [],
+            stockQuantity: item.product.stockQuantity
+          },
+          quantity: item.quantity,
+          total: (item.product.price || item.price) * item.quantity
+        }));
+
+        setCartItems(transformedItems);
         setCartCount(data.data.cart.totalItems || 0);
         setCartTotal(data.data.cart.totalAmount || 0);
       } else {
-        // If no cart exists or failed to fetch, initialize empty cart
+        // Initialize empty cart
         setCartItems([]);
         setCartCount(0);
         setCartTotal(0);
-        if (!data.success) {
-          console.error('Failed to fetch cart:', data.message);
-        }
       }
     } catch (error) {
-      console.error('Error fetching cart:', error);
+      console.error('Backend cart fetch failed, trying frontend fallback:', error);
+      // Fallback to frontend API if backend is not available
+      try {
+        const fallbackResponse = await makeAuthenticatedRequest('/api/cart');
+        const fallbackData = await fallbackResponse.json();
+
+        if (fallbackData.success && fallbackData.cart) {
+          setCartItems(fallbackData.cart.items || []);
+          setCartCount(fallbackData.cart.totalItems || 0);
+          setCartTotal(fallbackData.cart.totalAmount || 0);
+        } else {
+          setCartItems([]);
+          setCartCount(0);
+          setCartTotal(0);
+        }
+      } catch (fallbackError) {
+        console.error('Fallback cart fetch failed:', fallbackError);
+        setCartItems([]);
+        setCartCount(0);
+        setCartTotal(0);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -112,7 +145,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       setIsLoading(true);
-      const response = await makeAuthenticatedRequest('/api/cart', {
+      // Try backend first
+      const response = await makeAuthenticatedRequest('http://localhost:5000/api/cart', {
         method: 'POST',
         body: JSON.stringify({ productId, quantity }),
       });
@@ -131,15 +165,34 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return false;
       }
     } catch (error: any) {
-      console.error('Error adding to cart:', error);
-      const errorMessage = error.message.includes('token')
-        ? 'Please login again to add items to cart'
-        : 'Failed to add item to cart';
-      showToast({
-        message: errorMessage,
-        type: 'error'
-      });
-      return false;
+      console.error('Backend add to cart failed, trying frontend fallback:', error);
+      // Fallback to frontend API
+      try {
+        const fallbackResponse = await makeAuthenticatedRequest('/api/cart', {
+          method: 'POST',
+          body: JSON.stringify({ productId, quantity }),
+        });
+
+        const fallbackData = await fallbackResponse.json();
+
+        if (fallbackData.success) {
+          await refreshCart();
+          showCartToast(`${quantity} item${quantity > 1 ? 's' : ''} added to cart!`);
+          return true;
+        } else {
+          throw new Error(fallbackData.message || 'Failed to add item to cart');
+        }
+      } catch (fallbackError: any) {
+        console.error('Fallback add to cart failed:', fallbackError);
+        const errorMessage = fallbackError.message.includes('token')
+          ? 'Please login again to add items to cart'
+          : 'Failed to add item to cart';
+        showToast({
+          message: errorMessage,
+          type: 'error'
+        });
+        return false;
+      }
     } finally {
       setIsLoading(false);
     }
@@ -157,8 +210,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       setIsLoading(true);
-      const response = await makeAuthenticatedRequest(`/api/cart?productId=${productId}`, {
+      // Try backend first
+      const response = await makeAuthenticatedRequest('http://localhost:5000/api/cart', {
         method: 'DELETE',
+        body: JSON.stringify({ productId }),
       });
 
       const data = await response.json();
@@ -204,7 +259,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       setIsLoading(true);
-      const response = await makeAuthenticatedRequest('/api/cart', {
+      // Try backend first
+      const response = await makeAuthenticatedRequest('http://localhost:5000/api/cart', {
         method: 'PUT',
         body: JSON.stringify({ productId, quantity }),
       });
@@ -222,15 +278,33 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return false;
       }
     } catch (error: any) {
-      console.error('Error updating quantity:', error);
-      const errorMessage = error.message.includes('token')
-        ? 'Please login again to manage your cart'
-        : 'Failed to update quantity';
-      showToast({
-        message: errorMessage,
-        type: 'error'
-      });
-      return false;
+      console.error('Backend update quantity failed, trying frontend fallback:', error);
+      // Fallback to frontend API
+      try {
+        const fallbackResponse = await makeAuthenticatedRequest('/api/cart', {
+          method: 'PUT',
+          body: JSON.stringify({ productId, quantity }),
+        });
+
+        const fallbackData = await fallbackResponse.json();
+
+        if (fallbackData.success) {
+          await refreshCart();
+          return true;
+        } else {
+          throw new Error(fallbackData.message || 'Failed to update quantity');
+        }
+      } catch (fallbackError: any) {
+        console.error('Fallback update quantity failed:', fallbackError);
+        const errorMessage = fallbackError.message.includes('token')
+          ? 'Please login again to manage your cart'
+          : 'Failed to update quantity';
+        showToast({
+          message: errorMessage,
+          type: 'error'
+        });
+        return false;
+      }
     } finally {
       setIsLoading(false);
     }
@@ -242,7 +316,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       setIsLoading(true);
-      const response = await makeAuthenticatedRequest('/api/cart/clear', {
+      // Try backend first
+      const response = await makeAuthenticatedRequest('http://localhost:5000/api/cart/clear', {
         method: 'DELETE',
       });
 
@@ -257,8 +332,27 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return false;
       }
     } catch (error) {
-      console.error('Error clearing cart:', error);
-      return false;
+      console.error('Backend clear cart failed, trying frontend fallback:', error);
+      // Fallback to frontend API
+      try {
+        const fallbackResponse = await makeAuthenticatedRequest('/api/cart/clear', {
+          method: 'DELETE',
+        });
+
+        const fallbackData = await fallbackResponse.json();
+
+        if (fallbackData.success) {
+          setCartItems([]);
+          setCartCount(0);
+          setCartTotal(0);
+          return true;
+        } else {
+          return false;
+        }
+      } catch (fallbackError) {
+        console.error('Fallback clear cart failed:', fallbackError);
+        return false;
+      }
     } finally {
       setIsLoading(false);
     }

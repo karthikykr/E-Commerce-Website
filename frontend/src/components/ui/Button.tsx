@@ -31,23 +31,25 @@ export const Button: React.FC<ButtonProps> = ({
   fullWidth = false,
   rounded = 'md',
 }) => {
-  const baseClasses = 'font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 relative overflow-hidden group disabled:cursor-not-allowed transform hover:scale-105 active:scale-95';
+  // Mobile-first responsive base classes with improved touch targets
+  const baseClasses = 'font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-1 sm:focus:ring-offset-2 relative overflow-hidden group disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 touch-manipulation select-none';
 
   const variantClasses = {
-    primary: 'bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white focus:ring-orange-500 shadow-lg hover:shadow-xl',
-    secondary: 'bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white focus:ring-gray-500 shadow-lg hover:shadow-xl',
-    outline: 'border-2 border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white focus:ring-orange-500 bg-white hover:shadow-lg',
-    danger: 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white focus:ring-red-500 shadow-lg hover:shadow-xl',
-    ghost: 'text-gray-700 hover:bg-gray-100 focus:ring-gray-500 hover:shadow-md',
-    gradient: 'bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 hover:from-purple-700 hover:via-pink-700 hover:to-orange-700 text-white focus:ring-purple-500 shadow-lg hover:shadow-xl',
+    primary: 'bg-orange-600 hover:bg-orange-700 active:bg-orange-800 text-white focus:ring-orange-500 shadow-lg hover:shadow-xl',
+    secondary: 'bg-gray-600 hover:bg-gray-700 active:bg-gray-800 text-white focus:ring-gray-500 shadow-lg hover:shadow-xl',
+    outline: 'border-2 border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white active:bg-orange-700 focus:ring-orange-500 bg-white hover:shadow-lg',
+    danger: 'bg-red-600 hover:bg-red-700 active:bg-red-800 text-white focus:ring-red-500 shadow-lg hover:shadow-xl',
+    ghost: 'text-gray-700 hover:bg-gray-100 active:bg-gray-200 focus:ring-gray-500 hover:shadow-md',
+    gradient: 'bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 active:from-orange-800 active:to-red-800 text-white focus:ring-orange-500 shadow-lg hover:shadow-xl',
   };
 
+  // Enhanced mobile-first sizing with minimum touch targets (44px)
   const sizeClasses = {
-    xs: 'px-2 py-1 text-xs',
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg',
-    xl: 'px-8 py-4 text-xl',
+    xs: 'px-3 py-2 text-xs min-h-[44px] sm:px-3 sm:py-2 sm:min-h-[36px] sm:text-xs',
+    sm: 'px-4 py-2.5 text-sm min-h-[44px] sm:px-4 sm:py-2 sm:min-h-[40px] sm:text-sm',
+    md: 'px-5 py-3 text-sm min-h-[48px] sm:px-5 sm:py-2.5 sm:min-h-[44px] sm:text-base md:px-6 md:py-3',
+    lg: 'px-6 py-3.5 text-base min-h-[52px] sm:px-6 sm:py-3 sm:min-h-[48px] sm:text-lg md:px-7 md:py-3.5',
+    xl: 'px-8 py-4 text-lg min-h-[56px] sm:px-8 sm:py-4 sm:min-h-[52px] sm:text-xl md:px-10 md:py-5',
   };
 
   const roundedClasses = {

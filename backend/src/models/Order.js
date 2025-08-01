@@ -66,13 +66,13 @@ const shippingAddressSchema = new mongoose.Schema({
 const orderSchema = new mongoose.Schema({
   orderNumber: {
     type: String,
-    required: true,
     unique: true
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
+    index: true
   },
   items: [orderItemSchema],
   shippingAddress: {
@@ -223,9 +223,7 @@ orderSchema.virtual('orderAge').get(function() {
 orderSchema.set('toJSON', { virtuals: true });
 orderSchema.set('toObject', { virtuals: true });
 
-// Indexes for better performance
-orderSchema.index({ user: 1, createdAt: -1 });
-orderSchema.index({ orderNumber: 1 });
+// Indexes for better performance (orderNumber already has unique index)
 orderSchema.index({ orderStatus: 1 });
 orderSchema.index({ paymentStatus: 1 });
 orderSchema.index({ createdAt: -1 });

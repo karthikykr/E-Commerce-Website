@@ -34,6 +34,7 @@ export interface Product {
   tags: string[];
   rating: number;
   reviewCount: number;
+  isFeatured: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

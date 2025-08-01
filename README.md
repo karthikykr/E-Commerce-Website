@@ -1,101 +1,261 @@
-# Ecommerce App
+# 🏠 Gruhapaaka E-Commerce Website
 
-A full-stack ecommerce application with separate frontend (Next.js) and backend (Express.js) services.
+A modern, full-stack e-commerce platform for authentic homemade food products built with Next.js, Node.js, and MongoDB.
 
-## Project Structure
+## 🌟 Features
 
-```
-ecommerce-app/
-├── frontend/          # Next.js frontend application
-├── backend/           # Express.js backend API
-└── README.md          # This file
-```
+### 🛍️ Customer Features
+- **Product Browsing**: Browse products by categories with advanced filtering
+- **Shopping Cart**: Add/remove items with quantity management
+- **Wishlist**: Save favorite products for later
+- **User Authentication**: Secure login/signup with JWT tokens
+- **Order Management**: Place orders and track order history
+- **Responsive Design**: Fully optimized for all device sizes
 
-## Prerequisites
+### 👨‍💼 Admin Features
+- **Admin Dashboard**: Comprehensive admin panel
+- **Product Management**: Add, edit, delete products with image upload
+- **Order Management**: View and update order statuses
+- **User Management**: Manage customer accounts
+- **Analytics**: Sales and order analytics
 
-- Node.js (v18 or higher)
-- npm or yarn
-- MongoDB
-
-## Running the Application
-
-This project is structured with completely separate frontend and backend services. Each service has its own dependencies and can be run independently.
-
-### Frontend (Next.js)
-
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Run the development server:
-   ```bash
-   npm run dev
-   ```
-
-The frontend will be available at `http://localhost:3000`
-
-### Backend (Express.js)
-
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Create a `.env` file with your environment variables:
-   ```bash
-   MONGODB_URI=mongodb://localhost:27017/ecommerce
-   JWT_SECRET=your_jwt_secret_here
-   PORT=5000
-   ```
-
-4. Run the development server:
-   ```bash
-   npm run dev
-   ```
-
-The backend API will be available at `http://localhost:5000`
-
-## Building for Production
+## 🛠️ Tech Stack
 
 ### Frontend
-```bash
-cd frontend
-npm run build
-npm start
-```
+- **Next.js 15** - React framework with App Router
+- **TypeScript** - Type-safe development
+- **Tailwind CSS** - Utility-first CSS framework
+- **React Context** - State management for auth, cart, wishlist
 
 ### Backend
-```bash
-cd backend
-npm start
-```
+- **Node.js** - Server runtime
+- **Express.js** - Web framework
+- **MongoDB** - NoSQL database
+- **Mongoose** - MongoDB object modeling
+- **JWT** - Authentication tokens
+- **bcryptjs** - Password hashing
 
-## Development Workflow
+## 🚀 Quick Start
 
-1. Start MongoDB service on your system
-2. Open two terminal windows/tabs
-3. In the first terminal, run the backend:
+### Prerequisites
+- Node.js (v18 or higher)
+- MongoDB (local or MongoDB Atlas)
+- npm or yarn package manager
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd E-Commerce-Website
+   ```
+
+2. **Setup Backend**
    ```bash
    cd backend
-   npm install  # First time only
-   npm run dev
+   npm install
    ```
-4. In the second terminal, run the frontend:
+
+3. **Setup Frontend**
    ```bash
-   cd frontend
-   npm install  # First time only
+   cd ../frontend
+   npm install
+   ```
+
+4. **Environment Configuration**
+
+   Create `.env` file in the backend directory:
+   ```env
+   PORT=5000
+   MONGODB_URI=mongodb://localhost:27017/gruhapaaka
+   JWT_SECRET=your-super-secret-jwt-key-here
+   NODE_ENV=development
+   ```
+
+5. **Start the Application**
+
+   **Backend** (Terminal 1):
+   ```bash
+   cd backend
    npm run dev
    ```
 
-Both services will run independently and can be developed separately.
+   **Frontend** (Terminal 2):
+   ```bash
+   cd frontend
+   npm run dev
+   ```
+
+6. **Access the Application**
+   - 🌐 Frontend: http://localhost:3000
+   - 🔧 Backend API: http://localhost:5000
+
+## 📁 Project Structure
+
+```
+E-Commerce-Website/
+├── 🎨 frontend/              # Next.js frontend application
+│   ├── src/
+│   │   ├── app/             # App Router pages
+│   │   ├── components/      # Reusable UI components
+│   │   ├── contexts/        # React contexts (Auth, Cart, Wishlist)
+│   │   ├── hooks/           # Custom React hooks
+│   │   ├── types/           # TypeScript type definitions
+│   │   └── utils/           # Utility functions
+│   ├── public/              # Static assets
+│   └── package.json
+├── ⚙️ backend/               # Node.js backend application
+│   ├── src/
+│   │   ├── controllers/     # Route controllers
+│   │   ├── middleware/      # Custom middleware
+│   │   ├── models/          # MongoDB models
+│   │   ├── routes/          # API routes
+│   │   └── utils/           # Utility functions
+│   ├── server.js           # Server entry point
+│   └── package.json
+├── 📚 MOBILE_NAVBAR_ENHANCEMENTS.md  # Mobile responsiveness guide
+└── 📖 README.md
+```
+
+## 🔐 Authentication System
+
+JWT-based authentication with role-based access control:
+
+### User Roles
+- **👤 Customer**: Browse products, manage cart/wishlist, place orders
+- **👑 Admin**: Full system access, manage products/orders/users
+
+### Security Features
+- Password hashing with bcryptjs
+- JWT token authentication
+- Protected routes and API endpoints
+- Session management
+
+## 🛒 Core Features
+
+### 🛍️ Shopping Cart
+- Persistent cart using React Context
+- Real-time quantity updates
+- Add/remove items functionality
+- Cart count indicator
+- Session persistence
+
+### ❤️ Wishlist
+- Save favorite products
+- Quick add/remove from product cards
+- Wishlist count indicator
+- Easy access from navigation
+
+### 📱 Mobile Responsiveness
+- **Mobile-first design approach**
+- **Responsive navbar with animated mobile menu**
+- **Touch-optimized interface (44px+ touch targets)**
+- **Smooth animations and transitions**
+- **Consistent experience across all devices**
+
+### 🎨 UI/UX Features
+- Modern, clean design with orange/amber theme
+- Smooth animations and micro-interactions
+- Loading states and error handling
+- Accessibility compliance (WCAG guidelines)
+- Performance optimized
+
+## 📱 Mobile Features
+
+The application includes comprehensive mobile optimizations:
+
+- ✅ **Responsive Navigation**: Animated hamburger menu with smooth transitions
+- ✅ **Touch Targets**: All interactive elements meet 44px minimum size
+- ✅ **Mobile Animations**: Custom CSS animations for mobile interactions
+- ✅ **Keyboard Support**: ESC key and click-outside functionality
+- ✅ **Performance**: GPU-accelerated animations and optimized rendering
+
+## 🔧 Development
+
+### Available Scripts
+
+**Frontend:**
+```bash
+npm run dev      # Start development server
+npm run build    # Build for production
+npm run start    # Start production server
+npm run lint     # Run ESLint
+```
+
+**Backend:**
+```bash
+npm run dev      # Start development server with nodemon
+npm start        # Start production server
+```
+
+### Code Quality
+- **ESLint** - Code linting and style enforcement
+- **TypeScript** - Type safety and better developer experience
+- **Prettier** - Code formatting (recommended)
+
+## 🚀 Deployment
+
+### Frontend (Vercel - Recommended)
+1. Connect GitHub repository to Vercel
+2. Set environment variables in dashboard
+3. Automatic deployment on push to main
+
+### Backend (Railway/Heroku)
+1. Create new app on platform
+2. Set environment variables
+3. Connect MongoDB Atlas for production
+4. Deploy from GitHub
+
+### Environment Variables
+```env
+# Backend
+PORT=5000
+MONGODB_URI=your-mongodb-connection-string
+JWT_SECRET=your-jwt-secret-key
+NODE_ENV=production
+
+# Frontend (if needed)
+NEXT_PUBLIC_API_URL=your-backend-url
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
+
+### Development Guidelines
+- Follow TypeScript best practices
+- Write responsive, mobile-first CSS
+- Include proper error handling
+- Add appropriate comments and documentation
+- Test on multiple devices and browsers
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 🙏 Acknowledgments
+
+- **Next.js** team for the incredible React framework
+- **Tailwind CSS** for the utility-first CSS framework
+- **MongoDB** for the flexible NoSQL database
+- **Vercel** for seamless deployment platform
+
+## 📞 Support & Contact
+
+- 📧 Email: support@gruhapaaka.com
+- 🐛 Issues: Create an issue in this repository
+- 💬 Discussions: Use GitHub Discussions for questions
+
+---
+
+<div align="center">
+
+**🏠 Gruhapaaka - Authentic Homemade Food Products 🍽️**
+
+*Made with ❤️ for food lovers everywhere*
+
+</div>

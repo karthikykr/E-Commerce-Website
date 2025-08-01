@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Cookies from 'js-cookie';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
@@ -115,22 +116,40 @@ export default function CheckoutPage() {
 
     setIsLoading(true);
     try {
+      // Transform frontend address format to backend format
+      const transformedShippingAddress = {
+        fullName: `${shippingAddress.firstName} ${shippingAddress.lastName}`.trim(),
+        street: shippingAddress.address,
+        city: shippingAddress.city,
+        state: shippingAddress.state,
+        zipCode: shippingAddress.zipCode,
+        country: shippingAddress.country,
+        phone: shippingAddress.phone
+      };
+
       const orderData = {
         items: cartItems.map(item => ({
           productId: item.productId,
           quantity: item.quantity,
           price: item.product?.price || 0,
         })),
-        shippingAddress,
+        shippingAddress: transformedShippingAddress,
         paymentMethod: paymentMethod.type,
-        billingAddress: shippingAddress, // Using same as shipping for now
+        billingAddress: transformedShippingAddress, // Using same as shipping for now
       };
+
+      // Get token using the same method as cart context
+      const token = Cookies.get('auth-token') || localStorage.getItem('token');
+
+      if (!token) {
+        throw new Error('Authentication token not available. Please login again.');
+      }
 
       const response = await fetch('http://localhost:5000/api/orders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(orderData),
       });
@@ -183,36 +202,36 @@ export default function CheckoutPage() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Progress Steps */}
-        <div className="mb-8">
-          <div className="flex items-center justify-center">
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
+        {/* Progress Steps - Enhanced Mobile-First Design */}
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-center space-y-3 sm:space-y-0">
             {steps.map((step, index) => (
-              <div key={step.number} className="flex items-center">
+              <div key={step.number} className="flex items-center w-full sm:w-auto">
                 <div className={`
-                  flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300
-                  ${currentStep >= step.number 
-                    ? 'bg-orange-600 border-orange-600 text-white' 
+                  flex items-center justify-center w-10 h-10 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full border-2 transition-all duration-300 flex-shrink-0
+                  ${currentStep >= step.number
+                    ? 'bg-orange-600 border-orange-600 text-white shadow-lg'
                     : 'bg-white border-gray-300 text-gray-500'
                   }
                 `}>
                   {currentStep > step.number ? (
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-5 h-5 sm:w-5 sm:h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   ) : (
-                    <span className="text-sm font-semibold">{step.number}</span>
+                    <span className="text-sm sm:text-sm md:text-base font-semibold">{step.number}</span>
                   )}
                 </div>
-                <div className="ml-3 text-left">
-                  <p className={`text-sm font-medium ${currentStep >= step.number ? 'text-orange-600' : 'text-gray-500'}`}>
+                <div className="ml-3 sm:ml-3 text-left flex-1 sm:flex-none">
+                  <p className={`text-sm sm:text-sm md:text-base font-medium leading-tight ${currentStep >= step.number ? 'text-orange-600' : 'text-gray-500'}`}>
                     {step.title}
                   </p>
-                  <p className="text-xs text-gray-500">{step.description}</p>
+                  <p className="text-xs sm:text-xs md:text-sm text-gray-500 mt-0.5 hidden sm:block leading-tight">{step.description}</p>
                 </div>
                 {index < steps.length - 1 && (
                   <div className={`
-                    w-16 h-0.5 mx-4 transition-all duration-300
+                    hidden sm:block w-12 md:w-16 h-0.5 mx-3 md:mx-4 transition-all duration-300
                     ${currentStep > step.number ? 'bg-orange-600' : 'bg-gray-300'}
                   `} />
                 )}
@@ -221,26 +240,27 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          {/* Main Content - Enhanced mobile spacing */}
           <div className="lg:col-span-2">
             <Card padding="lg" className="animate-fade-in-up">
               {/* Step 1: Shipping Information */}
               {currentStep === 1 && (
                 <div>
                   <CardHeader>
-                    <h2 className="text-xl font-semibold text-gray-900">Shipping Information</h2>
-                    <p className="text-gray-600 mt-1">Please provide your shipping details</p>
+                    <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900">Shipping Information</h2>
+                    <p className="text-sm sm:text-base text-gray-600 mt-1">Please provide your shipping details</p>
                   </CardHeader>
 
                   <CardBody>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                       <Input
                         label="First Name"
                         value={shippingAddress.firstName}
                         onChange={(e) => setShippingAddress({...shippingAddress, firstName: e.target.value})}
                         error={errors.firstName}
                         required
+                        inputSize="md"
                       />
                       <Input
                         label="Last Name"
@@ -248,6 +268,7 @@ export default function CheckoutPage() {
                         onChange={(e) => setShippingAddress({...shippingAddress, lastName: e.target.value})}
                         error={errors.lastName}
                         required
+                        inputSize="md"
                       />
                       <Input
                         label="Email"
@@ -256,6 +277,7 @@ export default function CheckoutPage() {
                         onChange={(e) => setShippingAddress({...shippingAddress, email: e.target.value})}
                         error={errors.email}
                         required
+                        inputSize="md"
                       />
                       <Input
                         label="Phone"
@@ -264,26 +286,29 @@ export default function CheckoutPage() {
                         onChange={(e) => setShippingAddress({...shippingAddress, phone: e.target.value})}
                         error={errors.phone}
                         required
+                        inputSize="md"
                       />
                     </div>
 
-                    <div className="mt-4">
+                    <div className="mt-5">
                       <Input
                         label="Address"
                         value={shippingAddress.address}
                         onChange={(e) => setShippingAddress({...shippingAddress, address: e.target.value})}
                         error={errors.address}
                         required
+                        inputSize="md"
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 mt-5">
                       <Input
                         label="City"
                         value={shippingAddress.city}
                         onChange={(e) => setShippingAddress({...shippingAddress, city: e.target.value})}
                         error={errors.city}
                         required
+                        inputSize="md"
                       />
                       <Input
                         label="State"
@@ -291,6 +316,7 @@ export default function CheckoutPage() {
                         onChange={(e) => setShippingAddress({...shippingAddress, state: e.target.value})}
                         error={errors.state}
                         required
+                        inputSize="md"
                       />
                       <Input
                         label="ZIP Code"
@@ -298,6 +324,7 @@ export default function CheckoutPage() {
                         onChange={(e) => setShippingAddress({...shippingAddress, zipCode: e.target.value})}
                         error={errors.zipCode}
                         required
+                        inputSize="md"
                       />
                     </div>
                   </CardBody>
@@ -308,72 +335,73 @@ export default function CheckoutPage() {
               {currentStep === 2 && (
                 <div>
                   <CardHeader>
-                    <h2 className="text-xl font-semibold text-gray-900">Payment Method</h2>
-                    <p className="text-gray-600 mt-1">Choose how you'd like to pay</p>
+                    <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900">Payment Method</h2>
+                    <p className="text-sm sm:text-base text-gray-600 mt-1">Choose how you'd like to pay</p>
                   </CardHeader>
 
                   <CardBody>
-                    <div className="space-y-4">
-                      {/* Payment Method Selection */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-5">
+                      {/* Payment Method Selection - Enhanced mobile touch targets */}
+                      <div className="grid grid-cols-1 gap-4">
                         <div
                           className={`
-                            border-2 rounded-lg p-4 cursor-pointer transition-all duration-200
+                            border-2 rounded-lg p-4 sm:p-5 cursor-pointer transition-all duration-200 touch-manipulation min-h-[60px] flex items-center
                             ${paymentMethod.type === 'credit_card'
-                              ? 'border-orange-500 bg-orange-50'
-                              : 'border-gray-300 hover:border-gray-400'
+                              ? 'border-orange-500 bg-orange-50 shadow-md'
+                              : 'border-gray-300 hover:border-gray-400 hover:shadow-sm'
                             }
                           `}
                           onClick={() => setPaymentMethod({...paymentMethod, type: 'credit_card'})}
                         >
-                          <div className="flex items-center">
+                          <div className="flex items-center w-full">
                             <input
                               type="radio"
                               checked={paymentMethod.type === 'credit_card'}
                               onChange={() => setPaymentMethod({...paymentMethod, type: 'credit_card'})}
-                              className="mr-3"
+                              className="mr-3 sm:mr-4 w-4 h-4 sm:w-5 sm:h-5"
                             />
-                            <div>
-                              <p className="font-medium text-gray-900">Credit Card</p>
-                              <p className="text-sm text-gray-500">Visa, Mastercard, American Express</p>
+                            <div className="flex-1">
+                              <p className="font-medium text-gray-900 text-sm sm:text-base">💳 Credit Card</p>
+                              <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Visa, Mastercard, American Express</p>
                             </div>
                           </div>
                         </div>
 
                         <div
                           className={`
-                            border-2 rounded-lg p-4 cursor-pointer transition-all duration-200
+                            border-2 rounded-lg p-4 sm:p-5 cursor-pointer transition-all duration-200 touch-manipulation min-h-[60px] flex items-center
                             ${paymentMethod.type === 'cash_on_delivery'
-                              ? 'border-orange-500 bg-orange-50'
-                              : 'border-gray-300 hover:border-gray-400'
+                              ? 'border-orange-500 bg-orange-50 shadow-md'
+                              : 'border-gray-300 hover:border-gray-400 hover:shadow-sm'
                             }
                           `}
                           onClick={() => setPaymentMethod({...paymentMethod, type: 'cash_on_delivery'})}
                         >
-                          <div className="flex items-center">
+                          <div className="flex items-center w-full">
                             <input
                               type="radio"
                               checked={paymentMethod.type === 'cash_on_delivery'}
                               onChange={() => setPaymentMethod({...paymentMethod, type: 'cash_on_delivery'})}
-                              className="mr-3"
+                              className="mr-3 sm:mr-4 w-4 h-4 sm:w-5 sm:h-5"
                             />
-                            <div>
-                              <p className="font-medium text-gray-900">Cash on Delivery</p>
-                              <p className="text-sm text-gray-500">Pay when you receive your order</p>
+                            <div className="flex-1">
+                              <p className="font-medium text-gray-900 text-sm sm:text-base">💵 Cash on Delivery</p>
+                              <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Pay when you receive your order</p>
                             </div>
                           </div>
                         </div>
                       </div>
 
-                      {/* Credit Card Form */}
+                      {/* Credit Card Form - Enhanced mobile layout */}
                       {paymentMethod.type === 'credit_card' && (
-                        <div className="mt-6 space-y-4 animate-fade-in-up">
+                        <div className="mt-6 space-y-5 animate-fade-in-up">
                           <Input
                             label="Cardholder Name"
                             value={paymentMethod.cardholderName || ''}
                             onChange={(e) => setPaymentMethod({...paymentMethod, cardholderName: e.target.value})}
                             error={errors.cardholderName}
                             required
+                            inputSize="md"
                           />
                           <Input
                             label="Card Number"
@@ -382,8 +410,9 @@ export default function CheckoutPage() {
                             error={errors.cardNumber}
                             placeholder="1234 5678 9012 3456"
                             required
+                            inputSize="md"
                           />
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                             <Input
                               label="Expiry Date"
                               value={paymentMethod.expiryDate || ''}
@@ -391,6 +420,7 @@ export default function CheckoutPage() {
                               error={errors.expiryDate}
                               placeholder="MM/YY"
                               required
+                              inputSize="md"
                             />
                             <Input
                               label="CVV"
@@ -475,26 +505,27 @@ export default function CheckoutPage() {
                 </div>
               )}
 
-              {/* Navigation Buttons */}
-              <div className="flex justify-between mt-8 pt-6 border-t border-gray-200">
-                <div>
+              {/* Navigation Buttons - Mobile Responsive */}
+              <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 mt-8 pt-6 border-t border-gray-200">
+                <div className="order-2 sm:order-1">
                   {currentStep > 1 && (
-                    <Button variant="outline" onClick={handlePreviousStep}>
+                    <Button variant="outline" onClick={handlePreviousStep} className="w-full sm:w-auto">
                       Previous
                     </Button>
                   )}
                 </div>
-                <div>
+                <div className="order-1 sm:order-2">
                   {currentStep < 3 ? (
-                    <Button onClick={handleNextStep}>
+                    <Button onClick={handleNextStep} className="w-full sm:w-auto">
                       Next Step
                     </Button>
                   ) : (
-                    <Button 
-                      onClick={handlePlaceOrder} 
+                    <Button
+                      onClick={handlePlaceOrder}
                       loading={isLoading}
-                      variant="gradient"
+                      variant="primary"
                       size="lg"
+                      className="w-full sm:w-auto"
                     >
                       Place Order
                     </Button>
@@ -504,27 +535,27 @@ export default function CheckoutPage() {
             </Card>
           </div>
 
-          {/* Order Summary */}
+          {/* Order Summary - Mobile Responsive */}
           <div className="lg:col-span-1">
-            <Card padding="lg" variant="elevated" className="sticky top-8 animate-fade-in-up">
+            <Card padding="lg" variant="elevated" className="sticky top-4 sm:top-6 lg:top-8 animate-fade-in-up">
               <CardHeader>
-                <h3 className="text-lg font-semibold text-gray-900">Order Summary</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900">Order Summary</h3>
               </CardHeader>
-              
+
               <CardBody>
                 <div className="space-y-3">
                   {cartItems.map((item) => (
                     <div key={item.id} className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                        <span className="text-lg">{item.product?.category?.image || '🌶️'}</span>
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <span className="text-base sm:text-lg">{item.product?.category?.image || '🌶️'}</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">
                           {item.product?.name}
                         </p>
-                        <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                        <p className="text-xs sm:text-sm text-gray-500">Qty: {item.quantity}</p>
                       </div>
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-xs sm:text-sm font-medium text-gray-900">
                         {formatCurrency((item.product?.price || 0) * item.quantity)}
                       </p>
                     </div>

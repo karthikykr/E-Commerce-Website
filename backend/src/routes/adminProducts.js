@@ -312,26 +312,26 @@ router.put('/:id/stock', [
         errors: errors.array()
       });
     }
-    
+
     const { stockQuantity } = req.body;
-    
+
     const product = await Product.findById(req.params.id);
-    
+
     if (!product) {
       return res.status(404).json({
         success: false,
         message: 'Product not found'
       });
     }
-    
+
     const oldStock = product.stockQuantity;
     product.stockQuantity = stockQuantity;
     await product.save();
-    
+
     res.json({
       success: true,
       message: 'Stock updated successfully',
-      data: { 
+      data: {
         product: {
           id: product._id,
           name: product.name,
@@ -345,6 +345,45 @@ router.put('/:id/stock', [
     res.status(500).json({
       success: false,
       message: 'Error updating stock'
+    });
+  }
+});
+
+// @route   PATCH /api/admin/products/:id/feature
+// @desc    Toggle product featured status
+// @access  Private (Admin)
+router.patch('/:id/feature', adminAuth, logAdminAction('TOGGLE_PRODUCT_FEATURED'), async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+    }
+
+    // Toggle the isFeatured status
+    product.isFeatured = !product.isFeatured;
+    await product.save();
+    await product.populate('category', 'name');
+
+    res.json({
+      success: true,
+      message: `Product ${product.isFeatured ? 'added to' : 'removed from'} homepage successfully`,
+      data: {
+        product: {
+          id: product._id,
+          name: product.name,
+          isFeatured: product.isFeatured
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Toggle featured product error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error toggling product featured status'
     });
   }
 });

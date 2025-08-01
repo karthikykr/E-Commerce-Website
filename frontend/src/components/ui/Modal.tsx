@@ -50,11 +50,11 @@ export const Modal: React.FC<ModalProps> = ({
   if (!isOpen) return null;
 
   const sizeClasses = {
-    sm: 'max-w-md',
-    md: 'max-w-lg',
-    lg: 'max-w-2xl',
-    xl: 'max-w-4xl',
-    full: 'max-w-full mx-4',
+    sm: 'max-w-sm sm:max-w-md',
+    md: 'max-w-md sm:max-w-lg',
+    lg: 'max-w-lg sm:max-w-2xl',
+    xl: 'max-w-xl sm:max-w-4xl',
+    full: 'max-w-full mx-2 sm:mx-4',
   };
 
   return (
@@ -66,10 +66,10 @@ export const Modal: React.FC<ModalProps> = ({
       />
       
       {/* Modal */}
-      <div className="flex min-h-full items-center justify-center p-4">
-        <div 
+      <div className="flex min-h-full items-center justify-center p-2 sm:p-4">
+        <div
           className={`
-            relative bg-white rounded-2xl shadow-2xl transform transition-all duration-300
+            relative bg-white rounded-xl sm:rounded-2xl shadow-2xl transform transition-all duration-300
             ${sizeClasses[size]} w-full ${className}
             animate-modal-enter
           `}
@@ -77,9 +77,9 @@ export const Modal: React.FC<ModalProps> = ({
         >
           {/* Header */}
           {(title || showCloseButton) && (
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
               {title && (
-                <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900">{title}</h3>
               )}
               {showCloseButton && (
                 <button
@@ -87,16 +87,16 @@ export const Modal: React.FC<ModalProps> = ({
                   className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
                 >
                   <span className="sr-only">Close</span>
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               )}
             </div>
           )}
-          
+
           {/* Content */}
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {children}
           </div>
         </div>

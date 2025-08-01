@@ -32,12 +32,13 @@ export const Card: React.FC<CardProps> = ({
     glass: 'bg-white/80 backdrop-blur-sm border border-white/20 shadow-lg',
   };
 
+  // Enhanced mobile-first responsive padding with better touch spacing
   const paddingClasses = {
     none: '',
-    sm: 'p-3',
-    md: 'p-4',
-    lg: 'p-6',
-    xl: 'p-8',
+    sm: 'p-3 sm:p-4 md:p-3',
+    md: 'p-4 sm:p-5 md:p-4 lg:p-5',
+    lg: 'p-5 sm:p-6 md:p-6 lg:p-7 xl:p-6',
+    xl: 'p-6 sm:p-7 md:p-8 lg:p-9 xl:p-8',
   };
 
   const roundedClasses = {
@@ -145,7 +146,7 @@ export const ProductCardWrapper: React.FC<ProductCardWrapperProps> = ({
       hover
       clickable
       className={`
-        overflow-hidden group
+        overflow-hidden group h-full flex flex-col
         ${featured ? 'ring-2 ring-orange-500 ring-opacity-50' : ''}
         ${className}
       `}

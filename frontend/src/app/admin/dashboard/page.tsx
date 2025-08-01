@@ -48,6 +48,7 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isLoading) {
@@ -68,24 +69,59 @@ export default function AdminDashboard() {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
+      setError(null);
+
+      // Check if user has valid token
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found. Please log in again.');
+      }
 
       // Fetch dashboard statistics
       const statsResponse = await getDashboardStats();
-      if (statsResponse.success) {
+
+      if (statsResponse && statsResponse.success && statsResponse.data) {
         const data = statsResponse.data;
         setStats({
-          totalOrders: data.orders.total,
-          pendingOrders: data.orders.pending,
-          processingOrders: data.orders.processing,
-          shippedOrders: data.orders.shipped,
-          deliveredOrders: data.orders.delivered,
-          cancelledOrders: data.orders.cancelled,
-          totalRevenue: data.revenue.total
+          totalOrders: data.orders?.total || 0,
+          pendingOrders: data.orders?.pending || 0,
+          processingOrders: data.orders?.processing || 0,
+          shippedOrders: data.orders?.shipped || 0,
+          deliveredOrders: data.orders?.delivered || 0,
+          cancelledOrders: data.orders?.cancelled || 0,
+          totalRevenue: data.revenue?.total || 0
         });
-        setRecentOrders(data.recentOrders);
+        setRecentOrders(data.recentOrders || []);
+      } else {
+        throw new Error('Invalid response format from dashboard API');
       }
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('Dashboard error:', error);
+
+      // Set user-friendly error messages
+      let displayMessage = errorMessage;
+      if (errorMessage.includes('fetch')) {
+        displayMessage = 'Unable to connect to server. Please check if the backend is running.';
+      } else if (errorMessage.includes('401') || errorMessage.includes('authentication')) {
+        displayMessage = 'Authentication failed. Please log in again.';
+      } else if (errorMessage.includes('403') || errorMessage.includes('admin')) {
+        displayMessage = 'Access denied. Admin privileges required.';
+      }
+
+      setError(displayMessage);
+
+      // Set default values to prevent UI crashes
+      setStats({
+        totalOrders: 0,
+        pendingOrders: 0,
+        processingOrders: 0,
+        shippedOrders: 0,
+        deliveredOrders: 0,
+        cancelledOrders: 0,
+        totalRevenue: 0
+      });
+      setRecentOrders([]);
     } finally {
       setLoading(false);
     }
@@ -137,6 +173,29 @@ export default function AdminDashboard() {
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome back, {user.name}!</h2>
           <p className="text-gray-600">Here's what's happening with your store today.</p>
         </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <div className="flex items-center">
+              <div className="p-2 rounded-full bg-red-100 text-red-600 mr-4">
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-medium text-red-800 mb-1">Dashboard Error</h3>
+                <p className="text-red-700">{error}</p>
+                <button
+                  onClick={fetchDashboardData}
+                  className="mt-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                >
+                  Retry
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Stats Cards */}
         {loading ? (
@@ -216,7 +275,7 @@ export default function AdminDashboard() {
         {/* Quick Actions */}
         <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <Link href="/admin/products/add" className="block">
               <div className="p-4 border border-gray-200 rounded-lg hover:border-orange-300 hover:bg-orange-50 transition-colors cursor-pointer">
                 <div className="flex items-center">
@@ -262,6 +321,18 @@ export default function AdminDashboard() {
                     </svg>
                   </div>
                   <span className="ml-3 text-sm font-medium text-gray-900">Categories</span>
+                </div>
+              </div>
+            </Link>
+            <Link href="/admin/featured-products" className="block">
+              <div className="p-4 border border-gray-200 rounded-lg hover:border-pink-300 hover:bg-pink-50 transition-colors cursor-pointer">
+                <div className="flex items-center">
+                  <div className="p-2 bg-pink-100 rounded-lg">
+                    <svg className="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                    </svg>
+                  </div>
+                  <span className="ml-3 text-sm font-medium text-gray-900">Featured Products</span>
                 </div>
               </div>
             </Link>

@@ -193,7 +193,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
             type="submit"
             disabled={!stripe || isProcessing || !clientSecret}
             loading={isProcessing}
-            variant="gradient"
+            variant="primary"
             size="lg"
             fullWidth
             icon={
