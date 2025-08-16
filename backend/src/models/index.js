@@ -7,6 +7,8 @@ const Wishlist = require('./Wishlist');
 const Coupon = require('./Coupon');
 const Notification = require('./Notification');
 const FeaturedProduct = require('./FeaturedProduct');
+const HomePageContent = require('./HomePageContent');
+const Banner = require('./Banner');
 
 module.exports = {
   User,
@@ -17,5 +19,7 @@ module.exports = {
   Wishlist,
   Coupon,
   Notification,
-  FeaturedProduct
+  FeaturedProduct,
+  HomePageContent,
+  Banner
 };

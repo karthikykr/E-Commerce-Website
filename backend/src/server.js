@@ -47,12 +47,16 @@ app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/coupons', require('./routes/coupons'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/featured-products', require('./routes/featuredProducts'));
+app.use('/api/homepage-content', require('./routes/homePageContent'));
+app.use('/api/banners', require('./routes/banners'));
 
 // Admin routes
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/admin/products', require('./routes/adminProducts'));
 app.use('/api/admin/orders', require('./routes/adminOrders'));
 app.use('/api/admin/categories', require('./routes/adminCategories'));
+app.use('/api/admin/homepage-content', require('./routes/adminHomePageContent'));
+app.use('/api/admin/banners', require('./routes/adminBanners'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

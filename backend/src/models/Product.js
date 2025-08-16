@@ -76,6 +76,33 @@ const productSchema = new mongoose.Schema({
     isPrimary: {
       type: Boolean,
       default: false
+    },
+    filename: {
+      type: String,
+      trim: true
+    },
+    originalName: {
+      type: String,
+      trim: true
+    },
+    mimeType: {
+      type: String,
+      trim: true
+    },
+    size: {
+      type: Number,
+      min: 0
+    },
+    thumbnail: {
+      url: String,
+      filename: String
+    },
+    uploadedAt: {
+      type: Date,
+      default: Date.now
+    },
+    publicId: {
+      type: String // For cloud storage like Cloudinary
     }
   }],
   inStock: {
@@ -232,6 +259,78 @@ productSchema.virtual('isLowStock').get(function() {
 // Ensure virtual fields are serialized
 productSchema.set('toJSON', { virtuals: true });
 productSchema.set('toObject', { virtuals: true });
+
+// Instance method to get primary image
+productSchema.methods.getPrimaryImage = function() {
+  const primaryImage = this.images.find(img => img.isPrimary);
+  return primaryImage || this.images[0] || null;
+};
+
+// Instance method to add image
+productSchema.methods.addImage = function(imageData) {
+  // If this is the first image, make it primary
+  if (this.images.length === 0) {
+    imageData.isPrimary = true;
+  }
+  this.images.push(imageData);
+  return this.save();
+};
+
+// Instance method to remove image
+productSchema.methods.removeImage = function(imageId) {
+  const imageIndex = this.images.findIndex(img => img._id.toString() === imageId);
+  if (imageIndex === -1) {
+    throw new Error('Image not found');
+  }
+
+  const removedImage = this.images[imageIndex];
+  this.images.splice(imageIndex, 1);
+
+  // If removed image was primary and there are other images, make the first one primary
+  if (removedImage.isPrimary && this.images.length > 0) {
+    this.images[0].isPrimary = true;
+  }
+
+  return this.save();
+};
+
+// Instance method to set primary image
+productSchema.methods.setPrimaryImage = function(imageId) {
+  // Remove primary flag from all images
+  this.images.forEach(img => {
+    img.isPrimary = false;
+  });
+
+  // Set the specified image as primary
+  const targetImage = this.images.find(img => img._id.toString() === imageId);
+  if (!targetImage) {
+    throw new Error('Image not found');
+  }
+
+  targetImage.isPrimary = true;
+  return this.save();
+};
+
+// Instance method to get all image URLs
+productSchema.methods.getImageUrls = function() {
+  return this.images.map(img => ({
+    id: img._id,
+    url: img.url,
+    thumbnail: img.thumbnail?.url,
+    alt: img.alt,
+    isPrimary: img.isPrimary
+  }));
+};
+
+// Static method to find products with missing images
+productSchema.statics.findProductsWithoutImages = function() {
+  return this.find({
+    $or: [
+      { images: { $size: 0 } },
+      { images: { $exists: false } }
+    ]
+  });
+};
 
 // Indexes for better performance
 productSchema.index({ name: 'text', description: 'text', tags: 'text' });

@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { ProductCard } from '@/components/product/ProductCard';
+import { ProductGrid, GridContainer } from '@/components/ui/ProductGrid';
 import { ProductGridSkeleton } from '@/components/ui/Skeleton';
 import { SearchInput } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -293,38 +294,15 @@ function ProductsContent() {
         )}
 
         {/* Products Grid - Enhanced Mobile-First Responsive Design */}
-        {isLoading ? (
-          <ProductGridSkeleton count={8} />
-        ) : filteredAndSortedProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
-            {filteredAndSortedProducts.map(product => (
-              <ProductCard key={product._id} product={product} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-10 sm:py-12 md:py-16 px-4">
-            <div className="text-5xl sm:text-6xl md:text-7xl mb-4 sm:mb-6">🔍</div>
-            <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 mb-2 sm:mb-3">
-              No products found
-            </h3>
-            <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 max-w-md mx-auto leading-relaxed">
-              Try adjusting your filters or search criteria to find what you're looking for
-            </p>
-            <Button
-              onClick={() => {
-                setSelectedCategory('all');
-                setSortBy('name');
-                setShowInStockOnly(false);
-                setSearchQuery('');
-                window.history.pushState({}, '', '/products');
-              }}
-              size="md"
-              className="min-h-[48px]"
-            >
-              Clear All Filters
-            </Button>
-          </div>
-        )}
+        <ProductGrid
+          products={filteredAndSortedProducts}
+          variant="default"
+          loading={isLoading}
+          emptyMessage={`No products found ${searchQuery ? `for "${searchQuery}"` : ''}. Try adjusting your filters or search criteria.`}
+          emptyIcon="🔍"
+        />
+
+
 
         {/* Load More Button (for pagination in real app) */}
         {filteredAndSortedProducts.length > 0 && (

@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import ImageUpload from '@/components/ui/ImageUpload';
 
 interface Category {
   _id: string;
@@ -35,6 +36,8 @@ export default function AddProduct() {
     isActive: true,
     isFeatured: false
   });
+
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
 
   useEffect(() => {
     if (!isLoading) {
@@ -147,32 +150,51 @@ export default function AddProduct() {
           .trim();
       };
 
-      const productData = {
-        name: formData.name,
-        slug: generateSlug(formData.name),
-        description: formData.description,
-        shortDescription: formData.shortDescription || formData.description.substring(0, 100),
-        price: parseFloat(formData.price),
-        category: formData.category,
-        stockQuantity: parseInt(formData.stockQuantity),
-        weight: {
-          value: parseFloat(formData.weight.value) || 100,
-          unit: formData.weight.unit || 'g'
-        },
-        images: filteredImages.length > 0 ? filteredImages : [{ url: 'https://via.placeholder.com/500', alt: formData.name }],
-        specifications: filteredSpecs,
-        tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '') : [],
-        isActive: formData.isActive,
-        isFeatured: formData.isFeatured || false
-      };
+      // Create FormData for file upload
+      const formDataToSend = new FormData();
 
-      const response = await fetch('http://localhost:5000/api/products', {
+      // Add basic product data
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('shortDescription', formData.shortDescription || formData.description.substring(0, 100));
+      formDataToSend.append('price', formData.price);
+      formDataToSend.append('category', formData.category);
+      formDataToSend.append('stockQuantity', formData.stockQuantity);
+      formDataToSend.append('weight[value]', formData.weight.value || '100');
+      formDataToSend.append('weight[unit]', formData.weight.unit || 'g');
+      formDataToSend.append('isActive', formData.isActive.toString());
+      formDataToSend.append('isFeatured', formData.isFeatured.toString());
+
+      // Add tags
+      if (formData.tags) {
+        const tags = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+        tags.forEach(tag => formDataToSend.append('tags[]', tag));
+      }
+
+      // Add specifications
+      filteredSpecs.forEach((spec, index) => {
+        formDataToSend.append(`specifications[${index}][key]`, spec.key);
+        formDataToSend.append(`specifications[${index}][value]`, spec.value);
+      });
+
+      // Add URL-based images
+      filteredImages.forEach((img, index) => {
+        formDataToSend.append(`images[${index}][url]`, img.url);
+        formDataToSend.append(`images[${index}][alt]`, img.alt || formData.name);
+      });
+
+      // Add image files
+      imageFiles.forEach(file => {
+        formDataToSend.append('images', file);
+      });
+
+      const response = await fetch('http://localhost:5000/api/admin/products', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
+          // Don't set Content-Type for FormData, let browser set it with boundary
         },
-        body: JSON.stringify(productData)
+        body: formDataToSend
       });
 
       const data = await response.json();
@@ -445,45 +467,61 @@ export default function AddProduct() {
 
             {/* Images Section */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-4">
                 Product Images
               </label>
-              {formData.images.map((image, index) => (
-                <div key={index} className="flex gap-4 mb-4 p-4 border border-gray-200 rounded-lg">
-                  <div className="flex-1">
-                    <input
-                      type="url"
-                      placeholder="Image URL"
-                      value={image.url}
-                      onChange={(e) => handleImageChange(index, 'url', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    />
+              <ImageUpload
+                onImagesChange={setImageFiles}
+                maxFiles={10}
+                maxSizeInMB={5}
+                showPreview={true}
+                allowReorder={true}
+                allowSetPrimary={true}
+                className="mb-4"
+              />
+
+              {/* URL-based Images (Legacy Support) */}
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Or Add Images by URL
+                </label>
+                {formData.images.map((image, index) => (
+                  <div key={index} className="flex gap-4 mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                    <div className="flex-1">
+                      <input
+                        type="url"
+                        placeholder="Image URL"
+                        value={image.url}
+                        onChange={(e) => handleImageChange(index, 'url', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <input
+                        type="text"
+                        placeholder="Alt text"
+                        value={image.alt}
+                        onChange={(e) => handleImageChange(index, 'alt', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeImageField(index)}
+                      className="px-3 py-2 text-red-600 hover:text-red-800"
+                    >
+                      Remove
+                    </button>
                   </div>
-                  <div className="flex-1">
-                    <input
-                      type="text"
-                      placeholder="Alt text"
-                      value={image.alt}
-                      onChange={(e) => handleImageChange(index, 'alt', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeImageField(index)}
-                    className="px-3 py-2 text-red-600 hover:text-red-800"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={addImageField}
-                className="text-orange-600 hover:text-orange-700 text-sm"
-              >
-                + Add Another Image
-              </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={addImageField}
+                  className="text-orange-600 hover:text-orange-700 text-sm"
+                >
+                  + Add Image URL
+                </button>
+              </div>
             </div>
 
             {/* Specifications Section */}

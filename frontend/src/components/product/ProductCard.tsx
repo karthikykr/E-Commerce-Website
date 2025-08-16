@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { ProductCardWrapper } from '@/components/ui/Card';
+import { ProductImage } from '@/components/ui/ProductImage';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useToast } from '@/contexts/ToastContext';
@@ -101,19 +102,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <ProductCardWrapper featured={product.isFeatured} className="hover-lift animate-fade-in-up">
       <Link href={`/products/${productId}`} className="block h-full flex flex-col">
-        {/* Product Image - Reduced height for more compact cards */}
-        <div className="relative h-40 sm:h-44 md:h-48 bg-orange-50 flex items-center justify-center overflow-hidden">
-          {primaryImage ? (
-            <img
-              src={primaryImage.url}
-              alt={primaryImage.alt || product.name}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-            />
-          ) : (
-            <div className="text-3xl sm:text-4xl md:text-5xl group-hover:scale-110 transition-transform duration-300">
-              🌶️
-            </div>
-          )}
+        {/* Product Image - Consistent aspect ratio */}
+        <div className="relative aspect-square overflow-hidden bg-gray-50 flex-shrink-0">
+          <ProductImage
+            src={primaryImage?.url}
+            alt={primaryImage?.alt || product.name}
+            className="w-full h-full group-hover:scale-110 transition-transform duration-300"
+            objectFit="cover"
+            lazy={true}
+            showFallbackIcon={true}
+            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+          />
 
           {/* Discount Badge */}
           {priceInfo.hasDiscount && (
