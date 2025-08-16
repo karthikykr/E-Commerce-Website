@@ -1,14 +1,20 @@
 {
-  "name": "ecommerce-backend",
+  "name": "gruhapaaka-backend",
   "version": "1.0.0",
-  "description": "Backend API for ecommerce application",
+  "description": "Backend API for Gruhapaaka homemade food products application",
   "main": "src/server.js",
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
+    "start-safe": "node start-server.js",
     "build": "echo 'No build step required for Node.js'",
     "seed": "node src/scripts/seedData.js",
-    "reset-db": "node src/scripts/resetDatabase.js"
+    "reset-db": "node src/scripts/resetDatabase.js",
+    "test-connection": "node test-connection.js",
+    "test-api": "node api-test.js",
+    "check-mongodb": "node check-mongodb.js",
+    "setup-db": "node setup-database.js",
+    "create-admin": "node create-admin.js"
   },
   "dependencies": {
     "axios": "^1.10.0",
@@ -20,7 +26,9 @@
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.0.3",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "multer": "^2.0.2",
+    "sharp": "^0.34.3"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"

@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Cookies from 'js-cookie';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardBody } from '@/components/ui/Card';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/components/ui/Toast';
+import { useToast } from '@/contexts/ToastContext';
 
 interface OrderItem {
   product: {
@@ -26,24 +27,22 @@ interface Order {
   orderNumber: string;
   items: OrderItem[];
   shippingAddress: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-    address: string;
+    fullName: string;
+    street: string;
     city: string;
     state: string;
     zipCode: string;
+    country: string;
+    phone: string;
   };
   billingAddress: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-    address: string;
+    fullName: string;
+    street: string;
     city: string;
     state: string;
     zipCode: string;
+    country: string;
+    phone: string;
   };
   paymentMethod: string;
   paymentStatus: string;
@@ -60,7 +59,7 @@ export default function OrderDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
-  const { addToast } = useToast();
+  const { showToast } = useToast();
   
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -79,9 +78,17 @@ export default function OrderDetailsPage() {
   const fetchOrder = async (orderId: string) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`http://localhost:5001/api/orders/${orderId}`, {
+
+      // Get token using the same method as cart context
+      const token = Cookies.get('auth-token') || localStorage.getItem('token');
+
+      if (!token) {
+        throw new Error('Authentication token not available. Please login again.');
+      }
+
+      const response = await fetch(`http://localhost:5000/api/orders/${orderId}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${token}`,
         },
       });
 
@@ -93,9 +100,8 @@ export default function OrderDetailsPage() {
       }
     } catch (error) {
       console.error('Error fetching order:', error);
-      addToast({
+      showToast({
         type: 'error',
-        title: 'Error',
         message: 'Failed to load order details.',
         duration: 5000,
       });
@@ -254,11 +260,11 @@ export default function OrderDetailsPage() {
               </CardHeader>
               <CardBody>
                 <div className="text-gray-700">
-                  <p className="font-medium">{order.shippingAddress.firstName} {order.shippingAddress.lastName}</p>
-                  <p>{order.shippingAddress.address}</p>
+                  <p className="font-medium">{order.shippingAddress.fullName}</p>
+                  <p>{order.shippingAddress.street}</p>
                   <p>{order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}</p>
+                  <p>{order.shippingAddress.country}</p>
                   <p className="mt-2">📞 {order.shippingAddress.phone}</p>
-                  <p>📧 {order.shippingAddress.email}</p>
                 </div>
               </CardBody>
             </Card>

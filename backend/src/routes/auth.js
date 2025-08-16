@@ -125,7 +125,44 @@ router.post('/login', [
 
     const { email, password } = req.body;
 
-    // Find user by email
+    // Check for hardcoded admin credentials
+    if ((email === 'admin@123.com' || email === 'kaushikbshetty1@gmail.com') && password === 'admin123') {
+      // Create admin user object
+      const adminUser = {
+        _id: email === 'admin@123.com' ? 'admin-hardcoded-id' : 'admin-kaushik-id',
+        name: email === 'admin@123.com' ? 'Admin User' : 'Kaushik B Shetty',
+        email: email,
+        role: 'admin',
+        authMethod: 'email',
+        isActive: true,
+        lastLogin: new Date()
+      };
+
+      // Generate JWT token for admin
+      const token = jwt.sign(
+        { id: adminUser._id, role: adminUser.role },
+        process.env.JWT_SECRET || 'your-secret-key',
+        { expiresIn: process.env.JWT_EXPIRE || '30d' }
+      );
+
+      return res.json({
+        success: true,
+        message: 'Admin login successful',
+        data: {
+          user: {
+            id: adminUser._id,
+            name: adminUser.name,
+            email: adminUser.email,
+            role: adminUser.role,
+            authMethod: adminUser.authMethod,
+            lastLogin: adminUser.lastLogin
+          },
+          token
+        }
+      });
+    }
+
+    // Find user by email for regular users
     const user = await User.findOne({ email }).select('+password');
 
     if (!user) {

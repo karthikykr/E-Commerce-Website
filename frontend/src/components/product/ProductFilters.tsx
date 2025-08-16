@@ -73,10 +73,10 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
     (filters.priceRange[0] > 0 || filters.priceRange[1] < 1000 ? 1 : 0);
 
   return (
-    <Card variant="elevated" className="sticky top-24">
+    <Card variant="elevated" className="sticky top-20 sm:top-24">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900">Filters</h3>
           <div className="flex items-center space-x-2">
             {activeFiltersCount > 0 && (
               <span className="bg-orange-100 text-orange-800 text-xs font-medium px-2 py-1 rounded-full">
@@ -87,7 +87,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
               variant="ghost"
               size="sm"
               onClick={() => setIsExpanded(!isExpanded)}
-              className="lg:hidden"
+              className="lg:hidden text-xs sm:text-sm"
             >
               {isExpanded ? 'Hide' : 'Show'}
             </Button>
@@ -95,7 +95,7 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
         </div>
       </CardHeader>
 
-      <CardBody className={`space-y-6 ${isExpanded ? 'block' : 'hidden lg:block'}`}>
+      <CardBody className={`space-y-4 sm:space-y-6 ${isExpanded ? 'block' : 'hidden lg:block'}`}>
         {/* Sort Options */}
         <div>
           <h4 className="font-medium text-gray-900 mb-3">Sort By</h4>

@@ -3,13 +3,22 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
+const path = require('path');
 const connectDB = require('./config/database');
 
 // Load environment variables
 dotenv.config();
 
-// Connect to MongoDB
-connectDB();
+// Connect to MongoDB (with error handling)
+if (process.env.MONGODB_URI) {
+  connectDB().catch(err => {
+    console.log('⚠️  MongoDB connection failed, running without database:', err.message);
+    console.log('💡 Install and start MongoDB to enable full functionality');
+  });
+} else {
+  console.log('⚠️  No MongoDB URI found, running without database');
+  console.log('💡 Add MONGODB_URI to .env file to enable database features');
+}
 
 const app = express();
 
@@ -23,6 +32,9 @@ app.use(morgan('combined')); // Logging
 app.use(express.json({ limit: '10mb' })); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
+// Serve static files (uploaded images)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/products', require('./routes/products'));
@@ -34,12 +46,17 @@ app.use('/api/wishlist', require('./routes/wishlist'));
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/coupons', require('./routes/coupons'));
 app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/featured-products', require('./routes/featuredProducts'));
+app.use('/api/homepage-content', require('./routes/homePageContent'));
+app.use('/api/banners', require('./routes/banners'));
 
 // Admin routes
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/admin/products', require('./routes/adminProducts'));
 app.use('/api/admin/orders', require('./routes/adminOrders'));
 app.use('/api/admin/categories', require('./routes/adminCategories'));
+app.use('/api/admin/homepage-content', require('./routes/adminHomePageContent'));
+app.use('/api/admin/banners', require('./routes/adminBanners'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

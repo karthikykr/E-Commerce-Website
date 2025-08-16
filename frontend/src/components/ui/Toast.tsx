@@ -14,6 +14,9 @@ interface ToastContextType {
   toasts: Toast[];
   addToast: (toast: Omit<Toast, 'id'>) => void;
   removeToast: (id: string) => void;
+  showToast: (toast: Omit<Toast, 'id'>) => void;
+  showCartToast: (message: string) => void;
+  showWishlistToast: (message: string) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -21,7 +24,26 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 export const useToast = () => {
   const context = useContext(ToastContext);
   if (!context) {
-    throw new Error('useToast must be used within a ToastProvider');
+    // Provide a fallback implementation instead of throwing an error
+    console.warn('useToast is being used outside of ToastProvider. Using fallback implementation.');
+    return {
+      toasts: [],
+      addToast: (toast: Omit<Toast, 'id'>) => {
+        console.log('Toast (fallback):', toast.title, toast.message);
+      },
+      removeToast: (id: string) => {
+        console.log('Remove toast (fallback):', id);
+      },
+      showToast: (toast: Omit<Toast, 'id'>) => {
+        console.log('Toast (fallback):', toast.title, toast.message);
+      },
+      showCartToast: (message: string) => {
+        console.log('Cart toast (fallback):', message);
+      },
+      showWishlistToast: (message: string) => {
+        console.log('Wishlist toast (fallback):', message);
+      }
+    };
   }
   return context;
 };
@@ -45,8 +67,26 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setToasts(prev => prev.filter(toast => toast.id !== id));
   }, []);
 
+  const showToast = addToast; // Alias for compatibility
+  const showCartToast = (message: string) => {
+    addToast({
+      type: 'success',
+      title: 'Added to Cart',
+      message,
+      duration: 4000
+    });
+  };
+  const showWishlistToast = (message: string) => {
+    addToast({
+      type: 'success',
+      title: 'Added to Wishlist',
+      message,
+      duration: 4000
+    });
+  };
+
   return (
-    <ToastContext.Provider value={{ toasts, addToast, removeToast }}>
+    <ToastContext.Provider value={{ toasts, addToast, removeToast, showToast, showCartToast, showWishlistToast }}>
       {children}
       <ToastContainer />
     </ToastContext.Provider>
@@ -104,26 +144,26 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
   return (
     <div className={`
       ${getToastStyles()}
-      border rounded-lg p-4 shadow-lg max-w-sm w-full
+      border rounded-lg p-3 sm:p-4 shadow-lg max-w-xs sm:max-w-sm w-full
       transform transition-all duration-300 ease-in-out
       animate-slide-in-right hover:scale-105
     `}>
       <div className="flex items-start">
-        <div className="flex-shrink-0 text-lg mr-3">
+        <div className="flex-shrink-0 text-base sm:text-lg mr-2 sm:mr-3">
           {getIcon()}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-sm">{toast.title}</p>
+          <p className="font-semibold text-xs sm:text-sm">{toast.title}</p>
           {toast.message && (
-            <p className="text-sm mt-1 opacity-90">{toast.message}</p>
+            <p className="text-xs sm:text-sm mt-1 opacity-90">{toast.message}</p>
           )}
         </div>
         <button
           onClick={() => onRemove(toast.id)}
-          className="flex-shrink-0 ml-2 text-gray-400 hover:text-gray-600 transition-colors"
+          className="flex-shrink-0 ml-1 sm:ml-2 text-gray-400 hover:text-gray-600 transition-colors p-1"
         >
           <span className="sr-only">Close</span>
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>

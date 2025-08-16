@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { useAdminAPI } from '@/hooks/useAdminAPI';
-import { useToast } from '@/components/ui/Toast';
+import { useToast } from '@/contexts/ToastContext';
 
 interface Category {
   _id: string;

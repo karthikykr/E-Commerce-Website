@@ -1,28 +1,90 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { ProductCard } from '@/components/product/ProductCard';
 import { Button } from '@/components/ui/Button';
-import { products } from '@/data/products';
+import { useCart } from '@/contexts/CartContext';
+import { useWishlist } from '@/contexts/WishlistContext';
+import { Product } from '@/types';
 
 export default function ProductDetailPage() {
   const params = useParams();
   const productId = params.id as string;
-  
-  const product = products.find(p => p.id === productId);
+
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedTab, setSelectedTab] = useState('description');
 
-  if (!product) {
+  // Fetch product data from backend
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // Fetch the specific product
+        const productResponse = await fetch(`http://localhost:5000/api/products/${productId}`);
+        const productData = await productResponse.json();
+
+        if (productData.success && productData.data) {
+          const fetchedProduct = productData.data;
+          setProduct(fetchedProduct);
+
+          // Fetch related products from the same category
+          const relatedResponse = await fetch(`http://localhost:5000/api/products?category=${fetchedProduct.category._id || fetchedProduct.category.id}&limit=4`);
+          const relatedData = await relatedResponse.json();
+
+          if (relatedData.success && relatedData.data?.products) {
+            // Filter out the current product from related products
+            const filtered = relatedData.data.products.filter((p: Product) =>
+              (p._id || p.id) !== productId
+            ).slice(0, 4);
+            setRelatedProducts(filtered);
+          }
+        } else {
+          setError('Product not found');
+        }
+      } catch (err) {
+        console.error('Error fetching product:', err);
+        setError('Failed to load product');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (productId) {
+      fetchProduct();
+    }
+  }, [productId]);
+
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h1>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading product...</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            {error || 'Product Not Found'}
+          </h1>
           <p className="text-gray-600 mb-8">The product you're looking for doesn't exist.</p>
           <Link href="/products">
             <Button>Back to Products</Button>
@@ -33,71 +95,84 @@ export default function ProductDetailPage() {
     );
   }
 
-  // Get related products (same category, excluding current product)
-  const relatedProducts = products
-    .filter(p => p.category.id === product.category.id && p.id !== product.id)
-    .slice(0, 4);
-
-  const discountPercentage = product.originalPrice 
+  const discountPercentage = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
 
-  const handleAddToCart = () => {
-    alert(`Added ${quantity} x ${product.name} to cart!`);
+  const { addToCart, isLoading: cartLoading } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist, isLoading: wishlistLoading } = useWishlist();
+
+  const productIdForActions = product._id || product.id;
+
+  const handleAddToCart = async () => {
+    const success = await addToCart(productIdForActions, quantity);
+    if (success) {
+      alert(`Added ${quantity} x ${product.name} to cart!`);
+    }
   };
 
-  const handleAddToWishlist = () => {
-    alert(`Added ${product.name} to wishlist!`);
+  const handleAddToWishlist = async () => {
+    if (isInWishlist(productIdForActions)) {
+      const success = await removeFromWishlist(productIdForActions);
+      if (success) {
+        alert(`Removed ${product.name} from wishlist!`);
+      }
+    } else {
+      const success = await addToWishlist(productIdForActions);
+      if (success) {
+        alert(`Added ${product.name} to wishlist!`);
+      }
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Breadcrumb */}
-        <nav className="mb-8">
-          <ol className="flex items-center space-x-2 text-sm text-gray-500">
-            <li><Link href="/" className="hover:text-orange-600">Home</Link></li>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        {/* Breadcrumb - Mobile Responsive */}
+        <nav className="mb-4 sm:mb-6 lg:mb-8">
+          <ol className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm text-gray-500 overflow-x-auto">
+            <li><Link href="/" className="hover:text-orange-600 whitespace-nowrap">Home</Link></li>
             <li>/</li>
-            <li><Link href="/products" className="hover:text-orange-600">Products</Link></li>
+            <li><Link href="/products" className="hover:text-orange-600 whitespace-nowrap">Products</Link></li>
             <li>/</li>
-            <li><Link href={`/categories/${product.category.slug}`} className="hover:text-orange-600">{product.category.name}</Link></li>
+            <li><Link href={`/categories/${product.category.slug}`} className="hover:text-orange-600 whitespace-nowrap">{product.category.name}</Link></li>
             <li>/</li>
-            <li className="text-gray-900">{product.name}</li>
+            <li className="text-gray-900 truncate">{product.name}</li>
           </ol>
         </nav>
 
-        {/* Product Details */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
-            {/* Product Image */}
+        {/* Product Details - Mobile Responsive */}
+        <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6 sm:mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 p-4 sm:p-6 lg:p-8">
+            {/* Product Image - Mobile Responsive */}
             <div className="space-y-4">
               <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
-                <div className="text-9xl">{product.category.image}</div>
+                <div className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl">{product.category.image}</div>
               </div>
               {/* Thumbnail images would go here in a real app */}
             </div>
 
-            {/* Product Info */}
-            <div className="space-y-6">
+            {/* Product Info - Mobile Responsive */}
+            <div className="space-y-4 sm:space-y-6">
               {/* Category */}
               <div>
-                <Link href={`/categories/${product.category.slug}`} className="text-orange-600 hover:text-orange-700 font-medium">
+                <Link href={`/categories/${product.category.slug}`} className="text-orange-600 hover:text-orange-700 font-medium text-sm sm:text-base">
                   {product.category.name}
                 </Link>
               </div>
 
               {/* Product Name */}
-              <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{product.name}</h1>
 
-              {/* Rating */}
-              <div className="flex items-center space-x-4">
+              {/* Rating - Mobile Responsive */}
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
                 <div className="flex items-center">
                   {[...Array(5)].map((_, i) => (
                     <svg
                       key={i}
-                      className={`h-5 w-5 ${
+                      className={`h-4 w-4 sm:h-5 sm:w-5 ${
                         i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-300'
                       }`}
                       fill="currentColor"
@@ -107,41 +182,41 @@ export default function ProductDetailPage() {
                     </svg>
                   ))}
                 </div>
-                <span className="text-gray-600">
+                <span className="text-sm sm:text-base text-gray-600">
                   {product.rating} ({product.reviewCount} reviews)
                 </span>
               </div>
 
-              {/* Price */}
-              <div className="flex items-center space-x-4">
-                <span className="text-3xl font-bold text-gray-900">${product.price}</span>
+              {/* Price - Mobile Responsive */}
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                <span className="text-2xl sm:text-3xl font-bold text-gray-900">${product.price}</span>
                 {product.originalPrice && (
-                  <>
-                    <span className="text-xl text-gray-500 line-through">${product.originalPrice}</span>
-                    <span className="bg-red-100 text-red-800 px-2 py-1 rounded-md text-sm font-semibold">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg sm:text-xl text-gray-500 line-through">${product.originalPrice}</span>
+                    <span className="bg-red-100 text-red-800 px-2 py-1 rounded-md text-xs sm:text-sm font-semibold">
                       Save {discountPercentage}%
                     </span>
-                  </>
+                  </div>
                 )}
               </div>
 
-              {/* Stock Status */}
+              {/* Stock Status - Mobile Responsive */}
               <div className="flex items-center space-x-2">
                 <div className={`h-3 w-3 rounded-full ${product.inStock ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                <span className={`font-medium ${product.inStock ? 'text-green-700' : 'text-red-700'}`}>
+                <span className={`text-sm sm:text-base font-medium ${product.inStock ? 'text-green-700' : 'text-red-700'}`}>
                   {product.inStock ? `In Stock (${product.stockQuantity} available)` : 'Out of Stock'}
                 </span>
               </div>
 
-              {/* Product Details */}
+              {/* Product Details - Mobile Responsive */}
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Weight:</span>
-                  <span className="font-medium">{product.weight}</span>
+                  <span className="text-sm sm:text-base text-gray-600">Weight:</span>
+                  <span className="text-sm sm:text-base font-medium">{product.weight}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Origin:</span>
-                  <span className="font-medium">{product.origin}</span>
+                  <span className="text-sm sm:text-base text-gray-600">Origin:</span>
+                  <span className="text-sm sm:text-base font-medium">{product.origin}</span>
                 </div>
               </div>
 
@@ -180,8 +255,18 @@ export default function ProductDetailPage() {
                     <Button onClick={handleAddToCart} className="flex-1" size="lg">
                       Add to Cart - ${(product.price * quantity).toFixed(2)}
                     </Button>
-                    <Button onClick={handleAddToWishlist} variant="outline" size="lg">
-                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <Button
+                      onClick={handleAddToWishlist}
+                      variant="outline"
+                      size="lg"
+                      disabled={wishlistLoading}
+                    >
+                      <svg
+                        className={`h-5 w-5 ${isInWishlist(productIdForActions) ? 'text-red-500 fill-current' : ''}`}
+                        fill={isInWishlist(productIdForActions) ? 'currentColor' : 'none'}
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                       </svg>
                     </Button>
@@ -259,7 +344,7 @@ export default function ProductDetailPage() {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Related Products</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {relatedProducts.map(relatedProduct => (
-                <ProductCard key={relatedProduct.id} product={relatedProduct} />
+                <ProductCard key={relatedProduct._id || relatedProduct.id} product={relatedProduct} />
               ))}
             </div>
           </div>

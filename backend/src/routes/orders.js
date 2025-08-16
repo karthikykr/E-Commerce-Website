@@ -191,8 +191,13 @@ router.post('/', [
   body('paymentMethod').notEmpty().withMessage('Payment method is required')
 ], async (req, res) => {
   try {
+    console.log('=== CREATE ORDER REQUEST ===');
+    console.log('User ID:', req.user._id);
+    console.log('Request body:', JSON.stringify(req.body, null, 2));
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log('Validation errors:', errors.array());
       return res.status(400).json({
         success: false,
         message: 'Validation errors',
@@ -230,13 +235,32 @@ router.post('/', [
     const total = subtotal + tax + shippingCost;
 
     // Create order items
-    const orderItems = cart.items.map(item => ({
-      product: item.product._id,
-      name: item.product.name,
-      price: item.price,
-      quantity: item.quantity,
-      image: item.product.images && item.product.images.length > 0 ? item.product.images[0].url : null
-    }));
+    const orderItems = cart.items.map(item => {
+      console.log('Processing cart item:', {
+        productId: item.product._id,
+        productName: item.product.name,
+        price: item.price,
+        quantity: item.quantity,
+        hasImages: item.product.images && item.product.images.length > 0
+      });
+
+      let imageUrl = null;
+      try {
+        if (item.product.images && Array.isArray(item.product.images) && item.product.images.length > 0) {
+          imageUrl = item.product.images[0].url || item.product.images[0];
+        }
+      } catch (imageError) {
+        console.log('Error processing image:', imageError);
+      }
+
+      return {
+        product: item.product._id,
+        name: item.product.name,
+        price: item.price,
+        quantity: item.quantity,
+        image: imageUrl
+      };
+    });
 
     // Create order
     const order = new Order({
@@ -276,9 +300,12 @@ router.post('/', [
     });
   } catch (error) {
     console.error('Create order error:', error);
+    console.error('Error details:', error.message);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       success: false,
-      message: 'Server error while creating order'
+      message: 'Server error while creating order',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });

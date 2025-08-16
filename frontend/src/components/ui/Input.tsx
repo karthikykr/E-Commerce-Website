@@ -30,18 +30,20 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
   const [isFocused, setIsFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const baseClasses = 'transition-all duration-200 focus:outline-none';
+  // Mobile-first responsive base classes with improved touch interaction
+  const baseClasses = 'transition-all duration-200 focus:outline-none touch-manipulation';
 
   const variantClasses = {
     default: 'border-0 border-b-2 border-gray-300 focus:border-orange-500 bg-transparent rounded-none',
-    filled: 'border border-gray-300 focus:border-orange-500 bg-gray-50 focus:bg-white rounded-lg',
-    outlined: 'border-2 border-gray-300 focus:border-orange-500 bg-white rounded-lg shadow-sm hover:shadow-md',
+    filled: 'border border-gray-300 focus:border-orange-500 bg-gray-50 focus:bg-white rounded-lg hover:border-gray-400',
+    outlined: 'border-2 border-gray-300 focus:border-orange-500 bg-white rounded-lg shadow-sm hover:shadow-md hover:border-gray-400',
   };
 
+  // Enhanced mobile-first sizing with minimum touch targets and better mobile keyboard interaction
   const sizeClasses = {
-    sm: 'px-3 py-2 text-sm',
-    md: 'px-4 py-3 text-base',
-    lg: 'px-5 py-4 text-lg',
+    sm: 'px-3 py-3 text-base min-h-[48px] sm:px-3.5 sm:py-2.5 sm:text-sm sm:min-h-[40px]',
+    md: 'px-4 py-3.5 text-base min-h-[52px] sm:px-4 sm:py-3 sm:text-base sm:min-h-[44px]',
+    lg: 'px-5 py-4 text-lg min-h-[56px] sm:px-5 sm:py-4 sm:text-lg sm:min-h-[48px]',
   };
 
   const errorClasses = error
@@ -69,7 +71,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
     <div className={`${fullWidth ? 'w-full' : ''}`}>
       {label && (
         <label className={`
-          block text-sm font-medium mb-2 transition-colors duration-200
+          block text-sm sm:text-base font-medium mb-2 transition-colors duration-200
           ${error ? 'text-red-700' : 'text-gray-700'}
           ${isFocused ? 'text-orange-600' : ''}
         `}>

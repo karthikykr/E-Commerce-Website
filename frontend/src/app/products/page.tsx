@@ -1,15 +1,16 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { ProductCard } from '@/components/product/ProductCard';
+import { ProductGrid, GridContainer } from '@/components/ui/ProductGrid';
 import { ProductGridSkeleton } from '@/components/ui/Skeleton';
 import { SearchInput } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { useToast } from '@/components/ui/Toast';
+import { useToast } from '@/contexts/ToastContext';
 
 interface Product {
   _id: string;
@@ -50,7 +51,7 @@ interface Category {
   image?: string;
 }
 
-export default function ProductsPage() {
+function ProductsContent() {
   const searchParams = useSearchParams();
   const { addToast } = useToast();
 
@@ -87,7 +88,7 @@ export default function ProductsPage() {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/products');
+      const response = await fetch('http://localhost:5000/api/products');
       const data = await response.json();
 
       if (data.success) {
@@ -110,7 +111,7 @@ export default function ProductsPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/categories');
+      const response = await fetch('http://localhost:5000/api/categories');
       const data = await response.json();
 
       if (data.success) {
@@ -170,26 +171,26 @@ export default function ProductsPage() {
     <div className="min-h-screen bg-gray-50">
       <Header />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
+        {/* Page Header - Enhanced Mobile-First Design */}
+        <div className="mb-5 sm:mb-6 md:mb-8">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 leading-tight">
             {searchQuery ? `Search Results for "${searchQuery}"` : 'All Products'}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
             {searchQuery
               ? `Found ${filteredAndSortedProducts.length} products matching your search`
               : 'Discover our premium collection of spices, herbs, and blends'
             }
           </p>
           {searchQuery && (
-            <div className="mt-4">
+            <div className="mt-3 sm:mt-4">
               <button
                 onClick={() => {
                   setSearchQuery('');
                   window.history.pushState({}, '', '/products');
                 }}
-                className="text-orange-600 hover:text-orange-700 text-sm font-medium"
+                className="text-orange-600 hover:text-orange-700 text-sm font-medium touch-manipulation inline-flex items-center py-2"
               >
                 ← Clear search and view all products
               </button>
@@ -197,32 +198,32 @@ export default function ProductsPage() {
           )}
         </div>
 
-        {/* Filters and Sorting */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        {/* Filters and Sorting - Enhanced Mobile-First Design */}
+        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-5 md:p-6 mb-5 sm:mb-6 md:mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-5">
             {/* Search Filter */}
-            <div>
+            <div className="sm:col-span-2 lg:col-span-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Search Products
+                🔍 Search Products
               </label>
               <input
                 type="text"
                 placeholder="Search spices..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-4 py-3 sm:py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-base sm:text-sm touch-manipulation min-h-[48px] sm:min-h-[40px]"
               />
             </div>
 
             {/* Category Filter */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Category
+                📂 Category
               </label>
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-4 py-3 sm:py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-base sm:text-sm touch-manipulation min-h-[48px] sm:min-h-[40px]"
               >
                 <option value="all">All Categories</option>
                 {categories.map(category => (
@@ -236,12 +237,12 @@ export default function ProductsPage() {
             {/* Sort By */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Sort By
+                🔄 Sort By
               </label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-4 py-3 sm:py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-base sm:text-sm touch-manipulation min-h-[48px] sm:min-h-[40px]"
               >
                 <option value="name">Name (A-Z)</option>
                 <option value="price-low">Price (Low to High)</option>
@@ -283,46 +284,25 @@ export default function ProductsPage() {
           </div>
         </div>
 
-        {/* Results Count */}
+        {/* Results Count - Mobile Responsive */}
         {!isLoading && (
-          <div className="mb-6">
-            <p className="text-gray-600">
+          <div className="mb-4 sm:mb-6">
+            <p className="text-sm sm:text-base text-gray-600">
               Showing {filteredAndSortedProducts.length} of {products.length} products
             </p>
           </div>
         )}
 
-        {/* Products Grid */}
-        {isLoading ? (
-          <ProductGridSkeleton count={8} />
-        ) : filteredAndSortedProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredAndSortedProducts.map(product => (
-              <ProductCard key={product._id} product={product} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              No products found
-            </h3>
-            <p className="text-gray-600 mb-4">
-              Try adjusting your filters or search criteria
-            </p>
-            <Button
-              onClick={() => {
-                setSelectedCategory('all');
-                setSortBy('name');
-                setShowInStockOnly(false);
-                setSearchQuery('');
-                window.history.pushState({}, '', '/products');
-              }}
-            >
-              Clear All Filters
-            </Button>
-          </div>
-        )}
+        {/* Products Grid - Enhanced Mobile-First Responsive Design */}
+        <ProductGrid
+          products={filteredAndSortedProducts}
+          variant="default"
+          loading={isLoading}
+          emptyMessage={`No products found ${searchQuery ? `for "${searchQuery}"` : ''}. Try adjusting your filters or search criteria.`}
+          emptyIcon="🔍"
+        />
+
+
 
         {/* Load More Button (for pagination in real app) */}
         {filteredAndSortedProducts.length > 0 && (
@@ -336,5 +316,13 @@ export default function ProductsPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ProductsContent />
+    </Suspense>
   );
 }

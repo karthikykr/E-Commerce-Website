@@ -103,7 +103,11 @@ export default function RegisterPage() {
       });
 
       if (success) {
-        router.push('/');
+        // Show success message briefly, then AuthContext will handle the redirect
+        setErrors({ general: '' });
+        setLoading(false);
+        // AuthContext login function will handle the redirect automatically
+        // No need to manually redirect here
       } else {
         setErrors({ general: 'Registration failed. Please try again.' });
       }

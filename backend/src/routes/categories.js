@@ -2,21 +2,44 @@ const express = require('express');
 const { body, validationResult } = require('express-validator');
 const { Category, Product } = require('../models');
 const { adminAuth } = require('../middleware/adminAuth');
+const mongoose = require('mongoose');
 
 const router = express.Router();
+
+// Sample categories for when MongoDB is not connected
+const sampleCategories = [
+  { _id: '1', name: 'Spices & Seasonings', slug: 'spices-seasonings', description: 'Premium quality spices and seasonings', isActive: true, featured: true, productsCount: 3 },
+  { _id: '2', name: 'Herbs & Aromatics', slug: 'herbs-aromatics', description: 'Fresh and dried herbs for cooking', isActive: true, featured: true, productsCount: 1 },
+  { _id: '3', name: 'Masala Blends', slug: 'masala-blends', description: 'Traditional and modern spice blends', isActive: true, featured: true, productsCount: 1 },
+  { _id: '4', name: 'Organic Collection', slug: 'organic-collection', description: 'Certified organic spices and herbs', isActive: true, featured: false, productsCount: 1 }
+];
 
 // @route   GET /api/categories
 // @desc    Get all categories
 // @access  Public
 router.get('/', async (req, res) => {
   try {
+    // Check if MongoDB is connected
+    if (mongoose.connection.readyState !== 1) {
+      console.log('⚠️  MongoDB not connected, using sample categories');
+      return res.json({
+        success: true,
+        message: 'Categories retrieved successfully (sample data)',
+        data: {
+          categories: sampleCategories
+        }
+      });
+    }
+
     const categories = await Category.find({ isActive: true })
       .populate('productsCount')
       .sort('sortOrder name');
 
     res.json({
       success: true,
-      data: categories
+      data: {
+        categories: categories
+      }
     });
   } catch (error) {
     console.error('Error fetching categories:', error);

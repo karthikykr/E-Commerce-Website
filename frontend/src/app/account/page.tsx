@@ -12,7 +12,7 @@ import { ProfileSkeleton, OrderHistorySkeleton } from '@/components/ui/Skeleton'
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
-import { useToast } from '@/components/ui/Toast';
+import { useToast } from '@/contexts/ToastContext';
 
 interface Order {
   _id: string;
@@ -79,7 +79,7 @@ export default function AccountPage() {
   const fetchOrders = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('http://localhost:5001/api/orders', {
+      const response = await fetch('http://localhost:5000/api/orders', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
@@ -107,7 +107,7 @@ export default function AccountPage() {
     setIsUpdating(true);
 
     try {
-      const response = await fetch('http://localhost:5001/api/auth/profile', {
+      const response = await fetch('http://localhost:5000/api/auth/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

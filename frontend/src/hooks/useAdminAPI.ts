@@ -29,7 +29,7 @@ export const useAdminAPI = () => {
     setError(null);
 
     try {
-      const response = await fetch(`http://localhost:5001/api/admin${endpoint}`, {
+      const response = await fetch(`http://localhost:5000/api/admin${endpoint}`, {
         ...options,
         headers: {
           ...getAuthHeaders(),
@@ -37,21 +37,58 @@ export const useAdminAPI = () => {
         },
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        console.error('Failed to parse response JSON:', parseError);
+        throw new Error('Invalid response format from server');
+      }
 
       if (!response.ok) {
-        throw new Error(data.message || 'API request failed');
+        const errorMessage = data?.message || `HTTP ${response.status}: ${response.statusText}`;
+        console.error('API Error:', {
+          endpoint,
+          status: response.status,
+          statusText: response.statusText,
+          data
+        });
+        throw new Error(errorMessage);
       }
 
       return data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      console.error('API Call Error:', {
+        endpoint,
+        error: errorMessage,
+        originalError: err
+      });
       setError(errorMessage);
       throw err;
     } finally {
       setLoading(false);
     }
   }, [getAuthHeaders]);
+
+  // Health check
+  const checkConnection = useCallback(async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/health', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('Connection check failed:', error);
+      return false;
+    }
+  }, []);
+
+  // Test API
+  const testAdminAuth = useCallback(async () => {
+    return apiCall('/test');
+  }, [apiCall]);
 
   // Dashboard APIs
   const getDashboardStats = useCallback(async () => {
@@ -251,6 +288,10 @@ export const useAdminAPI = () => {
   return {
     loading,
     error,
+    // Connection
+    checkConnection,
+    // Test
+    testAdminAuth,
     // Dashboard
     getDashboardStats,
     getDashboardCharts,

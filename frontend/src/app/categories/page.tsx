@@ -14,20 +14,20 @@ export default function CategoriesPage() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Page Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        {/* Page Header - Mobile Responsive */}
+        <div className="text-center mb-8 sm:mb-12 px-4">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
             Spice Categories
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Explore our carefully curated collection of spices, herbs, and blends 
+          <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto">
+            Explore our carefully curated collection of spices, herbs, and blends
             organized by category to help you find exactly what you need.
           </p>
         </div>
 
-        {/* Categories Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+        {/* Categories Grid - Mobile Responsive */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
           {categories.map(category => {
             const productCount = getCategoryProductCount(category.id);
             
@@ -36,27 +36,27 @@ export default function CategoriesPage() {
                 key={category.id}
                 className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden group"
               >
-                {/* Category Image/Icon */}
-                <div className="h-48 bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center">
-                  <div className="text-8xl group-hover:scale-110 transition-transform duration-300">
+                {/* Category Image/Icon - Mobile Responsive */}
+                <div className="h-40 sm:h-48 bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center">
+                  <div className="text-6xl sm:text-7xl lg:text-8xl group-hover:scale-110 transition-transform duration-300">
                     {category.image}
                   </div>
                 </div>
 
-                {/* Category Info */}
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                {/* Category Info - Mobile Responsive */}
+                <div className="p-4 sm:p-6">
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
                     {category.name}
                   </h3>
-                  <p className="text-gray-600 mb-4">
+                  <p className="text-sm sm:text-base text-gray-600 mb-4">
                     {category.description}
                   </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                    <span className="text-xs sm:text-sm text-gray-500">
                       {productCount} product{productCount !== 1 ? 's' : ''}
                     </span>
                     <Link href={`/products?category=${category.id}`}>
-                      <Button size="sm">
+                      <Button size="sm" className="w-full sm:w-auto">
                         View Products
                       </Button>
                     </Link>

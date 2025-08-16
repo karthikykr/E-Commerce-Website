@@ -1,6 +1,15 @@
 const express = require('express');
+const path = require('path');
 const { body, validationResult } = require('express-validator');
 const { adminAuth, logAdminAction } = require('../middleware/adminAuth');
+const {
+  productImageUpload,
+  optimizeImage,
+  createThumbnails,
+  handleUploadError,
+  deleteUploadedFiles,
+  getFileUrl
+} = require('../middleware/imageUpload');
 const { Product, Category } = require('../models');
 
 const router = express.Router();
@@ -106,16 +115,22 @@ router.get('/:id', adminAuth, async (req, res) => {
 // @route   POST /api/admin/products
 // @desc    Create new product
 // @access  Private (Admin)
-router.post('/', [
+router.post('/',
   adminAuth,
-  body('name').notEmpty().withMessage('Product name is required'),
-  body('description').notEmpty().withMessage('Description is required'),
-  body('price').isNumeric().withMessage('Price must be a number'),
-  body('category').isMongoId().withMessage('Valid category ID is required'),
-  body('stockQuantity').isInt({ min: 0 }).withMessage('Stock quantity must be a non-negative integer'),
-  body('weight.value').isNumeric().withMessage('Weight value must be a number'),
-  body('weight.unit').notEmpty().withMessage('Weight unit is required')
-], logAdminAction('CREATE_PRODUCT'), async (req, res) => {
+  productImageUpload.array('images', 10), // Allow up to 10 images
+  optimizeImage,
+  createThumbnails,
+  [
+    body('name').notEmpty().withMessage('Product name is required'),
+    body('description').notEmpty().withMessage('Description is required'),
+    body('price').isNumeric().withMessage('Price must be a number'),
+    body('category').isMongoId().withMessage('Valid category ID is required'),
+    body('stockQuantity').isInt({ min: 0 }).withMessage('Stock quantity must be a non-negative integer'),
+    body('weight.value').isNumeric().withMessage('Weight value must be a number'),
+    body('weight.unit').notEmpty().withMessage('Weight unit is required')
+  ],
+  logAdminAction('CREATE_PRODUCT'),
+  async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -159,12 +174,51 @@ router.post('/', [
     // Check if slug already exists
     const existingProduct = await Product.findOne({ slug });
     if (existingProduct) {
+      // Clean up uploaded files if product creation fails
+      if (req.files && req.files.length > 0) {
+        deleteUploadedFiles(req.files);
+      }
       return res.status(400).json({
         success: false,
         message: 'Product with this name already exists'
       });
     }
-    
+
+    // Process uploaded images
+    let processedImages = [];
+
+    // Handle uploaded files
+    if (req.files && req.files.length > 0) {
+      processedImages = req.files.map((file, index) => ({
+        url: getFileUrl(file),
+        alt: `${name} - Image ${index + 1}`,
+        isPrimary: index === 0, // First image is primary
+        filename: file.filename,
+        originalName: file.originalname,
+        mimeType: file.mimetype,
+        size: file.size,
+        thumbnail: file.thumbnail ? {
+          url: file.thumbnail.url,
+          filename: file.thumbnail.filename
+        } : undefined
+      }));
+    }
+
+    // Handle images from request body (URLs)
+    if (images && Array.isArray(images)) {
+      const urlImages = images.filter(img => img.url).map((img, index) => ({
+        url: img.url,
+        alt: img.alt || `${name} - Image ${processedImages.length + index + 1}`,
+        isPrimary: processedImages.length === 0 && index === 0 // Primary if no uploaded files
+      }));
+      processedImages = [...processedImages, ...urlImages];
+    }
+
+    // Ensure at least one image is marked as primary
+    if (processedImages.length > 0 && !processedImages.some(img => img.isPrimary)) {
+      processedImages[0].isPrimary = true;
+    }
+
     const product = new Product({
       name,
       slug,
@@ -173,7 +227,7 @@ router.post('/', [
       price,
       originalPrice,
       category,
-      images: images || [],
+      images: processedImages,
       stockQuantity,
       weight,
       origin,
@@ -196,9 +250,16 @@ router.post('/', [
     });
   } catch (error) {
     console.error('Create product error:', error);
+
+    // Clean up uploaded files if product creation fails
+    if (req.files && req.files.length > 0) {
+      deleteUploadedFiles(req.files);
+    }
+
     res.status(500).json({
       success: false,
-      message: 'Error creating product'
+      message: 'Error creating product',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
@@ -312,26 +373,26 @@ router.put('/:id/stock', [
         errors: errors.array()
       });
     }
-    
+
     const { stockQuantity } = req.body;
-    
+
     const product = await Product.findById(req.params.id);
-    
+
     if (!product) {
       return res.status(404).json({
         success: false,
         message: 'Product not found'
       });
     }
-    
+
     const oldStock = product.stockQuantity;
     product.stockQuantity = stockQuantity;
     await product.save();
-    
+
     res.json({
       success: true,
       message: 'Stock updated successfully',
-      data: { 
+      data: {
         product: {
           id: product._id,
           name: product.name,
@@ -348,5 +409,201 @@ router.put('/:id/stock', [
     });
   }
 });
+
+// @route   PATCH /api/admin/products/:id/feature
+// @desc    Toggle product featured status
+// @access  Private (Admin)
+router.patch('/:id/feature', adminAuth, logAdminAction('TOGGLE_PRODUCT_FEATURED'), async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+    }
+
+    // Toggle the isFeatured status
+    product.isFeatured = !product.isFeatured;
+    await product.save();
+    await product.populate('category', 'name');
+
+    res.json({
+      success: true,
+      message: `Product ${product.isFeatured ? 'added to' : 'removed from'} homepage successfully`,
+      data: {
+        product: {
+          id: product._id,
+          name: product.name,
+          isFeatured: product.isFeatured
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Toggle featured product error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error toggling product featured status'
+    });
+  }
+});
+
+// @route   POST /api/admin/products/:id/images
+// @desc    Add images to existing product
+// @access  Private (Admin)
+router.post('/:id/images',
+  adminAuth,
+  productImageUpload.array('images', 10),
+  optimizeImage,
+  createThumbnails,
+  logAdminAction('ADD_PRODUCT_IMAGES'),
+  async (req, res) => {
+    try {
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'No images uploaded'
+        });
+      }
+
+      const product = await Product.findById(req.params.id);
+      if (!product) {
+        deleteUploadedFiles(req.files);
+        return res.status(404).json({
+          success: false,
+          message: 'Product not found'
+        });
+      }
+
+      // Process uploaded images
+      const newImages = req.files.map((file, index) => ({
+        url: getFileUrl(file),
+        alt: `${product.name} - Image ${product.images.length + index + 1}`,
+        isPrimary: product.images.length === 0 && index === 0, // First image is primary if no existing images
+        filename: file.filename,
+        originalName: file.originalname,
+        mimeType: file.mimetype,
+        size: file.size,
+        thumbnail: file.thumbnail ? {
+          url: file.thumbnail.url,
+          filename: file.thumbnail.filename
+        } : undefined
+      }));
+
+      // Add new images to product
+      product.images.push(...newImages);
+      await product.save();
+
+      res.json({
+        success: true,
+        message: 'Images added successfully',
+        data: {
+          product: await product.populate('category', 'name'),
+          addedImages: newImages
+        }
+      });
+    } catch (error) {
+      console.error('Add product images error:', error);
+
+      if (req.files && req.files.length > 0) {
+        deleteUploadedFiles(req.files);
+      }
+
+      res.status(500).json({
+        success: false,
+        message: 'Error adding images to product'
+      });
+    }
+  }
+);
+
+// @route   DELETE /api/admin/products/:id/images/:imageId
+// @desc    Remove image from product
+// @access  Private (Admin)
+router.delete('/:id/images/:imageId',
+  adminAuth,
+  logAdminAction('REMOVE_PRODUCT_IMAGE'),
+  async (req, res) => {
+    try {
+      const product = await Product.findById(req.params.id);
+      if (!product) {
+        return res.status(404).json({
+          success: false,
+          message: 'Product not found'
+        });
+      }
+
+      const imageIndex = product.images.findIndex(img => img._id.toString() === req.params.imageId);
+      if (imageIndex === -1) {
+        return res.status(404).json({
+          success: false,
+          message: 'Image not found'
+        });
+      }
+
+      const removedImage = product.images[imageIndex];
+
+      // Remove image from filesystem if it's a local file
+      if (removedImage.filename) {
+        deleteUploadedFiles([{
+          path: path.join(__dirname, '../../uploads/products', removedImage.filename),
+          thumbnail: removedImage.thumbnail
+        }]);
+      }
+
+      // Remove image from product
+      await product.removeImage(req.params.imageId);
+
+      res.json({
+        success: true,
+        message: 'Image removed successfully',
+        data: { product: await product.populate('category', 'name') }
+      });
+    } catch (error) {
+      console.error('Remove product image error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error removing image from product'
+      });
+    }
+  }
+);
+
+// @route   PUT /api/admin/products/:id/images/:imageId/primary
+// @desc    Set image as primary
+// @access  Private (Admin)
+router.put('/:id/images/:imageId/primary',
+  adminAuth,
+  logAdminAction('SET_PRIMARY_IMAGE'),
+  async (req, res) => {
+    try {
+      const product = await Product.findById(req.params.id);
+      if (!product) {
+        return res.status(404).json({
+          success: false,
+          message: 'Product not found'
+        });
+      }
+
+      await product.setPrimaryImage(req.params.imageId);
+
+      res.json({
+        success: true,
+        message: 'Primary image updated successfully',
+        data: { product: await product.populate('category', 'name') }
+      });
+    } catch (error) {
+      console.error('Set primary image error:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Error setting primary image'
+      });
+    }
+  }
+);
+
+// Error handling middleware for image uploads
+router.use(handleUploadError);
 
 module.exports = router;

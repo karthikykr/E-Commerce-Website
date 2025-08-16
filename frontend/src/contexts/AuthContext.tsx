@@ -79,21 +79,56 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string, role: 'admin' | 'user' = 'user'): Promise<boolean> => {
     setIsLoading(true);
 
+    // First, test backend connectivity
     try {
-      const response = await fetch('http://localhost:5001/api/auth/login', {
+      console.log('🔍 Testing backend connectivity...');
+      const healthResponse = await fetch('http://localhost:5000/api/health');
+      console.log('🏥 Health check status:', healthResponse.status);
+      if (healthResponse.ok) {
+        const healthData = await healthResponse.json();
+        console.log('✅ Backend is accessible:', healthData);
+      } else {
+        console.warn('⚠️ Backend health check failed');
+      }
+    } catch (healthError) {
+      console.error('❌ Backend connectivity test failed:', healthError);
+    }
+
+    try {
+      console.log('🔄 Attempting login with:', { email, password: password.substring(0, 3) + '***', role });
+
+      const requestBody = {
+        email,
+        password
+      };
+      console.log('📤 Request body:', { ...requestBody, password: password.substring(0, 3) + '***' });
+
+      const response = await fetch(`http://localhost:5000/api/auth/login?t=${Date.now()}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache',
         },
-        body: JSON.stringify({
-          email,
-          password
-        }),
+        body: JSON.stringify(requestBody),
       });
 
-      const data = await response.json();
+      console.log('📡 Login response status:', response.status);
+      console.log('📡 Login response ok:', response.ok);
+      console.log('📡 Login response headers:', Object.fromEntries(response.headers.entries()));
+
+      let data;
+      try {
+        data = await response.json();
+        console.log('📄 Login response data:', data);
+      } catch (parseError) {
+        console.error('❌ Failed to parse response as JSON:', parseError);
+        console.log('📄 Raw response text:', await response.text());
+        return false;
+      }
 
       if (response.ok && data.success) {
+        console.log('✅ Login successful, processing user data...');
+
         const userData: User = {
           id: data.data.user._id || data.data.user.id,
           email: data.data.user.email || data.data.user.mobile || data.data.user.adminId,
@@ -112,9 +147,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('token', data.data.token);
         localStorage.setItem('user', JSON.stringify(userData));
 
+        // Redirect based on user role
+        setTimeout(() => {
+          if (userData.role === 'admin') {
+            window.location.href = '/admin/dashboard';
+          } else {
+            window.location.href = '/';
+          }
+        }, 100);
+
         return true;
       } else {
-        console.error('Login failed:', data.message);
+        console.error('❌ Login failed');
+        console.error('Response ok:', response.ok);
+        console.error('Data success:', data.success);
+        console.error('Error message:', data.message);
+        console.error('Full response data:', data);
         return false;
       }
     } catch (error) {
@@ -129,7 +177,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     
     try {
-      const response = await fetch('http://localhost:5001/api/auth/register', {
+      const response = await fetch('http://localhost:5000/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

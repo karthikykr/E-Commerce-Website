@@ -3,8 +3,112 @@ const { body, validationResult, query } = require('express-validator');
 const { Product, Category } = require('../models');
 const auth = require('../middleware/auth');
 const { adminAuth } = require('../middleware/adminAuth');
+const mongoose = require('mongoose');
 
 const router = express.Router();
+
+// Sample data for when MongoDB is not connected
+const sampleProducts = [
+  {
+    _id: '1',
+    name: 'Premium Turmeric Powder',
+    slug: 'premium-turmeric-powder',
+    description: 'High-quality turmeric powder with rich color and aroma. Perfect for cooking and health benefits.',
+    shortDescription: 'Premium quality turmeric powder',
+    price: 299,
+    originalPrice: 399,
+    category: { _id: '1', name: 'Spices & Seasonings', slug: 'spices-seasonings' },
+    images: [{ url: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=400', alt: 'Premium Turmeric Powder', isPrimary: true }],
+    inStock: true,
+    stockQuantity: 100,
+    weight: { value: 250, unit: 'g' },
+    origin: 'India',
+    tags: ['turmeric', 'spice', 'healthy', 'organic'],
+    rating: 4.8,
+    reviewCount: 124,
+    isFeatured: true,
+    isActive: true,
+    discountPercentage: 25,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    _id: '2',
+    name: 'Garam Masala Blend',
+    slug: 'garam-masala-blend',
+    description: 'Traditional Indian spice blend with perfect balance of warmth and flavor.',
+    shortDescription: 'Authentic garam masala blend',
+    price: 199,
+    originalPrice: 249,
+    category: { _id: '3', name: 'Masala Blends', slug: 'masala-blends' },
+    images: [{ url: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400', alt: 'Garam Masala Blend', isPrimary: true }],
+    inStock: true,
+    stockQuantity: 75,
+    weight: { value: 100, unit: 'g' },
+    origin: 'India',
+    tags: ['garam-masala', 'blend', 'indian', 'traditional'],
+    rating: 4.6,
+    reviewCount: 89,
+    isFeatured: true,
+    isActive: true,
+    discountPercentage: 20,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    _id: '3',
+    name: 'Organic Cardamom Pods',
+    slug: 'organic-cardamom-pods',
+    description: 'Premium organic green cardamom pods with intense aroma and flavor.',
+    shortDescription: 'Organic green cardamom pods',
+    price: 899,
+    originalPrice: 999,
+    category: { _id: '4', name: 'Organic Collection', slug: 'organic-collection' },
+    images: [{ url: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=400', alt: 'Organic Cardamom Pods', isPrimary: true }],
+    inStock: true,
+    stockQuantity: 50,
+    weight: { value: 50, unit: 'g' },
+    origin: 'Kerala, India',
+    tags: ['cardamom', 'organic', 'premium', 'aromatic'],
+    rating: 4.9,
+    reviewCount: 67,
+    isFeatured: false,
+    isActive: true,
+    discountPercentage: 10,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    _id: '4',
+    name: 'Red Chili Powder',
+    slug: 'red-chili-powder',
+    description: 'Spicy red chili powder made from premium quality chilies.',
+    shortDescription: 'Premium red chili powder',
+    price: 179,
+    originalPrice: 199,
+    category: { _id: '1', name: 'Spices & Seasonings', slug: 'spices-seasonings' },
+    images: [{ url: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400', alt: 'Red Chili Powder', isPrimary: true }],
+    inStock: true,
+    stockQuantity: 80,
+    weight: { value: 200, unit: 'g' },
+    origin: 'Rajasthan, India',
+    tags: ['chili', 'spicy', 'red', 'powder'],
+    rating: 4.5,
+    reviewCount: 92,
+    isFeatured: true,
+    isActive: true,
+    discountPercentage: 10,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  }
+];
+
+const sampleCategories = [
+  { _id: '1', name: 'Spices & Seasonings', slug: 'spices-seasonings', description: 'Premium quality spices and seasonings', isActive: true, featured: true },
+  { _id: '2', name: 'Herbs & Aromatics', slug: 'herbs-aromatics', description: 'Fresh and dried herbs for cooking', isActive: true, featured: true },
+  { _id: '3', name: 'Masala Blends', slug: 'masala-blends', description: 'Traditional and modern spice blends', isActive: true, featured: true },
+  { _id: '4', name: 'Organic Collection', slug: 'organic-collection', description: 'Certified organic spices and herbs', isActive: true, featured: false }
+];
 
 // @route   GET /api/products
 // @desc    Get all products with filtering, sorting, and pagination
@@ -26,6 +130,59 @@ router.get('/', [
         success: false,
         message: 'Validation errors',
         errors: errors.array()
+      });
+    }
+
+    // Check if MongoDB is connected
+    if (mongoose.connection.readyState !== 1) {
+      // Use sample data when MongoDB is not connected
+      console.log('⚠️  MongoDB not connected, using sample data');
+
+      const {
+        page = 1,
+        limit = 12,
+        search,
+        category,
+        featured
+      } = req.query;
+
+      let filteredProducts = [...sampleProducts];
+
+      // Apply filters to sample data
+      if (search) {
+        const searchLower = search.toLowerCase();
+        filteredProducts = filteredProducts.filter(product =>
+          product.name.toLowerCase().includes(searchLower) ||
+          product.description.toLowerCase().includes(searchLower) ||
+          product.tags.some(tag => tag.toLowerCase().includes(searchLower))
+        );
+      }
+
+      if (category) {
+        filteredProducts = filteredProducts.filter(product => product.category._id === category);
+      }
+
+      if (featured !== undefined) {
+        filteredProducts = filteredProducts.filter(product => product.isFeatured === (featured === 'true'));
+      }
+
+      // Simple pagination for sample data
+      const skip = (parseInt(page) - 1) * parseInt(limit);
+      const paginatedProducts = filteredProducts.slice(skip, skip + parseInt(limit));
+
+      return res.json({
+        success: true,
+        message: 'Products retrieved successfully (sample data)',
+        data: {
+          products: paginatedProducts,
+          pagination: {
+            currentPage: parseInt(page),
+            totalPages: Math.ceil(filteredProducts.length / parseInt(limit)),
+            totalProducts: filteredProducts.length,
+            hasNextPage: skip + parseInt(limit) < filteredProducts.length,
+            hasPrevPage: parseInt(page) > 1
+          }
+        }
       });
     }
 
@@ -242,8 +399,8 @@ router.post('/', [
   body('price').isFloat({ min: 0 }).withMessage('Price must be a positive number'),
   body('category').isMongoId().withMessage('Valid category ID is required'),
   body('stockQuantity').isInt({ min: 0 }).withMessage('Stock quantity must be non-negative'),
-  body('weight.value').isFloat({ min: 0 }).withMessage('Weight value must be positive'),
-  body('weight.unit').isIn(['g', 'kg', 'oz', 'lb']).withMessage('Invalid weight unit')
+  body('weight.value').optional().isFloat({ min: 0 }).withMessage('Weight value must be positive'),
+  body('weight.unit').optional().isIn(['g', 'kg', 'ml', 'l', 'oz', 'lb']).withMessage('Invalid weight unit')
 ], async (req, res) => {
   try {
     const errors = validationResult(req);

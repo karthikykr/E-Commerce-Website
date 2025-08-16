@@ -217,12 +217,22 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    // Try to get productId from query parameter first, then from body
     const { searchParams } = new URL(request.url);
-    const productId = searchParams.get('productId');
+    let productId = searchParams.get('productId');
+
+    if (!productId) {
+      try {
+        const body = await request.json();
+        productId = body.productId;
+      } catch (error) {
+        // If no body, that's okay, we already tried query params
+      }
+    }
 
     if (!productId) {
       return NextResponse.json(
-        { success: false, message: 'Product ID is required' },
+        { success: false, message: 'Product ID is required in query parameter or request body' },
         { status: 400 }
       );
     }
@@ -244,9 +254,21 @@ export async function DELETE(request: NextRequest) {
 
     userCarts[user.userId].splice(itemIndex, 1);
 
+    // Calculate totals
+    const items = userCarts[user.userId];
+    const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+    const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
     return NextResponse.json({
       success: true,
-      message: 'Item removed from cart successfully'
+      message: 'Item removed from cart successfully',
+      data: {
+        cart: {
+          items,
+          totalItems,
+          totalAmount
+        }
+      }
     });
   } catch (error) {
     console.error('Remove from cart error:', error);

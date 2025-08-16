@@ -107,8 +107,7 @@ const couponSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Indexes for better performance
-couponSchema.index({ code: 1 });
+// Indexes for better performance (code already has unique index)
 couponSchema.index({ isActive: 1, validFrom: 1, validUntil: 1 });
 couponSchema.index({ createdBy: 1 });
 
