@@ -9,6 +9,8 @@ const connectDB = require('./config/database');
 // Load environment variables
 dotenv.config();
 
+const authRoutes= require('./routes/authRoutes');
+
 // Connect to MongoDB (with error handling)
 if (process.env.MONGODB_URI) {
   connectDB().catch(err => {
@@ -35,8 +37,10 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 // Serve static files (uploaded images)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+app.use('/api/auth', authRoutes);
+
 // Routes
-app.use('/api/auth', require('./routes/auth'));
+// app.use('/api/auth', require('./routes/auth'));
 app.use('/api/products', require('./routes/products'));
 app.use('/api/categories', require('./routes/categories'));
 app.use('/api/orders', require('./routes/orders'));
