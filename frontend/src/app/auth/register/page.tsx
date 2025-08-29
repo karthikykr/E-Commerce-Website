@@ -105,7 +105,7 @@ export default function RegisterPage() {
       if (success) {
         // Show success message briefly, then AuthContext will handle the redirect
         setErrors({ general: '' });
-        setLoading(false);
+        setIsLoading(false);
         // AuthContext login function will handle the redirect automatically
         // No need to manually redirect here
       } else {

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const connectDB = async () => {
   try {
@@ -6,7 +6,7 @@ const connectDB = async () => {
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
     console.log(`📊 Database: ${conn.connection.name}`);
   } catch (error) {
-    console.error('❌ Error connecting to MongoDB:', error.message);
+    console.error("❌ Error connecting to MongoDB:", error.message);
     throw error; // Don't exit, let the caller handle it
   }
 };

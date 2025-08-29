@@ -1,5 +1,5 @@
-const jwt = require('jsonwebtoken');
-const { User } = require('../models');
+const jwt = require("jsonwebtoken");
+const { User } = require("../models");
 
 /**
  * Admin Authentication Middleware
@@ -8,49 +8,53 @@ const { User } = require('../models');
 const adminAuth = async (req, res, next) => {
   try {
     // Get token from header
-    const token = req.header('Authorization')?.replace('Bearer ', '') ||
-                  req.header('x-auth-token') ||
-                  req.cookies?.token;
+    const token =
+      req.header("Authorization")?.replace("Bearer ", "") ||
+      req.header("x-auth-token") ||
+      req.cookies?.token;
 
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: 'Access denied. No token provided.'
+        message: "Access denied. No token provided.",
       });
     }
 
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "your-secret-key",
+    );
 
     let user;
 
     // Handle hardcoded admin users
-    if (decoded.id === 'admin-hardcoded-id') {
+    if (decoded.id === "admin-hardcoded-id") {
       user = {
-        _id: 'admin-hardcoded-id',
-        name: 'Admin User',
-        email: 'admin@123.com',
-        role: 'admin',
+        _id: "admin-hardcoded-id",
+        name: "Admin User",
+        email: "admin@123.com",
+        role: "admin",
         isActive: true,
-        authMethod: 'email'
+        authMethod: "email",
       };
-    } else if (decoded.id === 'admin-kaushik-id') {
+    } else if (decoded.id === "admin-kaushik-id") {
       user = {
-        _id: 'admin-kaushik-id',
-        name: 'Kaushik B Shetty',
-        email: 'kaushikbshetty1@gmail.com',
-        role: 'admin',
+        _id: "admin-kaushik-id",
+        name: "Kaushik B Shetty",
+        email: "kaushikbshetty1@gmail.com",
+        role: "admin",
         isActive: true,
-        authMethod: 'email'
+        authMethod: "email",
       };
     } else {
       // Get user from database for regular users
-      user = await User.findById(decoded.id).select('-password');
+      user = await User.findById(decoded.id).select("-password");
 
       if (!user) {
         return res.status(401).json({
           success: false,
-          message: 'Invalid token. User not found.'
+          message: "Invalid token. User not found.",
         });
       }
 
@@ -58,16 +62,16 @@ const adminAuth = async (req, res, next) => {
       if (!user.isActive) {
         return res.status(401).json({
           success: false,
-          message: 'Account is deactivated.'
+          message: "Account is deactivated.",
         });
       }
     }
 
     // Check if user has admin role
-    if (user.role !== 'admin') {
+    if (user.role !== "admin") {
       return res.status(403).json({
         success: false,
-        message: 'Access denied. Admin privileges required.'
+        message: "Access denied. Admin privileges required.",
       });
     }
 
@@ -75,25 +79,25 @@ const adminAuth = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    console.error('Admin auth middleware error:', error);
+    console.error("Admin auth middleware error:", error);
 
-    if (error.name === 'JsonWebTokenError') {
+    if (error.name === "JsonWebTokenError") {
       return res.status(401).json({
         success: false,
-        message: 'Invalid token.'
+        message: "Invalid token.",
       });
     }
 
-    if (error.name === 'TokenExpiredError') {
+    if (error.name === "TokenExpiredError") {
       return res.status(401).json({
         success: false,
-        message: 'Token expired.'
+        message: "Token expired.",
       });
     }
 
     res.status(500).json({
       success: false,
-      message: 'Server error in authentication.'
+      message: "Server error in authentication.",
     });
   }
 };
@@ -105,9 +109,11 @@ const logAdminAction = (action) => {
   return (req, res, next) => {
     const originalSend = res.send;
 
-    res.send = function(data) {
+    res.send = function (data) {
       // Log the action
-      console.log(`[ADMIN ACTION] ${new Date().toISOString()} - User: ${req.user?.email} - Action: ${action} - IP: ${req.ip} - Status: ${res.statusCode}`);
+      console.log(
+        `[ADMIN ACTION] ${new Date().toISOString()} - User: ${req.user?.email} - Action: ${action} - IP: ${req.ip} - Status: ${res.statusCode}`,
+      );
 
       // Call original send
       originalSend.call(this, data);
@@ -119,5 +125,5 @@ const logAdminAction = (action) => {
 
 module.exports = {
   adminAuth,
-  logAdminAction
+  logAdminAction,
 };

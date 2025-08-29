@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
+import axios from 'axios';
 import { User } from '@/types';
 
 interface AuthContextType {
@@ -82,11 +83,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // First, test backend connectivity
     try {
       console.log('🔍 Testing backend connectivity...');
-      const healthResponse = await fetch('http://localhost:5000/api/health');
+      const healthResponse = await axios.get('http://localhost:5000/api/health');
       console.log('🏥 Health check status:', healthResponse.status);
-      if (healthResponse.ok) {
-        const healthData = await healthResponse.json();
-        console.log('✅ Backend is accessible:', healthData);
+      if (healthResponse.status === 200) {
+        console.log('✅ Backend is accessible:', healthResponse.data);
       } else {
         console.warn('⚠️ Backend health check failed');
       }
@@ -103,30 +103,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
       console.log('📤 Request body:', { ...requestBody, password: password.substring(0, 3) + '***' });
 
-      const response = await fetch(`http://localhost:5000/api/auth/login?t=${Date.now()}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache',
-        },
-        body: JSON.stringify(requestBody),
-      });
+      const response = await axios.post(
+        `http://localhost:5000/api/auth/login?t=${Date.now()}`,
+        requestBody,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache',
+          },
+        }
+      );
 
-      console.log('📡 Login response status:', response.status);
-      console.log('📡 Login response ok:', response.ok);
-      console.log('📡 Login response headers:', Object.fromEntries(response.headers.entries()));
+      const data = response.data;
+      console.log('📄 Login response data:', data);
 
-      let data;
-      try {
-        data = await response.json();
-        console.log('📄 Login response data:', data);
-      } catch (parseError) {
-        console.error('❌ Failed to parse response as JSON:', parseError);
-        console.log('📄 Raw response text:', await response.text());
-        return false;
-      }
-
-      if (response.ok && data.success) {
+      if (response.status === 200 && data.success) {
         console.log('✅ Login successful, processing user data...');
 
         const userData: User = {
@@ -159,43 +150,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return true;
       } else {
         console.error('❌ Login failed');
-        console.error('Response ok:', response.ok);
+        console.error('Response status:', response.status);
         console.error('Data success:', data.success);
         console.error('Error message:', data.message);
         console.error('Full response data:', data);
         return false;
       }
-    } catch (error) {
-      console.error('Login error:', error);
+    } catch (error: any) {
+      console.error('Login error:', error.response?.data || error.message);
       return false;
     } finally {
       setIsLoading(false);
     }
   };
 
+
+
+  //register
+
   const register = async (userData: RegisterData): Promise<boolean> => {
     setIsLoading(true);
     
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
-      });
+      const response = await axios.post(
+        'http://localhost:5000/api/auth/register',
+        userData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
-      const data = await response.json();
+      const data = response.data;
 
-      if (response.ok && data.success) {
+      if (response) {
         // Auto-login after successful registration
         return await login(userData.email, userData.password, 'user');
       } else {
         console.error('Registration failed:', data.message);
         return false;
       }
-    } catch (error) {
-      console.error('Registration error:', error);
+    } catch (error: any) {
+      console.error('Registration error:', error.response?.data || error.message);
       return false;
     } finally {
       setIsLoading(false);

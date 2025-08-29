@@ -1,7 +1,7 @@
-const User = require('../models/User');
-const { generateToken } = require('../helpers/tokenHelper');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
+const User = require("../models/User");
+const { generateToken } = require("../helpers/tokenHelper");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 
 // Login Controller
 exports.login = async (req, res) => {
@@ -34,16 +34,20 @@ exports.login = async (req, res) => {
     // }
 
     // Handle regular user login
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email }).select("+password");
 
     if (!user) {
-      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid credentials" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid credentials" });
     }
 
     // Update last login
@@ -55,7 +59,7 @@ exports.login = async (req, res) => {
 
     return res.json({
       success: true,
-      message: 'Login successful',
+      message: "Login successful",
       data: {
         user: {
           id: user._id,
@@ -69,29 +73,26 @@ exports.login = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Login error:', error);
+    console.error("Login error:", error);
     return res.status(500).json({
       success: false,
-      message: 'Server error during login',
+      message: "Server error during login",
     });
   }
 };
-
-
-
 
 //Register
 
 exports.register = async (req, res) => {
   try {
-    const { firstName, lastName, email, password, phone, address } = req.body;
-
+    const { name, email, password } = req.body;
+    const role = req.body.role ? req.body.role : "user";
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: 'User already exists with this email address',
+        message: "User already exists with this email address",
       });
     }
 
@@ -100,51 +101,35 @@ exports.register = async (req, res) => {
 
     // Create new user
     const userData = {
-      name: `${firstName} ${lastName}`,
+      name,
       email,
       password: hashedPassword,
-      authMethod: 'email',
-      role: 'user',
-      phone,
+      role,
     };
-
-    // Add address if provided
-    if (address && address.street) {
-      userData.address = {
-        street: address.street,
-        city: address.city,
-        state: address.state,
-        zipCode: address.zipCode,
-        country: address.country || 'India',
-      };
-    }
 
     const user = await new User(userData).save();
 
-
     // Generate JWT token
-   const token = generateToken(user._id, user.role);
+    const token = generateToken(user._id, user.role);
 
     res.status(201).json({
       success: true,
-      message: 'User registered successfully',
+      message: "User registered successfully",
       data: {
         user: {
           id: user._id,
           name: user.name,
           email: user.email,
-          phone: user.phone,
-          address: user.address,
           role: user.role,
         },
         token,
       },
     });
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error("Registration error:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error during registration',
+      message: "Server error during registration",
     });
   }
 };
