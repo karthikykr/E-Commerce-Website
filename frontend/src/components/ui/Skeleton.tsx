@@ -27,7 +27,8 @@ export const Skeleton: React.FC<SkeletonProps> = ({
 
   const style: React.CSSProperties = {};
   if (width) style.width = typeof width === 'number' ? `${width}px` : width;
-  if (height) style.height = typeof height === 'number' ? `${height}px` : height;
+  if (height)
+    style.height = typeof height === 'number' ? `${height}px` : height;
 
   return (
     <div
@@ -59,7 +60,9 @@ export const ProductCardSkeleton: React.FC = () => {
 };
 
 // Product Grid Skeleton
-export const ProductGridSkeleton: React.FC<{ count?: number }> = ({ count = 8 }) => {
+export const ProductGridSkeleton: React.FC<{ count?: number }> = ({
+  count = 8,
+}) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {Array.from({ length: count }).map((_, index) => (
@@ -129,7 +132,9 @@ export const ProfileSkeleton: React.FC = () => {
 };
 
 // Order History Skeleton
-export const OrderHistorySkeleton: React.FC<{ count?: number }> = ({ count = 3 }) => {
+export const OrderHistorySkeleton: React.FC<{ count?: number }> = ({
+  count = 3,
+}) => {
   return (
     <div className="space-y-4">
       {Array.from({ length: count }).map((_, index) => (

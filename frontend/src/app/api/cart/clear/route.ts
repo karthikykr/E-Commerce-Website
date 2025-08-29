@@ -25,9 +25,9 @@ export async function DELETE(request: NextRequest) {
         cart: {
           items: [],
           totalItems: 0,
-          totalAmount: 0
-        }
-      }
+          totalAmount: 0,
+        },
+      },
     });
   } catch (error) {
     console.error('Clear cart error:', error);

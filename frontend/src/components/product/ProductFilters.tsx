@@ -53,22 +53,22 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
 
   const handleCategoryToggle = (categoryId: string) => {
     const newCategories = filters.categories.includes(categoryId)
-      ? filters.categories.filter(id => id !== categoryId)
+      ? filters.categories.filter((id) => id !== categoryId)
       : [...filters.categories, categoryId];
     updateFilter('categories', newCategories);
   };
 
   const handleTagToggle = (tag: string) => {
     const newTags = filters.tags.includes(tag)
-      ? filters.tags.filter(t => t !== tag)
+      ? filters.tags.filter((t) => t !== tag)
       : [...filters.tags, tag];
     updateFilter('tags', newTags);
   };
 
-  const activeFiltersCount = 
-    filters.categories.length + 
-    filters.tags.length + 
-    (filters.rating > 0 ? 1 : 0) + 
+  const activeFiltersCount =
+    filters.categories.length +
+    filters.tags.length +
+    (filters.rating > 0 ? 1 : 0) +
     (filters.inStock ? 1 : 0) +
     (filters.priceRange[0] > 0 || filters.priceRange[1] < 1000 ? 1 : 0);
 
@@ -76,7 +76,9 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
     <Card variant="elevated" className="sticky top-20 sm:top-24">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <h3 className="text-base sm:text-lg font-semibold text-gray-900">Filters</h3>
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+            Filters
+          </h3>
           <div className="flex items-center space-x-2">
             {activeFiltersCount > 0 && (
               <span className="bg-orange-100 text-orange-800 text-xs font-medium px-2 py-1 rounded-full">
@@ -95,7 +97,9 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
         </div>
       </CardHeader>
 
-      <CardBody className={`space-y-4 sm:space-y-6 ${isExpanded ? 'block' : 'hidden lg:block'}`}>
+      <CardBody
+        className={`space-y-4 sm:space-y-6 ${isExpanded ? 'block' : 'hidden lg:block'}`}
+      >
         {/* Sort Options */}
         <div>
           <h4 className="font-medium text-gray-900 mb-3">Sort By</h4>
@@ -103,7 +107,10 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
             <select
               value={`${filters.sortBy}-${filters.sortOrder}`}
               onChange={(e) => {
-                const [sortBy, sortOrder] = e.target.value.split('-') as [typeof filters.sortBy, typeof filters.sortOrder];
+                const [sortBy, sortOrder] = e.target.value.split('-') as [
+                  typeof filters.sortBy,
+                  typeof filters.sortOrder,
+                ];
                 updateFilter('sortBy', sortBy);
                 updateFilter('sortOrder', sortOrder);
               }}
@@ -128,7 +135,12 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
                 type="number"
                 placeholder="Min"
                 value={filters.priceRange[0]}
-                onChange={(e) => updateFilter('priceRange', [Number(e.target.value), filters.priceRange[1]])}
+                onChange={(e) =>
+                  updateFilter('priceRange', [
+                    Number(e.target.value),
+                    filters.priceRange[1],
+                  ])
+                }
                 inputSize="sm"
                 className="flex-1"
               />
@@ -137,7 +149,12 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
                 type="number"
                 placeholder="Max"
                 value={filters.priceRange[1]}
-                onChange={(e) => updateFilter('priceRange', [filters.priceRange[0], Number(e.target.value)])}
+                onChange={(e) =>
+                  updateFilter('priceRange', [
+                    filters.priceRange[0],
+                    Number(e.target.value),
+                  ])
+                }
                 inputSize="sm"
                 className="flex-1"
               />
@@ -153,7 +170,10 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
           <h4 className="font-medium text-gray-900 mb-3">Categories</h4>
           <div className="space-y-2 max-h-40 overflow-y-auto">
             {availableCategories.map((category) => (
-              <label key={category._id} className="flex items-center space-x-2 cursor-pointer">
+              <label
+                key={category._id}
+                className="flex items-center space-x-2 cursor-pointer"
+              >
                 <input
                   type="checkbox"
                   checked={filters.categories.includes(category._id)}
@@ -171,7 +191,10 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
           <h4 className="font-medium text-gray-900 mb-3">Minimum Rating</h4>
           <div className="space-y-2">
             {[4, 3, 2, 1].map((rating) => (
-              <label key={rating} className="flex items-center space-x-2 cursor-pointer">
+              <label
+                key={rating}
+                className="flex items-center space-x-2 cursor-pointer"
+              >
                 <input
                   type="radio"
                   name="rating"
@@ -206,7 +229,9 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
               onChange={(e) => updateFilter('inStock', e.target.checked)}
               className="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
             />
-            <span className="text-sm font-medium text-gray-700">In Stock Only</span>
+            <span className="text-sm font-medium text-gray-700">
+              In Stock Only
+            </span>
           </label>
         </div>
 
@@ -221,9 +246,10 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
                   onClick={() => handleTagToggle(tag)}
                   className={`
                     px-3 py-1 rounded-full text-xs font-medium transition-colors
-                    ${filters.tags.includes(tag)
-                      ? 'bg-orange-100 text-orange-800 border border-orange-300'
-                      : 'bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200'
+                    ${
+                      filters.tags.includes(tag)
+                        ? 'bg-orange-100 text-orange-800 border border-orange-300'
+                        : 'bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200'
                     }
                   `}
                 >

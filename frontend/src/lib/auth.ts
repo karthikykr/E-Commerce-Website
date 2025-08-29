@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_SECRET =
+  process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
 export interface TokenPayload {
   userId: string;
@@ -20,10 +21,10 @@ export function verifyToken(request: NextRequest): TokenPayload | null {
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
-    
+
     // Verify and decode the token
     const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload;
-    
+
     return decoded;
   } catch (error) {
     console.error('Token verification error:', error);
@@ -31,7 +32,9 @@ export function verifyToken(request: NextRequest): TokenPayload | null {
   }
 }
 
-export function generateToken(payload: Omit<TokenPayload, 'iat' | 'exp'>): string {
+export function generateToken(
+  payload: Omit<TokenPayload, 'iat' | 'exp'>
+): string {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
 }
 

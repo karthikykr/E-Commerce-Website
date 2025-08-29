@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_SECRET =
+  process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
 // Mock users database (in production, use a proper database)
-let users = [
+const users = [
   {
     id: '1',
     name: 'Admin User',
@@ -18,7 +19,7 @@ let users = [
       city: 'Admin City',
       state: 'AC',
       zipCode: '12345',
-      country: 'USA'
+      country: 'USA',
     },
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
@@ -35,7 +36,7 @@ let users = [
       city: 'Customer City',
       state: 'CC',
       zipCode: '67890',
-      country: 'USA'
+      country: 'USA',
     },
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
@@ -45,8 +46,10 @@ let users = [
 // Helper function to verify JWT token
 function verifyToken(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
-  const token = authHeader?.replace('Bearer ', '') || request.cookies.get('auth-token')?.value;
-  
+  const token =
+    authHeader?.replace('Bearer ', '') ||
+    request.cookies.get('auth-token')?.value;
+
   if (!token) {
     return null;
   }
@@ -69,7 +72,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const userProfile = users.find(u => u.id === user.userId);
+    const userProfile = users.find((u) => u.id === user.userId);
     if (!userProfile) {
       return NextResponse.json(
         { success: false, message: 'User not found' },
@@ -82,7 +85,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      user: userWithoutPassword
+      user: userWithoutPassword,
     });
   } catch (error) {
     console.error('Get profile error:', error);
@@ -104,9 +107,10 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const { name, phone, address, currentPassword, newPassword } = await request.json();
+    const { name, phone, address, currentPassword, newPassword } =
+      await request.json();
 
-    const userIndex = users.findIndex(u => u.id === user.userId);
+    const userIndex = users.findIndex((u) => u.id === user.userId);
     if (userIndex === -1) {
       return NextResponse.json(
         { success: false, message: 'User not found' },
@@ -118,12 +122,18 @@ export async function PUT(request: NextRequest) {
     if (newPassword) {
       if (!currentPassword) {
         return NextResponse.json(
-          { success: false, message: 'Current password is required to set new password' },
+          {
+            success: false,
+            message: 'Current password is required to set new password',
+          },
           { status: 400 }
         );
       }
 
-      const isValidPassword = await bcrypt.compare(currentPassword, users[userIndex].password);
+      const isValidPassword = await bcrypt.compare(
+        currentPassword,
+        users[userIndex].password
+      );
       if (!isValidPassword) {
         return NextResponse.json(
           { success: false, message: 'Current password is incorrect' },
@@ -133,7 +143,10 @@ export async function PUT(request: NextRequest) {
 
       if (newPassword.length < 6) {
         return NextResponse.json(
-          { success: false, message: 'New password must be at least 6 characters long' },
+          {
+            success: false,
+            message: 'New password must be at least 6 characters long',
+          },
           { status: 400 }
         );
       }
@@ -149,7 +162,7 @@ export async function PUT(request: NextRequest) {
     if (address) {
       users[userIndex].address = {
         ...users[userIndex].address,
-        ...address
+        ...address,
       };
     }
 
@@ -161,7 +174,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Profile updated successfully',
-      user: userWithoutPassword
+      user: userWithoutPassword,
     });
   } catch (error) {
     console.error('Update profile error:', error);
@@ -192,7 +205,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const userIndex = users.findIndex(u => u.id === user.userId);
+    const userIndex = users.findIndex((u) => u.id === user.userId);
     if (userIndex === -1) {
       return NextResponse.json(
         { success: false, message: 'User not found' },
@@ -201,7 +214,10 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Verify password
-    const isValidPassword = await bcrypt.compare(password, users[userIndex].password);
+    const isValidPassword = await bcrypt.compare(
+      password,
+      users[userIndex].password
+    );
     if (!isValidPassword) {
       return NextResponse.json(
         { success: false, message: 'Password is incorrect' },
@@ -214,7 +230,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Account deleted successfully'
+      message: 'Account deleted successfully',
     });
   } catch (error) {
     console.error('Delete account error:', error);

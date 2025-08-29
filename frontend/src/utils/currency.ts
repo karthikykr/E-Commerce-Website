@@ -8,9 +8,12 @@
  * @param inPaise - Whether the amount is in paise (true) or rupees (false)
  * @returns Formatted currency string
  */
-export const formatCurrency = (amount: number, inPaise: boolean = false): string => {
+export const formatCurrency = (
+  amount: number,
+  inPaise: boolean = false
+): string => {
   const rupees = inPaise ? amount / 100 : amount;
-  
+
   // Use Indian number formatting with commas
   const formatter = new Intl.NumberFormat('en-IN', {
     style: 'currency',
@@ -18,7 +21,7 @@ export const formatCurrency = (amount: number, inPaise: boolean = false): string
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   });
-  
+
   return formatter.format(rupees);
 };
 
@@ -28,14 +31,17 @@ export const formatCurrency = (amount: number, inPaise: boolean = false): string
  * @param inPaise - Whether the amount is in paise (true) or rupees (false)
  * @returns Formatted number string with commas
  */
-export const formatCurrencyNumber = (amount: number, inPaise: boolean = false): string => {
+export const formatCurrencyNumber = (
+  amount: number,
+  inPaise: boolean = false
+): string => {
   const rupees = inPaise ? amount / 100 : amount;
-  
+
   const formatter = new Intl.NumberFormat('en-IN', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   });
-  
+
   return formatter.format(rupees);
 };
 
@@ -55,28 +61,33 @@ export const convertUSDToINR = (usdAmount: number): number => {
  * @param originalPrice - Original price in rupees (optional)
  * @returns Object with formatted prices and discount percentage
  */
-export const formatPriceWithDiscount = (price: number, originalPrice?: number) => {
+export const formatPriceWithDiscount = (
+  price: number,
+  originalPrice?: number
+) => {
   const formattedPrice = formatCurrency(price);
-  
+
   if (originalPrice && originalPrice > price) {
-    const discountPercentage = Math.round(((originalPrice - price) / originalPrice) * 100);
+    const discountPercentage = Math.round(
+      ((originalPrice - price) / originalPrice) * 100
+    );
     const formattedOriginalPrice = formatCurrency(originalPrice);
-    
+
     return {
       price: formattedPrice,
       originalPrice: formattedOriginalPrice,
       discountPercentage,
       hasDiscount: true,
-      savings: formatCurrency(originalPrice - price)
+      savings: formatCurrency(originalPrice - price),
     };
   }
-  
+
   return {
     price: formattedPrice,
     originalPrice: null,
     discountPercentage: 0,
     hasDiscount: false,
-    savings: null
+    savings: null,
   };
 };
 
@@ -86,7 +97,10 @@ export const formatPriceWithDiscount = (price: number, originalPrice?: number) =
  * @param taxRate - Tax rate as decimal (default 18% GST)
  * @returns Tax amount in rupees
  */
-export const calculateTax = (amount: number, taxRate: number = 0.18): number => {
+export const calculateTax = (
+  amount: number,
+  taxRate: number = 0.18
+): number => {
   return Math.round(amount * taxRate);
 };
 
@@ -96,7 +110,10 @@ export const calculateTax = (amount: number, taxRate: number = 0.18): number => 
  * @param freeShippingThreshold - Minimum order value for free shipping (default ₹2000)
  * @returns Shipping cost in rupees
  */
-export const calculateShipping = (orderValue: number, freeShippingThreshold: number = 2000): number => {
+export const calculateShipping = (
+  orderValue: number,
+  freeShippingThreshold: number = 2000
+): number => {
   if (orderValue >= freeShippingThreshold) {
     return 0;
   }
@@ -111,14 +128,14 @@ export const calculateShipping = (orderValue: number, freeShippingThreshold: num
  * @returns Complete order summary
  */
 export const formatOrderSummary = (
-  subtotal: number, 
-  taxRate: number = 0.18, 
+  subtotal: number,
+  taxRate: number = 0.18,
   freeShippingThreshold: number = 2000
 ) => {
   const tax = calculateTax(subtotal, taxRate);
   const shipping = calculateShipping(subtotal, freeShippingThreshold);
   const total = subtotal + tax + shipping;
-  
+
   return {
     subtotal: formatCurrency(subtotal),
     subtotalRaw: subtotal,
@@ -129,7 +146,8 @@ export const formatOrderSummary = (
     total: formatCurrency(total),
     totalRaw: total,
     freeShippingEligible: subtotal >= freeShippingThreshold,
-    freeShippingRemaining: subtotal < freeShippingThreshold ? freeShippingThreshold - subtotal : 0
+    freeShippingRemaining:
+      subtotal < freeShippingThreshold ? freeShippingThreshold - subtotal : 0,
   };
 };
 
@@ -143,5 +161,5 @@ export const CURRENCY_CONFIG = {
   locale: 'en-IN',
   freeShippingThreshold: 2000,
   standardShipping: 99,
-  gstRate: 0.18
+  gstRate: 0.18,
 };

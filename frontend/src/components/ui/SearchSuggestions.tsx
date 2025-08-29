@@ -26,24 +26,24 @@ export const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
       const query = searchQuery.toLowerCase();
       const productSuggestions = new Set<string>();
 
-      products.forEach(product => {
+      products.forEach((product) => {
         // Add product names that match
         if (product.name.toLowerCase().includes(query)) {
           productSuggestions.add(product.name);
         }
-        
+
         // Add category names that match
         if (product.category.name.toLowerCase().includes(query)) {
           productSuggestions.add(product.category.name);
         }
-        
+
         // Add tags that match
-        product.tags.forEach(tag => {
+        product.tags.forEach((tag) => {
           if (tag.toLowerCase().includes(query)) {
             productSuggestions.add(tag);
           }
         });
-        
+
         // Add origins that match
         if (product.origin.toLowerCase().includes(query)) {
           productSuggestions.add(product.origin);
@@ -58,7 +58,10 @@ export const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
+      if (
+        suggestionsRef.current &&
+        !suggestionsRef.current.contains(event.target as Node)
+      ) {
         onClose();
       }
     };
@@ -93,8 +96,18 @@ export const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
             onClick={() => handleSuggestionClick(suggestion)}
             className="w-full px-4 py-2 text-left hover:bg-gray-100 transition-colors flex items-center"
           >
-            <svg className="h-4 w-4 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <svg
+              className="h-4 w-4 text-gray-400 mr-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
             <span className="text-gray-900">{suggestion}</span>
           </button>

@@ -46,13 +46,22 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addToCart, isLoading: cartLoading } = useCart();
-  const { addToWishlist, removeFromWishlist, isInWishlist, isLoading: wishlistLoading } = useWishlist();
+  const {
+    addToWishlist,
+    removeFromWishlist,
+    isInWishlist,
+    isLoading: wishlistLoading,
+  } = useWishlist();
   const { showToast } = useToast();
 
-  const priceInfo = formatPriceWithDiscount(product.price, product.originalPrice);
+  const priceInfo = formatPriceWithDiscount(
+    product.price,
+    product.originalPrice
+  );
 
   const productId = product.id || product._id;
-  const primaryImage = product.images?.find(img => img.isPrimary) || product.images?.[0];
+  const primaryImage =
+    product.images?.find((img) => img.isPrimary) || product.images?.[0];
   const weightDisplay = `${product.weight.value}${product.weight.unit}`;
 
   const handleAddToCart = async (e: React.MouseEvent) => {
@@ -100,8 +109,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
-    <ProductCardWrapper featured={product.isFeatured} className="hover-lift animate-fade-in-up">
-      <Link href={`/products/${productId}`} className="block h-full flex flex-col">
+    <ProductCardWrapper
+      featured={product.isFeatured}
+      className="hover-lift animate-fade-in-up"
+    >
+      <Link
+        href={`/products/${productId}`}
+        className="block h-full flex flex-col"
+      >
         {/* Product Image - Consistent aspect ratio */}
         <div className="relative aspect-square overflow-hidden bg-gray-50 flex-shrink-0">
           <ProductImage
@@ -144,7 +159,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             className={`absolute top-2 right-2 sm:top-3 sm:right-3 p-1.5 sm:p-2 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-gray-50 hover:scale-110 ${
               wishlistLoading ? 'cursor-not-allowed' : ''
             }`}
-            aria-label={isInWishlist(productId) ? 'Remove from wishlist' : 'Add to wishlist'}
+            aria-label={
+              isInWishlist(productId)
+                ? 'Remove from wishlist'
+                : 'Add to wishlist'
+            }
           >
             <svg
               className={`h-4 w-4 sm:h-5 sm:w-5 transition-colors ${
@@ -152,11 +171,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   ? 'text-red-500 fill-current'
                   : 'text-gray-600 hover:text-red-500'
               }`}
-              fill={isInWishlist(productId) ? "currentColor" : "none"}
+              fill={isInWishlist(productId) ? 'currentColor' : 'none'}
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+              />
             </svg>
           </button>
         </div>
@@ -192,7 +216,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 <svg
                   key={i}
                   className={`h-3 w-3 sm:h-4 sm:w-4 ${
-                    i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-300'
+                    i < Math.floor(product.rating)
+                      ? 'text-yellow-400'
+                      : 'text-gray-300'
                   }`}
                   fill="currentColor"
                   viewBox="0 0 20 20"
@@ -225,13 +251,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
           {/* Origin & Tags - Reduced margin */}
           <div className="mb-3">
-            <p className="text-xs text-gray-500 mb-1">
-              📍 {product.origin}
-            </p>
+            <p className="text-xs text-gray-500 mb-1">📍 {product.origin}</p>
             {product.tags.length > 0 && (
               <div className="flex flex-wrap gap-1">
                 {product.tags.slice(0, 2).map((tag, index) => (
-                  <span key={index} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                  <span
+                    key={index}
+                    className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full"
+                  >
                     #{tag}
                   </span>
                 ))}
@@ -250,11 +277,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             size="md"
             fullWidth
             loading={cartLoading}
-            icon={!cartLoading && product.inStock ? (
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h8" />
-              </svg>
-            ) : undefined}
+            icon={
+              !cartLoading && product.inStock ? (
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h8"
+                  />
+                </svg>
+              ) : undefined
+            }
             className="shadow-glow hover:shadow-glow-lg text-sm"
           >
             {product.inStock ? 'Add to Cart' : 'Out of Stock'}

@@ -129,23 +129,26 @@ function ProductsContent() {
     // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(query) ||
-        product.description.toLowerCase().includes(query) ||
-        product.category.name.toLowerCase().includes(query) ||
-        product.tags.some(tag => tag.toLowerCase().includes(query)) ||
-        product.origin.toLowerCase().includes(query)
+      filtered = filtered.filter(
+        (product) =>
+          product.name.toLowerCase().includes(query) ||
+          product.description.toLowerCase().includes(query) ||
+          product.category.name.toLowerCase().includes(query) ||
+          product.tags.some((tag) => tag.toLowerCase().includes(query)) ||
+          product.origin.toLowerCase().includes(query)
       );
     }
 
     // Filter by category
     if (selectedCategory !== 'all') {
-      filtered = filtered.filter(product => product.category._id === selectedCategory);
+      filtered = filtered.filter(
+        (product) => product.category._id === selectedCategory
+      );
     }
 
     // Filter by stock
     if (showInStockOnly) {
-      filtered = filtered.filter(product => product.inStock);
+      filtered = filtered.filter((product) => product.inStock);
     }
 
     // Sort products
@@ -175,13 +178,14 @@ function ProductsContent() {
         {/* Page Header - Enhanced Mobile-First Design */}
         <div className="mb-5 sm:mb-6 md:mb-8">
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 leading-tight">
-            {searchQuery ? `Search Results for "${searchQuery}"` : 'All Products'}
+            {searchQuery
+              ? `Search Results for "${searchQuery}"`
+              : 'All Products'}
           </h1>
           <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
             {searchQuery
               ? `Found ${filteredAndSortedProducts.length} products matching your search`
-              : 'Discover our premium collection of spices, herbs, and blends'
-            }
+              : 'Discover our premium collection of spices, herbs, and blends'}
           </p>
           {searchQuery && (
             <div className="mt-3 sm:mt-4">
@@ -226,7 +230,7 @@ function ProductsContent() {
                 className="w-full px-4 py-3 sm:py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-base sm:text-sm touch-manipulation min-h-[48px] sm:min-h-[40px]"
               >
                 <option value="all">All Categories</option>
-                {categories.map(category => (
+                {categories.map((category) => (
                   <option key={category._id} value={category._id}>
                     {category.name}
                   </option>
@@ -261,7 +265,9 @@ function ProductsContent() {
                   onChange={(e) => setShowInStockOnly(e.target.checked)}
                   className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
                 />
-                <span className="ml-2 text-sm text-gray-700">In Stock Only</span>
+                <span className="ml-2 text-sm text-gray-700">
+                  In Stock Only
+                </span>
               </label>
             </div>
 
@@ -288,7 +294,8 @@ function ProductsContent() {
         {!isLoading && (
           <div className="mb-4 sm:mb-6">
             <p className="text-sm sm:text-base text-gray-600">
-              Showing {filteredAndSortedProducts.length} of {products.length} products
+              Showing {filteredAndSortedProducts.length} of {products.length}{' '}
+              products
             </p>
           </div>
         )}
@@ -301,8 +308,6 @@ function ProductsContent() {
           emptyMessage={`No products found ${searchQuery ? `for "${searchQuery}"` : ''}. Try adjusting your filters or search criteria.`}
           emptyIcon="🔍"
         />
-
-
 
         {/* Load More Button (for pagination in real app) */}
         {filteredAndSortedProducts.length > 0 && (

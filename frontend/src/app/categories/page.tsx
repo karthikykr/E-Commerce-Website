@@ -7,13 +7,14 @@ import { Button } from '@/components/ui/Button';
 export default function CategoriesPage() {
   // Get product count for each category
   const getCategoryProductCount = (categoryId: string) => {
-    return products.filter(product => product.category.id === categoryId).length;
+    return products.filter((product) => product.category.id === categoryId)
+      .length;
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Page Header - Mobile Responsive */}
         <div className="text-center mb-8 sm:mb-12 px-4">
@@ -21,16 +22,16 @@ export default function CategoriesPage() {
             Spice Categories
           </h1>
           <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto">
-            Explore our carefully curated collection of spices, herbs, and blends
-            organized by category to help you find exactly what you need.
+            Explore our carefully curated collection of spices, herbs, and
+            blends organized by category to help you find exactly what you need.
           </p>
         </div>
 
         {/* Categories Grid - Mobile Responsive */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
-          {categories.map(category => {
+          {categories.map((category) => {
             const productCount = getCategoryProductCount(category.id);
-            
+
             return (
               <div
                 key={category.id}
@@ -78,21 +79,24 @@ export default function CategoriesPage() {
                 <div className="text-4xl mb-4">🌱</div>
                 <h3 className="text-lg font-semibold mb-2">Farm Fresh</h3>
                 <p className="text-gray-600">
-                  Sourced directly from farms around the world for maximum freshness and flavor.
+                  Sourced directly from farms around the world for maximum
+                  freshness and flavor.
                 </p>
               </div>
               <div className="text-center">
                 <div className="text-4xl mb-4">🔬</div>
                 <h3 className="text-lg font-semibold mb-2">Quality Tested</h3>
                 <p className="text-gray-600">
-                  Every batch is tested for purity, potency, and quality before reaching you.
+                  Every batch is tested for purity, potency, and quality before
+                  reaching you.
                 </p>
               </div>
               <div className="text-center">
                 <div className="text-4xl mb-4">📦</div>
                 <h3 className="text-lg font-semibold mb-2">Fresh Packaging</h3>
                 <p className="text-gray-600">
-                  Sealed in airtight containers to preserve aroma and extend shelf life.
+                  Sealed in airtight containers to preserve aroma and extend
+                  shelf life.
                 </p>
               </div>
             </div>
@@ -109,9 +113,7 @@ export default function CategoriesPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/products?sort=rating">
-              <Button size="lg">
-                View Bestsellers
-              </Button>
+              <Button size="lg">View Bestsellers</Button>
             </Link>
             <Link href="/products">
               <Button variant="outline" size="lg">
@@ -136,9 +138,7 @@ export default function CategoriesPage() {
                 placeholder="Enter your email"
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
-              <Button>
-                Subscribe
-              </Button>
+              <Button>Subscribe</Button>
             </div>
           </div>
         </div>

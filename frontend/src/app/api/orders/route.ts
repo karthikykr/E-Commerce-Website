@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { products } from '@/data/products';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_SECRET =
+  process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
 // Mock orders storage (in production, use a database)
-let userOrders: Record<string, any[]> = {
-  '2': [ // Sample orders for user
+const userOrders: Record<string, any[]> = {
+  '2': [
+    // Sample orders for user
     {
       id: 'ORD-001',
       userId: '2',
@@ -15,14 +17,14 @@ let userOrders: Record<string, any[]> = {
           id: '1',
           productId: '1',
           quantity: 2,
-          price: 12.99
+          price: 12.99,
         },
         {
           id: '2',
           productId: '3',
           quantity: 1,
-          price: 14.99
-        }
+          price: 14.99,
+        },
       ],
       total: 40.97,
       status: 'delivered',
@@ -32,12 +34,12 @@ let userOrders: Record<string, any[]> = {
         city: 'New York',
         state: 'NY',
         zipCode: '10001',
-        country: 'USA'
+        country: 'USA',
       },
       paymentMethod: 'Credit Card',
       createdAt: new Date('2024-01-15'),
       updatedAt: new Date('2024-01-20'),
-      deliveredAt: new Date('2024-01-20')
+      deliveredAt: new Date('2024-01-20'),
     },
     {
       id: 'ORD-002',
@@ -47,8 +49,8 @@ let userOrders: Record<string, any[]> = {
           id: '3',
           productId: '2',
           quantity: 1,
-          price: 18.99
-        }
+          price: 18.99,
+        },
       ],
       total: 18.99,
       status: 'shipped',
@@ -58,20 +60,22 @@ let userOrders: Record<string, any[]> = {
         city: 'New York',
         state: 'NY',
         zipCode: '10001',
-        country: 'USA'
+        country: 'USA',
       },
       paymentMethod: 'Credit Card',
       createdAt: new Date('2024-01-25'),
-      updatedAt: new Date('2024-01-26')
-    }
-  ]
+      updatedAt: new Date('2024-01-26'),
+    },
+  ],
 };
 
 // Helper function to verify JWT token
 function verifyToken(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
-  const token = authHeader?.replace('Bearer ', '') || request.cookies.get('auth-token')?.value;
-  
+  const token =
+    authHeader?.replace('Bearer ', '') ||
+    request.cookies.get('auth-token')?.value;
+
   if (!token) {
     return null;
   }
@@ -95,23 +99,26 @@ export async function GET(request: NextRequest) {
     }
 
     const orders = userOrders[user.userId] || [];
-    const ordersWithProducts = orders.map(order => ({
+    const ordersWithProducts = orders.map((order) => ({
       ...order,
       items: order.items.map((item: any) => {
-        const product = products.find(p => p.id === item.productId);
+        const product = products.find((p) => p.id === item.productId);
         return {
           ...item,
-          product
+          product,
         };
-      })
+      }),
     }));
 
     // Sort by creation date (newest first)
-    ordersWithProducts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    ordersWithProducts.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
 
     return NextResponse.json({
       success: true,
-      orders: ordersWithProducts
+      orders: ordersWithProducts,
     });
   } catch (error) {
     console.error('Get orders error:', error);
@@ -144,7 +151,10 @@ export async function POST(request: NextRequest) {
 
     if (!shippingAddress || !paymentMethod) {
       return NextResponse.json(
-        { success: false, message: 'Shipping address and payment method are required' },
+        {
+          success: false,
+          message: 'Shipping address and payment method are required',
+        },
         { status: 400 }
       );
     }
@@ -154,7 +164,7 @@ export async function POST(request: NextRequest) {
     const orderItems = [];
 
     for (const item of items) {
-      const product = products.find(p => p.id === item.productId);
+      const product = products.find((p) => p.id === item.productId);
       if (!product) {
         return NextResponse.json(
           { success: false, message: `Product ${item.productId} not found` },
@@ -176,7 +186,7 @@ export async function POST(request: NextRequest) {
         id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
         productId: item.productId,
         quantity: item.quantity,
-        price: product.price
+        price: product.price,
       });
     }
 
@@ -190,7 +200,7 @@ export async function POST(request: NextRequest) {
       shippingAddress,
       paymentMethod,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     if (!userOrders[user.userId]) {
@@ -202,7 +212,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Order created successfully',
-      order: newOrder
+      order: newOrder,
     });
   } catch (error) {
     console.error('Create order error:', error);
@@ -243,16 +253,19 @@ export async function PUT(request: NextRequest) {
     // Find order across all users
     let orderFound = false;
     for (const userId in userOrders) {
-      const orderIndex = userOrders[userId].findIndex(order => order.id === orderId);
+      const orderIndex = userOrders[userId].findIndex(
+        (order) => order.id === orderId
+      );
       if (orderIndex !== -1) {
         if (status) userOrders[userId][orderIndex].status = status;
-        if (paymentStatus) userOrders[userId][orderIndex].paymentStatus = paymentStatus;
+        if (paymentStatus)
+          userOrders[userId][orderIndex].paymentStatus = paymentStatus;
         userOrders[userId][orderIndex].updatedAt = new Date();
-        
+
         if (status === 'delivered') {
           userOrders[userId][orderIndex].deliveredAt = new Date();
         }
-        
+
         orderFound = true;
         break;
       }
@@ -267,7 +280,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Order updated successfully'
+      message: 'Order updated successfully',
     });
   } catch (error) {
     console.error('Update order error:', error);

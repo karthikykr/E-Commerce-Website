@@ -51,11 +51,15 @@ export default function DynamicHomePage() {
   const fetchHomePageContent = async () => {
     try {
       // Fetch homepage content
-      const contentResponse = await fetch('http://localhost:5000/api/homepage-content');
+      const contentResponse = await fetch(
+        'http://localhost:5000/api/homepage-content'
+      );
       const contentData = await contentResponse.json();
 
       if (!contentData.success) {
-        throw new Error(contentData.message || 'Failed to fetch homepage content');
+        throw new Error(
+          contentData.message || 'Failed to fetch homepage content'
+        );
       }
 
       // Fetch banners
@@ -74,16 +78,18 @@ export default function DynamicHomePage() {
       }, {});
 
       // Add banners to sections
-      const sectionsWithBanners = contentData.data.sections.map((section: any) => {
-        if (section.type === 'hero_banner' && bannersByPosition.hero) {
-          return { ...section, banners: bannersByPosition.hero };
+      const sectionsWithBanners = contentData.data.sections.map(
+        (section: any) => {
+          if (section.type === 'hero_banner' && bannersByPosition.hero) {
+            return { ...section, banners: bannersByPosition.hero };
+          }
+          return section;
         }
-        return section;
-      });
+      );
 
       setHomePageData({
         ...contentData.data,
-        sections: sectionsWithBanners
+        sections: sectionsWithBanners,
       });
     } catch (error) {
       console.error('Error fetching homepage content:', error);
@@ -96,8 +102,9 @@ export default function DynamicHomePage() {
   // Apply global styles
   useEffect(() => {
     if (homePageData?.globalSettings) {
-      const { primaryColor, secondaryColor, fontFamily, customCSS } = homePageData.globalSettings;
-      
+      const { primaryColor, secondaryColor, fontFamily, customCSS } =
+        homePageData.globalSettings;
+
       // Apply CSS custom properties
       const root = document.documentElement;
       if (primaryColor) {
@@ -109,23 +116,23 @@ export default function DynamicHomePage() {
       if (fontFamily) {
         root.style.setProperty('--font-family', fontFamily);
       }
-      
+
       // Apply custom CSS
       if (customCSS) {
         const styleElement = document.createElement('style');
         styleElement.textContent = customCSS;
         styleElement.id = 'homepage-custom-css';
-        
+
         // Remove existing custom CSS
         const existingStyle = document.getElementById('homepage-custom-css');
         if (existingStyle) {
           existingStyle.remove();
         }
-        
+
         document.head.appendChild(styleElement);
       }
     }
-    
+
     // Cleanup function
     return () => {
       const customStyle = document.getElementById('homepage-custom-css');
@@ -138,15 +145,18 @@ export default function DynamicHomePage() {
   // Update document head with SEO settings
   useEffect(() => {
     if (homePageData?.seoSettings) {
-      const { title, description, keywords, ogImage } = homePageData.seoSettings;
-      
+      const { title, description, keywords, ogImage } =
+        homePageData.seoSettings;
+
       if (title) {
         document.title = title;
       }
-      
+
       // Update meta description
       if (description) {
-        let metaDescription = document.querySelector('meta[name="description"]');
+        let metaDescription = document.querySelector(
+          'meta[name="description"]'
+        );
         if (!metaDescription) {
           metaDescription = document.createElement('meta');
           metaDescription.setAttribute('name', 'description');
@@ -154,7 +164,7 @@ export default function DynamicHomePage() {
         }
         metaDescription.setAttribute('content', description);
       }
-      
+
       // Update meta keywords
       if (keywords && keywords.length > 0) {
         let metaKeywords = document.querySelector('meta[name="keywords"]');
@@ -165,7 +175,7 @@ export default function DynamicHomePage() {
         }
         metaKeywords.setAttribute('content', keywords.join(', '));
       }
-      
+
       // Update Open Graph image
       if (ogImage) {
         let ogImageMeta = document.querySelector('meta[property="og:image"]');
@@ -201,8 +211,12 @@ export default function DynamicHomePage() {
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <div className="text-6xl mb-4">😞</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Oops! Something went wrong</h2>
-            <p className="text-gray-600 mb-6">{error || 'Failed to load homepage content'}</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Oops! Something went wrong
+            </h2>
+            <p className="text-gray-600 mb-6">
+              {error || 'Failed to load homepage content'}
+            </p>
             <button
               onClick={fetchHomePageContent}
               className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200"
@@ -217,16 +231,21 @@ export default function DynamicHomePage() {
   }
 
   return (
-    <div 
+    <div
       className="min-h-screen bg-gradient-to-b from-orange-50 via-amber-50 to-white"
-      style={{ 
-        fontFamily: homePageData.globalSettings.fontFamily || 'Inter, sans-serif',
-        '--primary-color': homePageData.globalSettings.primaryColor || '#ea580c',
-        '--secondary-color': homePageData.globalSettings.secondaryColor || '#f97316'
-      } as React.CSSProperties}
+      style={
+        {
+          fontFamily:
+            homePageData.globalSettings.fontFamily || 'Inter, sans-serif',
+          '--primary-color':
+            homePageData.globalSettings.primaryColor || '#ea580c',
+          '--secondary-color':
+            homePageData.globalSettings.secondaryColor || '#f97316',
+        } as React.CSSProperties
+      }
     >
       <Header />
-      
+
       <main className="relative">
         {homePageData.sections.map((section, index) => (
           <DynamicSection
@@ -236,7 +255,7 @@ export default function DynamicHomePage() {
           />
         ))}
       </main>
-      
+
       <Footer />
     </div>
   );

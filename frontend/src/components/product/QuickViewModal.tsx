@@ -51,15 +51,22 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
 }) => {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
-  
+
   const { addToCart, isLoading: cartLoading } = useCart();
-  const { addToWishlist, removeFromWishlist, isInWishlist, isLoading: wishlistLoading } = useWishlist();
+  const {
+    addToWishlist,
+    removeFromWishlist,
+    isInWishlist,
+    isLoading: wishlistLoading,
+  } = useWishlist();
   const { showToast } = useToast();
 
   if (!product) return null;
 
   const discountPercentage = product.originalPrice
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    ? Math.round(
+        ((product.originalPrice - product.price) / product.originalPrice) * 100
+      )
     : 0;
 
   const handleAddToCart = async () => {
@@ -112,7 +119,9 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
           <div className="aspect-square bg-gradient-to-br from-orange-50 to-red-50 rounded-xl overflow-hidden relative">
             {product.images && product.images.length > 0 ? (
               <img
-                src={product.images[selectedImage]?.url || product.images[0].url}
+                src={
+                  product.images[selectedImage]?.url || product.images[0].url
+                }
                 alt={product.images[selectedImage]?.alt || product.name}
                 className="w-full h-full object-cover"
               />
@@ -121,7 +130,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                 🌶️
               </div>
             )}
-            
+
             {/* Discount Badge */}
             {discountPercentage > 0 && (
               <div className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
@@ -138,7 +147,9 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                   key={index}
                   onClick={() => setSelectedImage(index)}
                   className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                    selectedImage === index ? 'border-orange-500' : 'border-gray-200 hover:border-gray-300'
+                    selectedImage === index
+                      ? 'border-orange-500'
+                      : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
                   <img
@@ -176,7 +187,9 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                 <svg
                   key={i}
                   className={`h-5 w-5 ${
-                    i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-300'
+                    i < Math.floor(product.rating)
+                      ? 'text-yellow-400'
+                      : 'text-gray-300'
                   }`}
                   fill="currentColor"
                   viewBox="0 0 20 20"
@@ -211,7 +224,10 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-500">Weight:</span>
-              <span className="font-medium">{product.weight.value}{product.weight.unit}</span>
+              <span className="font-medium">
+                {product.weight.value}
+                {product.weight.unit}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500">Origin:</span>
@@ -223,7 +239,10 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
           {product.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {product.tags.map((tag, index) => (
-                <span key={index} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                <span
+                  key={index}
+                  className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"
+                >
                   #{tag}
                 </span>
               ))}
@@ -242,7 +261,9 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
               </button>
               <span className="px-4 py-2 font-medium">{quantity}</span>
               <button
-                onClick={() => setQuantity(Math.min(product.stockQuantity, quantity + 1))}
+                onClick={() =>
+                  setQuantity(Math.min(product.stockQuantity, quantity + 1))
+                }
                 className="px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-50"
                 disabled={quantity >= product.stockQuantity}
               >
@@ -261,14 +282,24 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
               size="lg"
               className="flex-1"
               icon={
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h8" />
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h8"
+                  />
                 </svg>
               }
             >
               Add to Cart
             </Button>
-            
+
             <Button
               onClick={handleToggleWishlist}
               disabled={wishlistLoading}
@@ -277,11 +308,20 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
               icon={
                 <svg
                   className={`h-5 w-5 ${isInWishlist(product.id || product._id) ? 'text-red-500 fill-current' : ''}`}
-                  fill={isInWishlist(product.id || product._id) ? "currentColor" : "none"}
+                  fill={
+                    isInWishlist(product.id || product._id)
+                      ? 'currentColor'
+                      : 'none'
+                  }
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                  />
                 </svg>
               }
             >

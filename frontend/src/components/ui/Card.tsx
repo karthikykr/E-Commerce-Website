@@ -84,7 +84,9 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
   divider = true,
 }) => {
   return (
-    <div className={`${divider ? 'border-b border-gray-200 pb-4 mb-4' : ''} ${className}`}>
+    <div
+      className={`${divider ? 'border-b border-gray-200 pb-4 mb-4' : ''} ${className}`}
+    >
       {children}
     </div>
   );
@@ -100,11 +102,7 @@ export const CardBody: React.FC<CardBodyProps> = ({
   children,
   className = '',
 }) => {
-  return (
-    <div className={className}>
-      {children}
-    </div>
-  );
+  return <div className={className}>{children}</div>;
 };
 
 // Card Footer Component
@@ -120,7 +118,9 @@ export const CardFooter: React.FC<CardFooterProps> = ({
   divider = true,
 }) => {
   return (
-    <div className={`${divider ? 'border-t border-gray-200 pt-4 mt-4' : ''} ${className}`}>
+    <div
+      className={`${divider ? 'border-t border-gray-200 pt-4 mt-4' : ''} ${className}`}
+    >
       {children}
     </div>
   );
@@ -182,27 +182,45 @@ export const StatsCard: React.FC<StatsCardProps> = ({
           <p className="text-sm font-medium text-gray-600">{title}</p>
           <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
           {change && (
-            <div className={`flex items-center mt-2 text-sm ${
-              change.type === 'increase' ? 'text-green-600' : 'text-red-600'
-            }`}>
+            <div
+              className={`flex items-center mt-2 text-sm ${
+                change.type === 'increase' ? 'text-green-600' : 'text-red-600'
+              }`}
+            >
               {change.type === 'increase' ? (
-                <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17l9.2-9.2M17 17V7H7" />
+                <svg
+                  className="h-4 w-4 mr-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 17l9.2-9.2M17 17V7H7"
+                  />
                 </svg>
               ) : (
-                <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 7l-9.2 9.2M7 7v10h10" />
+                <svg
+                  className="h-4 w-4 mr-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 7l-9.2 9.2M7 7v10h10"
+                  />
                 </svg>
               )}
               {Math.abs(change.value)}%
             </div>
           )}
         </div>
-        {icon && (
-          <div className="text-3xl text-orange-500">
-            {icon}
-          </div>
-        )}
+        {icon && <div className="text-3xl text-orange-500">{icon}</div>}
       </div>
     </Card>
   );

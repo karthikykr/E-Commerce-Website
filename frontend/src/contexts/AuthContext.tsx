@@ -7,7 +7,11 @@ import { User } from '@/types';
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string, role?: 'admin' | 'user') => Promise<boolean>;
+  login: (
+    email: string,
+    password: string,
+    role?: 'admin' | 'user'
+  ) => Promise<boolean>;
   register: (userData: RegisterData) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
@@ -40,7 +44,9 @@ export const useAuth = () => {
   return context;
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -77,13 +83,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string, role: 'admin' | 'user' = 'user'): Promise<boolean> => {
+  const login = async (
+    email: string,
+    password: string,
+    role: 'admin' | 'user' = 'user'
+  ): Promise<boolean> => {
     setIsLoading(true);
 
     // First, test backend connectivity
     try {
       console.log('🔍 Testing backend connectivity...');
-      const healthResponse = await axios.get('http://localhost:5000/api/health');
+      const healthResponse = await axios.get(
+        'http://localhost:5000/api/health'
+      );
       console.log('🏥 Health check status:', healthResponse.status);
       if (healthResponse.status === 200) {
         console.log('✅ Backend is accessible:', healthResponse.data);
@@ -95,13 +107,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      console.log('🔄 Attempting login with:', { email, password: password.substring(0, 3) + '***', role });
+      console.log('🔄 Attempting login with:', {
+        email,
+        password: password.substring(0, 3) + '***',
+        role,
+      });
 
       const requestBody = {
         email,
-        password
+        password,
       };
-      console.log('📤 Request body:', { ...requestBody, password: password.substring(0, 3) + '***' });
+      console.log('📤 Request body:', {
+        ...requestBody,
+        password: password.substring(0, 3) + '***',
+      });
 
       const response = await axios.post(
         `http://localhost:5000/api/auth/login?t=${Date.now()}`,
@@ -122,7 +141,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         const userData: User = {
           id: data.data.user._id || data.data.user.id,
-          email: data.data.user.email || data.data.user.mobile || data.data.user.adminId,
+          email:
+            data.data.user.email ||
+            data.data.user.mobile ||
+            data.data.user.adminId,
           name: data.data.user.name,
           role: data.data.user.role,
           phone: data.data.user.phone || data.data.user.mobile,
@@ -164,13 +186,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-
-
   //register
 
   const register = async (userData: RegisterData): Promise<boolean> => {
     setIsLoading(true);
-    
+
     try {
       const response = await axios.post(
         'http://localhost:5000/api/auth/register',
@@ -192,7 +212,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return false;
       }
     } catch (error: any) {
-      console.error('Registration error:', error.response?.data || error.message);
+      console.error(
+        'Registration error:',
+        error.response?.data || error.message
+      );
       return false;
     } finally {
       setIsLoading(false);
@@ -217,9 +240,5 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isAdmin,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

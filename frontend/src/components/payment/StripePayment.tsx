@@ -13,7 +13,9 @@ import { Card, CardHeader, CardBody } from '@/components/ui/Card';
 import { useToast } from '@/contexts/ToastContext';
 
 // Initialize Stripe
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_...');
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_...'
+);
 
 interface PaymentFormProps {
   amount: number;
@@ -34,7 +36,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
   const stripe = useStripe();
   const elements = useElements();
   const { addToast } = useToast();
-  
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [clientSecret, setClientSecret] = useState('');
 
@@ -85,15 +87,18 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
     }
 
     try {
-      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: cardElement,
-          billing_details: {
-            name: customerInfo.name,
-            email: customerInfo.email,
+      const { error, paymentIntent } = await stripe.confirmCardPayment(
+        clientSecret,
+        {
+          payment_method: {
+            card: cardElement,
+            billing_details: {
+              name: customerInfo.name,
+              email: customerInfo.email,
+            },
           },
-        },
-      });
+        }
+      );
 
       if (error) {
         console.error('Payment error:', error);
@@ -101,7 +106,8 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         addToast({
           type: 'error',
           title: 'Payment Failed',
-          message: error.message || 'Please check your card details and try again.',
+          message:
+            error.message || 'Please check your card details and try again.',
           duration: 5000,
         });
       } else if (paymentIntent.status === 'succeeded') {
@@ -142,8 +148,18 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
     <Card variant="outlined" padding="lg">
       <CardHeader>
         <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-          <svg className="h-5 w-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+          <svg
+            className="h-5 w-5 mr-2 text-blue-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+            />
           </svg>
           Credit Card Payment
         </h3>
@@ -157,8 +173,12 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
           {/* Amount Display */}
           <div className="bg-gray-50 rounded-lg p-4">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-700">Total Amount:</span>
-              <span className="text-xl font-bold text-gray-900">${amount.toFixed(2)}</span>
+              <span className="text-sm font-medium text-gray-700">
+                Total Amount:
+              </span>
+              <span className="text-xl font-bold text-gray-900">
+                ${amount.toFixed(2)}
+              </span>
             </div>
           </div>
 
@@ -178,11 +198,23 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
           {/* Security Features */}
           <div className="bg-green-50 border border-green-200 rounded-lg p-3">
             <div className="flex items-center">
-              <svg className="h-5 w-5 text-green-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              <svg
+                className="h-5 w-5 text-green-600 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                />
               </svg>
               <div>
-                <p className="text-sm font-medium text-green-800">Secure Payment</p>
+                <p className="text-sm font-medium text-green-800">
+                  Secure Payment
+                </p>
                 <p className="text-xs text-green-700">256-bit SSL encryption</p>
               </div>
             </div>
@@ -197,8 +229,18 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
             size="lg"
             fullWidth
             icon={
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                />
               </svg>
             }
           >
@@ -248,7 +290,11 @@ export const StripePayment: React.FC<StripePaymentProps> = (props) => {
 export const AlternativePaymentMethods: React.FC = () => {
   return (
     <div className="space-y-4">
-      <Card variant="outlined" padding="md" className="cursor-pointer hover:shadow-md transition-shadow">
+      <Card
+        variant="outlined"
+        padding="md"
+        className="cursor-pointer hover:shadow-md transition-shadow"
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <div className="w-12 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-sm">
@@ -256,16 +302,32 @@ export const AlternativePaymentMethods: React.FC = () => {
             </div>
             <div className="ml-3">
               <p className="font-medium text-gray-900">PayPal</p>
-              <p className="text-sm text-gray-500">Pay with your PayPal account</p>
+              <p className="text-sm text-gray-500">
+                Pay with your PayPal account
+              </p>
             </div>
           </div>
-          <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          <svg
+            className="h-5 w-5 text-gray-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5l7 7-7 7"
+            />
           </svg>
         </div>
       </Card>
 
-      <Card variant="outlined" padding="md" className="cursor-pointer hover:shadow-md transition-shadow">
+      <Card
+        variant="outlined"
+        padding="md"
+        className="cursor-pointer hover:shadow-md transition-shadow"
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <div className="w-12 h-8 bg-black rounded flex items-center justify-center text-white font-bold text-sm">
@@ -273,16 +335,32 @@ export const AlternativePaymentMethods: React.FC = () => {
             </div>
             <div className="ml-3">
               <p className="font-medium text-gray-900">Apple Pay</p>
-              <p className="text-sm text-gray-500">Pay with Touch ID or Face ID</p>
+              <p className="text-sm text-gray-500">
+                Pay with Touch ID or Face ID
+              </p>
             </div>
           </div>
-          <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          <svg
+            className="h-5 w-5 text-gray-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5l7 7-7 7"
+            />
           </svg>
         </div>
       </Card>
 
-      <Card variant="outlined" padding="md" className="cursor-pointer hover:shadow-md transition-shadow">
+      <Card
+        variant="outlined"
+        padding="md"
+        className="cursor-pointer hover:shadow-md transition-shadow"
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <div className="w-12 h-8 bg-green-600 rounded flex items-center justify-center text-white font-bold text-sm">
@@ -293,8 +371,18 @@ export const AlternativePaymentMethods: React.FC = () => {
               <p className="text-sm text-gray-500">Pay with Google Pay</p>
             </div>
           </div>
-          <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          <svg
+            className="h-5 w-5 text-gray-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5l7 7-7 7"
+            />
           </svg>
         </div>
       </Card>
