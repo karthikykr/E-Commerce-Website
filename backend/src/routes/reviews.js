@@ -1,24 +1,24 @@
-const express = require("express");
-const { body, validationResult } = require("express-validator");
-const { Product, Order } = require("../models");
-const auth = require("../middleware/auth");
-const { adminAuth } = require("../middleware/adminAuth");
+const express = require('express');
+const { body, validationResult } = require('express-validator');
+const { Product, Order } = require('../models');
+const auth = require('../middleware/auth');
+const { adminAuth } = require('../middleware/adminAuth');
 
 const router = express.Router();
 
 // @route   GET /api/reviews/product/:productId
 // @desc    Get all reviews for a product
 // @access  Public
-router.get("/product/:productId", async (req, res) => {
+router.get('/product/:productId', async (req, res) => {
   try {
     const product = await Product.findById(req.params.productId)
-      .populate("reviews.user", "name")
-      .select("reviews rating averageRating");
+      .populate('reviews.user', 'name')
+      .select('reviews rating averageRating');
 
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: "Product not found",
+        message: 'Product not found',
       });
     }
 
@@ -31,10 +31,10 @@ router.get("/product/:productId", async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Get reviews error:", error);
+    console.error('Get reviews error:', error);
     res.status(500).json({
       success: false,
-      message: "Server error while fetching reviews",
+      message: 'Server error while fetching reviews',
     });
   }
 });
@@ -43,20 +43,20 @@ router.get("/product/:productId", async (req, res) => {
 // @desc    Add a review for a product
 // @access  Private
 router.post(
-  "/product/:productId",
+  '/product/:productId',
   [
     auth,
-    body("rating")
+    body('rating')
       .isInt({ min: 1, max: 5 })
-      .withMessage("Rating must be between 1 and 5"),
-    body("comment")
+      .withMessage('Rating must be between 1 and 5'),
+    body('comment')
       .optional()
       .isLength({ max: 500 })
-      .withMessage("Comment cannot exceed 500 characters"),
-    body("title")
+      .withMessage('Comment cannot exceed 500 characters'),
+    body('title')
       .optional()
       .isLength({ max: 100 })
-      .withMessage("Title cannot exceed 100 characters"),
+      .withMessage('Title cannot exceed 100 characters'),
   ],
   async (req, res) => {
     try {
@@ -64,7 +64,7 @@ router.post(
       if (!errors.isEmpty()) {
         return res.status(400).json({
           success: false,
-          message: "Validation errors",
+          message: 'Validation errors',
           errors: errors.array(),
         });
       }
@@ -77,34 +77,34 @@ router.post(
       if (!product) {
         return res.status(404).json({
           success: false,
-          message: "Product not found",
+          message: 'Product not found',
         });
       }
 
       // Check if user has purchased this product
       const userOrder = await Order.findOne({
         user: req.user._id,
-        "items.product": productId,
-        orderStatus: "delivered",
+        'items.product': productId,
+        orderStatus: 'delivered',
       });
 
       if (!userOrder) {
         return res.status(400).json({
           success: false,
           message:
-            "You can only review products you have purchased and received",
+            'You can only review products you have purchased and received',
         });
       }
 
       // Check if user already reviewed this product
       const existingReview = product.reviews.find(
-        (review) => review.user.toString() === req.user._id.toString(),
+        (review) => review.user.toString() === req.user._id.toString()
       );
 
       if (existingReview) {
         return res.status(400).json({
           success: false,
-          message: "You have already reviewed this product",
+          message: 'You have already reviewed this product',
         });
       }
 
@@ -122,43 +122,43 @@ router.post(
       await product.save();
 
       // Populate the new review
-      await product.populate("reviews.user", "name");
+      await product.populate('reviews.user', 'name');
       const newReview = product.reviews[product.reviews.length - 1];
 
       res.status(201).json({
         success: true,
-        message: "Review added successfully",
+        message: 'Review added successfully',
         data: { review: newReview },
       });
     } catch (error) {
-      console.error("Add review error:", error);
+      console.error('Add review error:', error);
       res.status(500).json({
         success: false,
-        message: "Server error while adding review",
+        message: 'Server error while adding review',
       });
     }
-  },
+  }
 );
 
 // @route   PUT /api/reviews/:reviewId
 // @desc    Update a review
 // @access  Private
 router.put(
-  "/:reviewId",
+  '/:reviewId',
   [
     auth,
-    body("rating")
+    body('rating')
       .optional()
       .isInt({ min: 1, max: 5 })
-      .withMessage("Rating must be between 1 and 5"),
-    body("comment")
+      .withMessage('Rating must be between 1 and 5'),
+    body('comment')
       .optional()
       .isLength({ max: 500 })
-      .withMessage("Comment cannot exceed 500 characters"),
-    body("title")
+      .withMessage('Comment cannot exceed 500 characters'),
+    body('title')
       .optional()
       .isLength({ max: 100 })
-      .withMessage("Title cannot exceed 100 characters"),
+      .withMessage('Title cannot exceed 100 characters'),
   ],
   async (req, res) => {
     try {
@@ -166,7 +166,7 @@ router.put(
       if (!errors.isEmpty()) {
         return res.status(400).json({
           success: false,
-          message: "Validation errors",
+          message: 'Validation errors',
           errors: errors.array(),
         });
       }
@@ -175,12 +175,12 @@ router.put(
 
       // Find product with this review
       const product = await Product.findOne({
-        "reviews._id": req.params.reviewId,
+        'reviews._id': req.params.reviewId,
       });
       if (!product) {
         return res.status(404).json({
           success: false,
-          message: "Review not found",
+          message: 'Review not found',
         });
       }
 
@@ -190,7 +190,7 @@ router.put(
       if (review.user.toString() !== req.user._id.toString()) {
         return res.status(403).json({
           success: false,
-          message: "Not authorized to update this review",
+          message: 'Not authorized to update this review',
         });
       }
 
@@ -205,32 +205,32 @@ router.put(
 
       res.json({
         success: true,
-        message: "Review updated successfully",
+        message: 'Review updated successfully',
         data: { review },
       });
     } catch (error) {
-      console.error("Update review error:", error);
+      console.error('Update review error:', error);
       res.status(500).json({
         success: false,
-        message: "Server error while updating review",
+        message: 'Server error while updating review',
       });
     }
-  },
+  }
 );
 
 // @route   DELETE /api/reviews/:reviewId
 // @desc    Delete a review
 // @access  Private
-router.delete("/:reviewId", auth, async (req, res) => {
+router.delete('/:reviewId', auth, async (req, res) => {
   try {
     // Find product with this review
     const product = await Product.findOne({
-      "reviews._id": req.params.reviewId,
+      'reviews._id': req.params.reviewId,
     });
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: "Review not found",
+        message: 'Review not found',
       });
     }
 
@@ -239,11 +239,11 @@ router.delete("/:reviewId", auth, async (req, res) => {
     // Check if user owns this review or is admin
     if (
       review.user.toString() !== req.user._id.toString() &&
-      req.user.role !== "admin"
+      req.user.role !== 'admin'
     ) {
       return res.status(403).json({
         success: false,
-        message: "Not authorized to delete this review",
+        message: 'Not authorized to delete this review',
       });
     }
 
@@ -254,13 +254,13 @@ router.delete("/:reviewId", auth, async (req, res) => {
 
     res.json({
       success: true,
-      message: "Review deleted successfully",
+      message: 'Review deleted successfully',
     });
   } catch (error) {
-    console.error("Delete review error:", error);
+    console.error('Delete review error:', error);
     res.status(500).json({
       success: false,
-      message: "Server error while deleting review",
+      message: 'Server error while deleting review',
     });
   }
 });
@@ -268,16 +268,16 @@ router.delete("/:reviewId", auth, async (req, res) => {
 // @route   GET /api/reviews/admin
 // @desc    Get all reviews (Admin only)
 // @access  Private (Admin)
-router.get("/admin", adminAuth, async (req, res) => {
+router.get('/admin', adminAuth, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
 
-    const products = await Product.find({ "reviews.0": { $exists: true } })
-      .populate("reviews.user", "name email")
-      .select("name reviews")
-      .sort({ "reviews.createdAt": -1 })
+    const products = await Product.find({ 'reviews.0': { $exists: true } })
+      .populate('reviews.user', 'name email')
+      .select('name reviews')
+      .sort({ 'reviews.createdAt': -1 })
       .skip(skip)
       .limit(limit);
 
@@ -320,10 +320,10 @@ router.get("/admin", adminAuth, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Get admin reviews error:", error);
+    console.error('Get admin reviews error:', error);
     res.status(500).json({
       success: false,
-      message: "Server error while fetching reviews",
+      message: 'Server error while fetching reviews',
     });
   }
 });

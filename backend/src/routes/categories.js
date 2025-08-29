@@ -1,45 +1,45 @@
-const express = require("express");
-const { body, validationResult } = require("express-validator");
-const { Category, Product } = require("../models");
-const { adminAuth } = require("../middleware/adminAuth");
-const mongoose = require("mongoose");
+const express = require('express');
+const { body, validationResult } = require('express-validator');
+const { Category, Product } = require('../models');
+const { adminAuth } = require('../middleware/adminAuth');
+const mongoose = require('mongoose');
 
 const router = express.Router();
 
 // Sample categories for when MongoDB is not connected
 const sampleCategories = [
   {
-    _id: "1",
-    name: "Spices & Seasonings",
-    slug: "spices-seasonings",
-    description: "Premium quality spices and seasonings",
+    _id: '1',
+    name: 'Spices & Seasonings',
+    slug: 'spices-seasonings',
+    description: 'Premium quality spices and seasonings',
     isActive: true,
     featured: true,
     productsCount: 3,
   },
   {
-    _id: "2",
-    name: "Herbs & Aromatics",
-    slug: "herbs-aromatics",
-    description: "Fresh and dried herbs for cooking",
+    _id: '2',
+    name: 'Herbs & Aromatics',
+    slug: 'herbs-aromatics',
+    description: 'Fresh and dried herbs for cooking',
     isActive: true,
     featured: true,
     productsCount: 1,
   },
   {
-    _id: "3",
-    name: "Masala Blends",
-    slug: "masala-blends",
-    description: "Traditional and modern spice blends",
+    _id: '3',
+    name: 'Masala Blends',
+    slug: 'masala-blends',
+    description: 'Traditional and modern spice blends',
     isActive: true,
     featured: true,
     productsCount: 1,
   },
   {
-    _id: "4",
-    name: "Organic Collection",
-    slug: "organic-collection",
-    description: "Certified organic spices and herbs",
+    _id: '4',
+    name: 'Organic Collection',
+    slug: 'organic-collection',
+    description: 'Certified organic spices and herbs',
     isActive: true,
     featured: false,
     productsCount: 1,
@@ -49,14 +49,14 @@ const sampleCategories = [
 // @route   GET /api/categories
 // @desc    Get all categories
 // @access  Public
-router.get("/", async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     // Check if MongoDB is connected
     if (mongoose.connection.readyState !== 1) {
-      console.log("⚠️  MongoDB not connected, using sample categories");
+      console.log('⚠️  MongoDB not connected, using sample categories');
       return res.json({
         success: true,
-        message: "Categories retrieved successfully (sample data)",
+        message: 'Categories retrieved successfully (sample data)',
         data: {
           categories: sampleCategories,
         },
@@ -64,8 +64,8 @@ router.get("/", async (req, res) => {
     }
 
     const categories = await Category.find({ isActive: true })
-      .populate("productsCount")
-      .sort("sortOrder name");
+      .populate('productsCount')
+      .sort('sortOrder name');
 
     res.json({
       success: true,
@@ -74,10 +74,10 @@ router.get("/", async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error fetching categories:", error);
+    console.error('Error fetching categories:', error);
     res.status(500).json({
       success: false,
-      message: "Server error while fetching categories",
+      message: 'Server error while fetching categories',
     });
   }
 });
@@ -85,17 +85,17 @@ router.get("/", async (req, res) => {
 // @route   GET /api/categories/:id
 // @desc    Get category by ID
 // @access  Public
-router.get("/:id", async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const category = await Category.findOne({
       $or: [{ _id: req.params.id }, { slug: req.params.id }],
       isActive: true,
-    }).populate("productsCount");
+    }).populate('productsCount');
 
     if (!category) {
       return res.status(404).json({
         success: false,
-        message: "Category not found",
+        message: 'Category not found',
       });
     }
 
@@ -104,10 +104,10 @@ router.get("/:id", async (req, res) => {
       data: category,
     });
   } catch (error) {
-    console.error("Error fetching category:", error);
+    console.error('Error fetching category:', error);
     res.status(500).json({
       success: false,
-      message: "Server error while fetching category",
+      message: 'Server error while fetching category',
     });
   }
 });
@@ -116,14 +116,14 @@ router.get("/:id", async (req, res) => {
 // @desc    Create a new category
 // @access  Private (Admin only)
 router.post(
-  "/",
+  '/',
   [
     adminAuth,
-    body("name").notEmpty().withMessage("Category name is required"),
-    body("description")
+    body('name').notEmpty().withMessage('Category name is required'),
+    body('description')
       .optional()
       .isLength({ max: 500 })
-      .withMessage("Description cannot exceed 500 characters"),
+      .withMessage('Description cannot exceed 500 characters'),
   ],
   async (req, res) => {
     try {
@@ -131,7 +131,7 @@ router.post(
       if (!errors.isEmpty()) {
         return res.status(400).json({
           success: false,
-          message: "Validation errors",
+          message: 'Validation errors',
           errors: errors.array(),
         });
       }
@@ -141,40 +141,40 @@ router.post(
 
       res.status(201).json({
         success: true,
-        message: "Category created successfully",
+        message: 'Category created successfully',
         data: category,
       });
     } catch (error) {
-      console.error("Error creating category:", error);
+      console.error('Error creating category:', error);
       if (error.code === 11000) {
         return res.status(400).json({
           success: false,
-          message: "Category with this slug already exists",
+          message: 'Category with this slug already exists',
         });
       }
       res.status(500).json({
         success: false,
-        message: "Server error while creating category",
+        message: 'Server error while creating category',
       });
     }
-  },
+  }
 );
 
 // @route   PUT /api/categories/:id
 // @desc    Update category
 // @access  Private (Admin only)
 router.put(
-  "/:id",
+  '/:id',
   [
     adminAuth,
-    body("name")
+    body('name')
       .optional()
       .notEmpty()
-      .withMessage("Category name cannot be empty"),
-    body("description")
+      .withMessage('Category name cannot be empty'),
+    body('description')
       .optional()
       .isLength({ max: 500 })
-      .withMessage("Description cannot exceed 500 characters"),
+      .withMessage('Description cannot exceed 500 characters'),
   ],
   async (req, res) => {
     try {
@@ -182,7 +182,7 @@ router.put(
       if (!errors.isEmpty()) {
         return res.status(400).json({
           success: false,
-          message: "Validation errors",
+          message: 'Validation errors',
           errors: errors.array(),
         });
       }
@@ -190,47 +190,47 @@ router.put(
       const category = await Category.findByIdAndUpdate(
         req.params.id,
         req.body,
-        { new: true, runValidators: true },
+        { new: true, runValidators: true }
       );
 
       if (!category) {
         return res.status(404).json({
           success: false,
-          message: "Category not found",
+          message: 'Category not found',
         });
       }
 
       res.json({
         success: true,
-        message: "Category updated successfully",
+        message: 'Category updated successfully',
         data: category,
       });
     } catch (error) {
-      console.error("Error updating category:", error);
+      console.error('Error updating category:', error);
       if (error.code === 11000) {
         return res.status(400).json({
           success: false,
-          message: "Category with this slug already exists",
+          message: 'Category with this slug already exists',
         });
       }
       res.status(500).json({
         success: false,
-        message: "Server error while updating category",
+        message: 'Server error while updating category',
       });
     }
-  },
+  }
 );
 
 // @route   DELETE /api/categories/:id
 // @desc    Delete category (soft delete)
 // @access  Private (Admin only)
-router.delete("/:id", adminAuth, async (req, res) => {
+router.delete('/:id', adminAuth, async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
     if (!category) {
       return res.status(404).json({
         success: false,
-        message: "Category not found",
+        message: 'Category not found',
       });
     }
 
@@ -242,7 +242,7 @@ router.delete("/:id", adminAuth, async (req, res) => {
     if (productCount > 0) {
       return res.status(400).json({
         success: false,
-        message: "Cannot delete category with active products",
+        message: 'Cannot delete category with active products',
       });
     }
 
@@ -251,13 +251,13 @@ router.delete("/:id", adminAuth, async (req, res) => {
 
     res.json({
       success: true,
-      message: "Category deleted successfully",
+      message: 'Category deleted successfully',
     });
   } catch (error) {
-    console.error("Error deleting category:", error);
+    console.error('Error deleting category:', error);
     res.status(500).json({
       success: false,
-      message: "Server error while deleting category",
+      message: 'Server error while deleting category',
     });
   }
 });

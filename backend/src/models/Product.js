@@ -1,10 +1,10 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const reviewSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     rating: {
@@ -16,7 +16,7 @@ const reviewSchema = new mongoose.Schema(
     comment: {
       type: String,
       trim: true,
-      maxlength: [500, "Review comment cannot exceed 500 characters"],
+      maxlength: [500, 'Review comment cannot exceed 500 characters'],
     },
     isVerified: {
       type: Boolean,
@@ -25,16 +25,16 @@ const reviewSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 const productSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "Product name is required"],
+      required: [true, 'Product name is required'],
       trim: true,
-      maxlength: [200, "Product name cannot exceed 200 characters"],
+      maxlength: [200, 'Product name cannot exceed 200 characters'],
     },
     slug: {
       type: String,
@@ -45,28 +45,28 @@ const productSchema = new mongoose.Schema(
     },
     description: {
       type: String,
-      required: [true, "Product description is required"],
+      required: [true, 'Product description is required'],
       trim: true,
-      maxlength: [2000, "Description cannot exceed 2000 characters"],
+      maxlength: [2000, 'Description cannot exceed 2000 characters'],
     },
     shortDescription: {
       type: String,
       trim: true,
-      maxlength: [300, "Short description cannot exceed 300 characters"],
+      maxlength: [300, 'Short description cannot exceed 300 characters'],
     },
     price: {
       type: Number,
-      required: [true, "Product price is required"],
-      min: [0, "Price cannot be negative"],
+      required: [true, 'Product price is required'],
+      min: [0, 'Price cannot be negative'],
     },
     originalPrice: {
       type: Number,
-      min: [0, "Original price cannot be negative"],
+      min: [0, 'Original price cannot be negative'],
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Category",
-      required: [true, "Product category is required"],
+      ref: 'Category',
+      required: [true, 'Product category is required'],
     },
     images: [
       {
@@ -117,8 +117,8 @@ const productSchema = new mongoose.Schema(
     },
     stockQuantity: {
       type: Number,
-      required: [true, "Stock quantity is required"],
-      min: [0, "Stock quantity cannot be negative"],
+      required: [true, 'Stock quantity is required'],
+      min: [0, 'Stock quantity cannot be negative'],
       default: 0,
     },
     lowStockThreshold: {
@@ -133,8 +133,8 @@ const productSchema = new mongoose.Schema(
       unit: {
         type: String,
         required: true,
-        enum: ["g", "kg", "oz", "lb"],
-        default: "g",
+        enum: ['g', 'kg', 'oz', 'lb'],
+        default: 'g',
       },
     },
     dimensions: {
@@ -143,14 +143,14 @@ const productSchema = new mongoose.Schema(
       height: Number,
       unit: {
         type: String,
-        enum: ["cm", "in"],
-        default: "cm",
+        enum: ['cm', 'in'],
+        default: 'cm',
       },
     },
     origin: {
       type: String,
       trim: true,
-      maxlength: [100, "Origin cannot exceed 100 characters"],
+      maxlength: [100, 'Origin cannot exceed 100 characters'],
     },
     tags: [
       {
@@ -176,7 +176,7 @@ const productSchema = new mongoose.Schema(
     storageInstructions: {
       type: String,
       trim: true,
-      maxlength: [300, "Storage instructions cannot exceed 300 characters"],
+      maxlength: [300, 'Storage instructions cannot exceed 300 characters'],
     },
     shelfLife: {
       type: String,
@@ -212,32 +212,32 @@ const productSchema = new mongoose.Schema(
     seoTitle: {
       type: String,
       trim: true,
-      maxlength: [60, "SEO title cannot exceed 60 characters"],
+      maxlength: [60, 'SEO title cannot exceed 60 characters'],
     },
     seoDescription: {
       type: String,
       trim: true,
-      maxlength: [160, "SEO description cannot exceed 160 characters"],
+      maxlength: [160, 'SEO description cannot exceed 160 characters'],
     },
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 // Create slug from name before saving
-productSchema.pre("save", function (next) {
-  if (this.isModified("name") && !this.slug) {
+productSchema.pre('save', function (next) {
+  if (this.isModified('name') && !this.slug) {
     this.slug = this.name
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
   }
   next();
 });
 
 // Update stock status based on quantity
-productSchema.pre("save", function (next) {
+productSchema.pre('save', function (next) {
   this.inStock = this.stockQuantity > 0;
   next();
 });
@@ -252,30 +252,30 @@ productSchema.methods.calculateAverageRating = function () {
 
   const totalRating = this.reviews.reduce(
     (sum, review) => sum + review.rating,
-    0,
+    0
   );
   this.rating = Math.round((totalRating / this.reviews.length) * 10) / 10;
   this.reviewCount = this.reviews.length;
 };
 
 // Virtual for discount percentage
-productSchema.virtual("discountPercentage").get(function () {
+productSchema.virtual('discountPercentage').get(function () {
   if (this.originalPrice && this.originalPrice > this.price) {
     return Math.round(
-      ((this.originalPrice - this.price) / this.originalPrice) * 100,
+      ((this.originalPrice - this.price) / this.originalPrice) * 100
     );
   }
   return 0;
 });
 
 // Virtual for low stock status
-productSchema.virtual("isLowStock").get(function () {
+productSchema.virtual('isLowStock').get(function () {
   return this.stockQuantity <= this.lowStockThreshold && this.stockQuantity > 0;
 });
 
 // Ensure virtual fields are serialized
-productSchema.set("toJSON", { virtuals: true });
-productSchema.set("toObject", { virtuals: true });
+productSchema.set('toJSON', { virtuals: true });
+productSchema.set('toObject', { virtuals: true });
 
 // Instance method to get primary image
 productSchema.methods.getPrimaryImage = function () {
@@ -296,10 +296,10 @@ productSchema.methods.addImage = function (imageData) {
 // Instance method to remove image
 productSchema.methods.removeImage = function (imageId) {
   const imageIndex = this.images.findIndex(
-    (img) => img._id.toString() === imageId,
+    (img) => img._id.toString() === imageId
   );
   if (imageIndex === -1) {
-    throw new Error("Image not found");
+    throw new Error('Image not found');
   }
 
   const removedImage = this.images[imageIndex];
@@ -323,7 +323,7 @@ productSchema.methods.setPrimaryImage = function (imageId) {
   // Set the specified image as primary
   const targetImage = this.images.find((img) => img._id.toString() === imageId);
   if (!targetImage) {
-    throw new Error("Image not found");
+    throw new Error('Image not found');
   }
 
   targetImage.isPrimary = true;
@@ -349,11 +349,11 @@ productSchema.statics.findProductsWithoutImages = function () {
 };
 
 // Indexes for better performance
-productSchema.index({ name: "text", description: "text", tags: "text" });
+productSchema.index({ name: 'text', description: 'text', tags: 'text' });
 productSchema.index({ category: 1, isActive: 1 });
 productSchema.index({ price: 1 });
 productSchema.index({ rating: -1 });
 productSchema.index({ createdAt: -1 });
 // slug already has unique index
 
-module.exports = mongoose.model("Product", productSchema);
+module.exports = mongoose.model('Product', productSchema);

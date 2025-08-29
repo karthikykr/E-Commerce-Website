@@ -1,7 +1,7 @@
-const User = require("../models/User");
-const { generateToken } = require("../helpers/tokenHelper");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
+const User = require('../models/User');
+const { generateToken } = require('../helpers/tokenHelper');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
 // Login Controller
 exports.login = async (req, res) => {
@@ -34,12 +34,12 @@ exports.login = async (req, res) => {
     // }
 
     // Handle regular user login
-    const user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ email }).select('+password');
 
     if (!user) {
       return res
         .status(401)
-        .json({ success: false, message: "Invalid credentials" });
+        .json({ success: false, message: 'Invalid credentials' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -47,7 +47,7 @@ exports.login = async (req, res) => {
     if (!isMatch) {
       return res
         .status(401)
-        .json({ success: false, message: "Invalid credentials" });
+        .json({ success: false, message: 'Invalid credentials' });
     }
 
     // Update last login
@@ -59,7 +59,7 @@ exports.login = async (req, res) => {
 
     return res.json({
       success: true,
-      message: "Login successful",
+      message: 'Login successful',
       data: {
         user: {
           id: user._id,
@@ -73,10 +73,10 @@ exports.login = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Login error:", error);
+    console.error('Login error:', error);
     return res.status(500).json({
       success: false,
-      message: "Server error during login",
+      message: 'Server error during login',
     });
   }
 };
@@ -86,13 +86,13 @@ exports.login = async (req, res) => {
 exports.register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    const role = req.body.role ? req.body.role : "user";
+    const role = req.body.role ? req.body.role : 'user';
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: "User already exists with this email address",
+        message: 'User already exists with this email address',
       });
     }
 
@@ -114,7 +114,7 @@ exports.register = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: "User registered successfully",
+      message: 'User registered successfully',
       data: {
         user: {
           id: user._id,
@@ -126,10 +126,10 @@ exports.register = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Registration error:", error);
+    console.error('Registration error:', error);
     res.status(500).json({
       success: false,
-      message: "Server error during registration",
+      message: 'Server error during registration',
     });
   }
 };

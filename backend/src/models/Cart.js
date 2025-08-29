@@ -1,10 +1,10 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const cartItemSchema = new mongoose.Schema(
   {
     product: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
+      ref: 'Product',
       required: true,
     },
     quantity: {
@@ -20,14 +20,14 @@ const cartItemSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 const cartSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
       unique: true,
     },
@@ -43,18 +43,18 @@ const cartSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 // Calculate totals before saving
-cartSchema.pre("save", function (next) {
+cartSchema.pre('save', function (next) {
   this.totalItems = this.items.reduce(
     (total, item) => total + item.quantity,
-    0,
+    0
   );
   this.totalAmount = this.items.reduce(
     (total, item) => total + item.price * item.quantity,
-    0,
+    0
   );
   next();
 });
@@ -62,7 +62,7 @@ cartSchema.pre("save", function (next) {
 // Instance method to add item
 cartSchema.methods.addItem = function (productId, quantity, price) {
   const existingItemIndex = this.items.findIndex(
-    (item) => item.product.toString() === productId.toString(),
+    (item) => item.product.toString() === productId.toString()
   );
 
   if (existingItemIndex >= 0) {
@@ -81,14 +81,14 @@ cartSchema.methods.addItem = function (productId, quantity, price) {
 // Instance method to remove item
 cartSchema.methods.removeItem = function (productId) {
   this.items = this.items.filter(
-    (item) => item.product.toString() !== productId.toString(),
+    (item) => item.product.toString() !== productId.toString()
   );
 };
 
 // Instance method to update item quantity
 cartSchema.methods.updateItemQuantity = function (productId, quantity) {
   const item = this.items.find(
-    (item) => item.product.toString() === productId.toString(),
+    (item) => item.product.toString() === productId.toString()
   );
 
   if (item) {
@@ -107,4 +107,4 @@ cartSchema.methods.clearCart = function () {
   this.totalAmount = 0;
 };
 
-module.exports = mongoose.model("Cart", cartSchema);
+module.exports = mongoose.model('Cart', cartSchema);

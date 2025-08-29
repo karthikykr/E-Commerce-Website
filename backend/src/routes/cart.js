@@ -1,18 +1,18 @@
-const express = require("express");
-const { body, validationResult } = require("express-validator");
-const { Cart, Product } = require("../models");
-const auth = require("../middleware/auth");
+const express = require('express');
+const { body, validationResult } = require('express-validator');
+const { Cart, Product } = require('../models');
+const auth = require('../middleware/auth');
 
 const router = express.Router();
 
 // @route   GET /api/cart
 // @desc    Get user's cart
 // @access  Private
-router.get("/", auth, async (req, res) => {
+router.get('/', auth, async (req, res) => {
   try {
     let cart = await Cart.findOne({ user: req.user._id }).populate(
-      "items.product",
-      "name price images stockQuantity",
+      'items.product',
+      'name price images stockQuantity'
     );
 
     if (!cart) {
@@ -31,10 +31,10 @@ router.get("/", auth, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Get cart error:", error);
+    console.error('Get cart error:', error);
     res.status(500).json({
       success: false,
-      message: "Server error while fetching cart",
+      message: 'Server error while fetching cart',
     });
   }
 });
@@ -43,27 +43,27 @@ router.get("/", auth, async (req, res) => {
 // @desc    Add item to cart
 // @access  Private
 router.post(
-  "/",
+  '/',
   [
     auth,
-    body("productId").notEmpty().withMessage("Product ID is required"),
-    body("quantity")
+    body('productId').notEmpty().withMessage('Product ID is required'),
+    body('quantity')
       .isInt({ min: 1 })
-      .withMessage("Quantity must be at least 1"),
+      .withMessage('Quantity must be at least 1'),
   ],
   async (req, res) => {
     try {
-      console.log("=== ADD TO CART REQUEST ===");
-      console.log("User ID:", req.user.id);
-      console.log("Request body:", req.body);
-      console.log("Headers:", req.headers);
+      console.log('=== ADD TO CART REQUEST ===');
+      console.log('User ID:', req.user.id);
+      console.log('Request body:', req.body);
+      console.log('Headers:', req.headers);
 
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        console.log("Validation errors:", errors.array());
+        console.log('Validation errors:', errors.array());
         return res.status(400).json({
           success: false,
-          message: "Validation errors",
+          message: 'Validation errors',
           errors: errors.array(),
         });
       }
@@ -75,14 +75,14 @@ router.post(
       if (!product) {
         return res.status(404).json({
           success: false,
-          message: "Product not found",
+          message: 'Product not found',
         });
       }
 
       if (product.stockQuantity < quantity) {
         return res.status(400).json({
           success: false,
-          message: "Insufficient stock available",
+          message: 'Insufficient stock available',
         });
       }
 
@@ -97,11 +97,11 @@ router.post(
       await cart.save();
 
       // Populate and return updated cart
-      await cart.populate("items.product", "name price images stockQuantity");
+      await cart.populate('items.product', 'name price images stockQuantity');
 
       res.json({
         success: true,
-        message: "Item added to cart successfully",
+        message: 'Item added to cart successfully',
         data: {
           cart: {
             items: cart.items,
@@ -111,26 +111,26 @@ router.post(
         },
       });
     } catch (error) {
-      console.error("Add to cart error:", error);
+      console.error('Add to cart error:', error);
       res.status(500).json({
         success: false,
-        message: "Server error while adding item to cart",
+        message: 'Server error while adding item to cart',
       });
     }
-  },
+  }
 );
 
 // @route   PUT /api/cart
 // @desc    Update item quantity in cart
 // @access  Private
 router.put(
-  "/",
+  '/',
   [
     auth,
-    body("productId").notEmpty().withMessage("Product ID is required"),
-    body("quantity")
+    body('productId').notEmpty().withMessage('Product ID is required'),
+    body('quantity')
       .isInt({ min: 0 })
-      .withMessage("Quantity must be 0 or greater"),
+      .withMessage('Quantity must be 0 or greater'),
   ],
   async (req, res) => {
     try {
@@ -138,7 +138,7 @@ router.put(
       if (!errors.isEmpty()) {
         return res.status(400).json({
           success: false,
-          message: "Validation errors",
+          message: 'Validation errors',
           errors: errors.array(),
         });
       }
@@ -150,19 +150,19 @@ router.put(
       if (!cart) {
         return res.status(404).json({
           success: false,
-          message: "Cart not found",
+          message: 'Cart not found',
         });
       }
 
       // Check if product exists in cart
       const itemExists = cart.items.some(
-        (item) => item.product.toString() === productId.toString(),
+        (item) => item.product.toString() === productId.toString()
       );
 
       if (!itemExists) {
         return res.status(404).json({
           success: false,
-          message: "Item not found in cart",
+          message: 'Item not found in cart',
         });
       }
 
@@ -171,7 +171,7 @@ router.put(
         return res.status(400).json({
           success: false,
           message:
-            "Quantity must be at least 1. Use delete endpoint to remove items.",
+            'Quantity must be at least 1. Use delete endpoint to remove items.',
         });
       }
 
@@ -180,14 +180,14 @@ router.put(
       if (!product) {
         return res.status(404).json({
           success: false,
-          message: "Product not found",
+          message: 'Product not found',
         });
       }
 
       if (product.stockQuantity < quantity) {
         return res.status(400).json({
           success: false,
-          message: "Insufficient stock available",
+          message: 'Insufficient stock available',
         });
       }
 
@@ -196,12 +196,12 @@ router.put(
       await cart.save();
 
       // Populate and return updated cart
-      await cart.populate("items.product", "name price images stockQuantity");
+      await cart.populate('items.product', 'name price images stockQuantity');
 
       res.json({
         success: true,
         message:
-          quantity > 0 ? "Cart updated successfully" : "Item removed from cart",
+          quantity > 0 ? 'Cart updated successfully' : 'Item removed from cart',
         data: {
           cart: {
             items: cart.items,
@@ -211,19 +211,19 @@ router.put(
         },
       });
     } catch (error) {
-      console.error("Update cart error:", error);
+      console.error('Update cart error:', error);
       res.status(500).json({
         success: false,
-        message: "Server error while updating cart",
+        message: 'Server error while updating cart',
       });
     }
-  },
+  }
 );
 
 // @route   DELETE /api/cart
 // @desc    Remove item from cart
 // @access  Private
-router.delete("/", auth, async (req, res) => {
+router.delete('/', auth, async (req, res) => {
   try {
     // Try to get productId from both body and query params
     const productId = req.body.productId || req.query.productId;
@@ -231,7 +231,7 @@ router.delete("/", auth, async (req, res) => {
     if (!productId) {
       return res.status(400).json({
         success: false,
-        message: "Product ID is required in body or query parameter",
+        message: 'Product ID is required in body or query parameter',
       });
     }
 
@@ -240,7 +240,7 @@ router.delete("/", auth, async (req, res) => {
     if (!cart) {
       return res.status(404).json({
         success: false,
-        message: "Cart not found",
+        message: 'Cart not found',
       });
     }
 
@@ -249,11 +249,11 @@ router.delete("/", auth, async (req, res) => {
     await cart.save();
 
     // Populate and return updated cart
-    await cart.populate("items.product", "name price images stockQuantity");
+    await cart.populate('items.product', 'name price images stockQuantity');
 
     res.json({
       success: true,
-      message: "Item removed from cart successfully",
+      message: 'Item removed from cart successfully',
       data: {
         cart: {
           items: cart.items,
@@ -263,10 +263,10 @@ router.delete("/", auth, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Remove from cart error:", error);
+    console.error('Remove from cart error:', error);
     res.status(500).json({
       success: false,
-      message: "Server error while removing item from cart",
+      message: 'Server error while removing item from cart',
     });
   }
 });
@@ -274,14 +274,14 @@ router.delete("/", auth, async (req, res) => {
 // @route   DELETE /api/cart/clear
 // @desc    Clear entire cart
 // @access  Private
-router.delete("/clear", auth, async (req, res) => {
+router.delete('/clear', auth, async (req, res) => {
   try {
     // Find cart
     const cart = await Cart.findOne({ user: req.user._id });
     if (!cart) {
       return res.status(404).json({
         success: false,
-        message: "Cart not found",
+        message: 'Cart not found',
       });
     }
 
@@ -291,7 +291,7 @@ router.delete("/clear", auth, async (req, res) => {
 
     res.json({
       success: true,
-      message: "Cart cleared successfully",
+      message: 'Cart cleared successfully',
       data: {
         cart: {
           items: [],
@@ -301,10 +301,10 @@ router.delete("/clear", auth, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Clear cart error:", error);
+    console.error('Clear cart error:', error);
     res.status(500).json({
       success: false,
-      message: "Server error while clearing cart",
+      message: 'Server error while clearing cart',
     });
   }
 });

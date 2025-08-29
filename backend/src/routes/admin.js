@@ -1,17 +1,17 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const { adminAuth, logAdminAction } = require("../middleware/adminAuth");
-const { User, Product, Category, Order } = require("../models");
+const express = require('express');
+const mongoose = require('mongoose');
+const { adminAuth, logAdminAction } = require('../middleware/adminAuth');
+const { User, Product, Category, Order } = require('../models');
 
 const router = express.Router();
 
 // @route   GET /api/admin/test
 // @desc    Test admin authentication
 // @access  Private (Admin)
-router.get("/test", adminAuth, (req, res) => {
+router.get('/test', adminAuth, (req, res) => {
   res.json({
     success: true,
-    message: "Admin authentication working",
+    message: 'Admin authentication working',
     user: {
       id: req.user._id,
       name: req.user.name,
@@ -24,9 +24,9 @@ router.get("/test", adminAuth, (req, res) => {
 // @route   GET /api/admin/dashboard/stats
 // @desc    Get dashboard statistics
 // @access  Private (Admin)
-router.get("/dashboard/stats", adminAuth, async (req, res) => {
+router.get('/dashboard/stats', adminAuth, async (req, res) => {
   try {
-    console.log("📊 Dashboard stats requested by:", req.user?.email);
+    console.log('📊 Dashboard stats requested by:', req.user?.email);
 
     // Return mock data to ensure the dashboard works
     const mockData = {
@@ -54,34 +54,34 @@ router.get("/dashboard/stats", adminAuth, async (req, res) => {
       },
       recentOrders: [
         {
-          _id: "mock1",
-          orderNumber: "ORD-001",
+          _id: 'mock1',
+          orderNumber: 'ORD-001',
           total: 1250,
-          orderStatus: "delivered",
+          orderStatus: 'delivered',
           createdAt: new Date().toISOString(),
-          user: { name: "John Doe", email: "john@example.com" },
+          user: { name: 'John Doe', email: 'john@example.com' },
         },
         {
-          _id: "mock2",
-          orderNumber: "ORD-002",
+          _id: 'mock2',
+          orderNumber: 'ORD-002',
           total: 850,
-          orderStatus: "processing",
+          orderStatus: 'processing',
           createdAt: new Date().toISOString(),
-          user: { name: "Jane Smith", email: "jane@example.com" },
+          user: { name: 'Jane Smith', email: 'jane@example.com' },
         },
       ],
     };
 
-    console.log("✅ Returning mock dashboard data");
+    console.log('✅ Returning mock dashboard data');
     res.json({
       success: true,
       data: mockData,
     });
   } catch (error) {
-    console.error("❌ Dashboard stats error:", error);
+    console.error('❌ Dashboard stats error:', error);
     res.status(500).json({
       success: false,
-      message: "Error fetching dashboard statistics",
+      message: 'Error fetching dashboard statistics',
     });
   }
 });
@@ -90,24 +90,24 @@ router.get("/dashboard/stats", adminAuth, async (req, res) => {
 // @desc    Get chart data for dashboard
 // @access  Private (Admin)
 router.get(
-  "/dashboard/charts",
+  '/dashboard/charts',
   adminAuth,
-  logAdminAction("VIEW_DASHBOARD_CHARTS"),
+  logAdminAction('VIEW_DASHBOARD_CHARTS'),
   async (req, res) => {
     try {
-      const { period = "7d" } = req.query;
+      const { period = '7d' } = req.query;
 
       let startDate;
       const endDate = new Date();
 
       switch (period) {
-        case "7d":
+        case '7d':
           startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
           break;
-        case "30d":
+        case '30d':
           startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
           break;
-        case "90d":
+        case '90d':
           startDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
           break;
         default:
@@ -119,15 +119,15 @@ router.get(
         {
           $match: {
             createdAt: { $gte: startDate, $lte: endDate },
-            orderStatus: { $in: ["delivered", "shipped", "processing"] },
+            orderStatus: { $in: ['delivered', 'shipped', 'processing'] },
           },
         },
         {
           $group: {
             _id: {
-              $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
+              $dateToString: { format: '%Y-%m-%d', date: '$createdAt' },
             },
-            sales: { $sum: "$total" },
+            sales: { $sum: '$total' },
             orders: { $sum: 1 },
           },
         },
@@ -139,33 +139,33 @@ router.get(
         {
           $match: {
             createdAt: { $gte: startDate, $lte: endDate },
-            orderStatus: { $in: ["delivered", "shipped", "processing"] },
+            orderStatus: { $in: ['delivered', 'shipped', 'processing'] },
           },
         },
-        { $unwind: "$items" },
+        { $unwind: '$items' },
         {
           $lookup: {
-            from: "products",
-            localField: "items.product",
-            foreignField: "_id",
-            as: "product",
+            from: 'products',
+            localField: 'items.product',
+            foreignField: '_id',
+            as: 'product',
           },
         },
-        { $unwind: "$product" },
+        { $unwind: '$product' },
         {
           $lookup: {
-            from: "categories",
-            localField: "product.category",
-            foreignField: "_id",
-            as: "category",
+            from: 'categories',
+            localField: 'product.category',
+            foreignField: '_id',
+            as: 'category',
           },
         },
-        { $unwind: "$category" },
+        { $unwind: '$category' },
         {
           $group: {
-            _id: "$category.name",
-            sales: { $sum: { $multiply: ["$items.quantity", "$items.price"] } },
-            quantity: { $sum: "$items.quantity" },
+            _id: '$category.name',
+            sales: { $sum: { $multiply: ['$items.quantity', '$items.price'] } },
+            quantity: { $sum: '$items.quantity' },
           },
         },
         { $sort: { sales: -1 } },
@@ -180,39 +180,39 @@ router.get(
         },
       });
     } catch (error) {
-      console.error("Dashboard charts error:", error);
+      console.error('Dashboard charts error:', error);
       res.status(500).json({
         success: false,
-        message: "Error fetching chart data",
+        message: 'Error fetching chart data',
       });
     }
-  },
+  }
 );
 
 // @route   GET /api/admin/recent-activity
 // @desc    Get recent system activity
 // @access  Private (Admin)
-router.get("/recent-activity", adminAuth, async (req, res) => {
+router.get('/recent-activity', adminAuth, async (req, res) => {
   try {
     const { limit = 20 } = req.query;
 
     // Get recent orders
     const recentOrders = await Order.find()
-      .populate("user", "name email")
+      .populate('user', 'name email')
       .sort({ createdAt: -1 })
       .limit(parseInt(limit) / 2)
-      .select("orderNumber total orderStatus createdAt user");
+      .select('orderNumber total orderStatus createdAt user');
 
     // Get recent users
-    const recentUsers = await User.find({ role: "user" })
+    const recentUsers = await User.find({ role: 'user' })
       .sort({ createdAt: -1 })
       .limit(parseInt(limit) / 2)
-      .select("name email createdAt");
+      .select('name email createdAt');
 
     // Combine and sort by date
     const activities = [
       ...recentOrders.map((order) => ({
-        type: "order",
+        type: 'order',
         id: order._id,
         title: `New order #${order.orderNumber}`,
         description: `₹${order.total} by ${order.user?.name}`,
@@ -220,11 +220,11 @@ router.get("/recent-activity", adminAuth, async (req, res) => {
         createdAt: order.createdAt,
       })),
       ...recentUsers.map((user) => ({
-        type: "user",
+        type: 'user',
         id: user._id,
-        title: "New user registration",
+        title: 'New user registration',
         description: `${user.name} (${user.email})`,
-        status: "active",
+        status: 'active',
         createdAt: user.createdAt,
       })),
     ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -234,10 +234,10 @@ router.get("/recent-activity", adminAuth, async (req, res) => {
       data: activities.slice(0, parseInt(limit)),
     });
   } catch (error) {
-    console.error("Recent activity error:", error);
+    console.error('Recent activity error:', error);
     res.status(500).json({
       success: false,
-      message: "Error fetching recent activity",
+      message: 'Error fetching recent activity',
     });
   }
 });
@@ -246,19 +246,19 @@ router.get("/recent-activity", adminAuth, async (req, res) => {
 // @desc    Get all users with pagination and filtering
 // @access  Private (Admin)
 router.get(
-  "/users",
+  '/users',
   adminAuth,
-  logAdminAction("VIEW_USERS"),
+  logAdminAction('VIEW_USERS'),
   async (req, res) => {
     try {
       const {
         page = 1,
         limit = 10,
-        search = "",
-        role = "",
-        status = "",
-        sortBy = "createdAt",
-        sortOrder = "desc",
+        search = '',
+        role = '',
+        status = '',
+        sortBy = 'createdAt',
+        sortOrder = 'desc',
       } = req.query;
 
       // Build query
@@ -266,8 +266,8 @@ router.get(
 
       if (search) {
         query.$or = [
-          { name: { $regex: search, $options: "i" } },
-          { email: { $regex: search, $options: "i" } },
+          { name: { $regex: search, $options: 'i' } },
+          { email: { $regex: search, $options: 'i' } },
         ];
       }
 
@@ -275,19 +275,19 @@ router.get(
         query.role = role;
       }
 
-      if (status === "active") {
+      if (status === 'active') {
         query.isActive = true;
-      } else if (status === "inactive") {
+      } else if (status === 'inactive') {
         query.isActive = false;
       }
 
       // Build sort object
       const sort = {};
-      sort[sortBy] = sortOrder === "desc" ? -1 : 1;
+      sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
 
       // Execute query with pagination
       const users = await User.find(query)
-        .select("-password")
+        .select('-password')
         .sort(sort)
         .limit(parseInt(limit))
         .skip((parseInt(page) - 1) * parseInt(limit));
@@ -309,30 +309,30 @@ router.get(
         },
       });
     } catch (error) {
-      console.error("Get users error:", error);
+      console.error('Get users error:', error);
       res.status(500).json({
         success: false,
-        message: "Error fetching users",
+        message: 'Error fetching users',
       });
     }
-  },
+  }
 );
 
 // @route   GET /api/admin/users/:id
 // @desc    Get user details by ID
 // @access  Private (Admin)
 router.get(
-  "/users/:id",
+  '/users/:id',
   adminAuth,
-  logAdminAction("VIEW_USER_DETAILS"),
+  logAdminAction('VIEW_USER_DETAILS'),
   async (req, res) => {
     try {
-      const user = await User.findById(req.params.id).select("-password");
+      const user = await User.findById(req.params.id).select('-password');
 
       if (!user) {
         return res.status(404).json({
           success: false,
-          message: "User not found",
+          message: 'User not found',
         });
       }
 
@@ -340,7 +340,7 @@ router.get(
       const orders = await Order.find({ user: user._id })
         .sort({ createdAt: -1 })
         .limit(10)
-        .select("orderNumber total orderStatus createdAt");
+        .select('orderNumber total orderStatus createdAt');
 
       // Calculate user statistics
       const totalOrders = await Order.countDocuments({ user: user._id });
@@ -348,10 +348,10 @@ router.get(
         {
           $match: {
             user: user._id,
-            orderStatus: { $in: ["delivered", "shipped"] },
+            orderStatus: { $in: ['delivered', 'shipped'] },
           },
         },
-        { $group: { _id: null, total: { $sum: "$total" } } },
+        { $group: { _id: null, total: { $sum: '$total' } } },
       ]);
 
       res.json({
@@ -368,22 +368,22 @@ router.get(
         },
       });
     } catch (error) {
-      console.error("Get user details error:", error);
+      console.error('Get user details error:', error);
       res.status(500).json({
         success: false,
-        message: "Error fetching user details",
+        message: 'Error fetching user details',
       });
     }
-  },
+  }
 );
 
 // @route   PUT /api/admin/users/:id/status
 // @desc    Update user status (activate/deactivate)
 // @access  Private (Admin)
 router.put(
-  "/users/:id/status",
+  '/users/:id/status',
   adminAuth,
-  logAdminAction("UPDATE_USER_STATUS"),
+  logAdminAction('UPDATE_USER_STATUS'),
   async (req, res) => {
     try {
       const { isActive } = req.body;
@@ -393,7 +393,7 @@ router.put(
       if (!user) {
         return res.status(404).json({
           success: false,
-          message: "User not found",
+          message: 'User not found',
         });
       }
 
@@ -401,7 +401,7 @@ router.put(
       if (user._id.toString() === req.user._id.toString()) {
         return res.status(400).json({
           success: false,
-          message: "Cannot modify your own account status",
+          message: 'Cannot modify your own account status',
         });
       }
 
@@ -410,7 +410,7 @@ router.put(
 
       res.json({
         success: true,
-        message: `User ${isActive ? "activated" : "deactivated"} successfully`,
+        message: `User ${isActive ? 'activated' : 'deactivated'} successfully`,
         data: {
           user: {
             id: user._id,
@@ -421,13 +421,13 @@ router.put(
         },
       });
     } catch (error) {
-      console.error("Update user status error:", error);
+      console.error('Update user status error:', error);
       res.status(500).json({
         success: false,
-        message: "Error updating user status",
+        message: 'Error updating user status',
       });
     }
-  },
+  }
 );
 
 module.exports = router;

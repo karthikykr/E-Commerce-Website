@@ -1,12 +1,12 @@
-const express = require("express");
-const { Banner } = require("../models");
+const express = require('express');
+const { Banner } = require('../models');
 
 const router = express.Router();
 
 // @route   GET /api/banners
 // @desc    Get all active banners
 // @access  Public
-router.get("/", async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const position = req.query.position;
 
@@ -26,10 +26,10 @@ router.get("/", async (req, res) => {
       data: { banners },
     });
   } catch (error) {
-    console.error("Get banners error:", error);
+    console.error('Get banners error:', error);
     res.status(500).json({
       success: false,
-      message: "Error fetching banners",
+      message: 'Error fetching banners',
     });
   }
 });
@@ -37,15 +37,15 @@ router.get("/", async (req, res) => {
 // @route   GET /api/banners/:position
 // @desc    Get active banners by position
 // @access  Public
-router.get("/:position", async (req, res) => {
+router.get('/:position', async (req, res) => {
   try {
     const { position } = req.params;
 
-    const validPositions = ["hero", "top", "middle", "bottom", "sidebar"];
+    const validPositions = ['hero', 'top', 'middle', 'bottom', 'sidebar'];
     if (!validPositions.includes(position)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid banner position",
+        message: 'Invalid banner position',
       });
     }
 
@@ -60,10 +60,10 @@ router.get("/:position", async (req, res) => {
       data: { banners },
     });
   } catch (error) {
-    console.error("Get banners by position error:", error);
+    console.error('Get banners by position error:', error);
     res.status(500).json({
       success: false,
-      message: "Error fetching banners",
+      message: 'Error fetching banners',
     });
   }
 });
@@ -71,13 +71,13 @@ router.get("/:position", async (req, res) => {
 // @route   POST /api/banners/:id/click
 // @desc    Track banner click
 // @access  Public
-router.post("/:id/click", async (req, res) => {
+router.post('/:id/click', async (req, res) => {
   try {
     const banner = await Banner.findById(req.params.id);
     if (!banner) {
       return res.status(404).json({
         success: false,
-        message: "Banner not found",
+        message: 'Banner not found',
       });
     }
 
@@ -85,13 +85,13 @@ router.post("/:id/click", async (req, res) => {
 
     res.json({
       success: true,
-      message: "Click tracked successfully",
+      message: 'Click tracked successfully',
     });
   } catch (error) {
-    console.error("Track banner click error:", error);
+    console.error('Track banner click error:', error);
     res.status(500).json({
       success: false,
-      message: "Error tracking click",
+      message: 'Error tracking click',
     });
   }
 });

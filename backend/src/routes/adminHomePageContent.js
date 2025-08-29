@@ -1,6 +1,6 @@
-const express = require("express");
-const { body, validationResult } = require("express-validator");
-const { adminAuth, logAdminAction } = require("../middleware/adminAuth");
+const express = require('express');
+const { body, validationResult } = require('express-validator');
+const { adminAuth, logAdminAction } = require('../middleware/adminAuth');
 const {
   bannerImageUpload,
   optimizeImage,
@@ -8,8 +8,8 @@ const {
   handleUploadError,
   deleteUploadedFiles,
   getFileUrl,
-} = require("../middleware/imageUpload");
-const { HomePageContent } = require("../models");
+} = require('../middleware/imageUpload');
+const { HomePageContent } = require('../models');
 
 const router = express.Router();
 
@@ -17,9 +17,9 @@ const router = express.Router();
 // @desc    Get current home page content
 // @access  Private (Admin)
 router.get(
-  "/",
+  '/',
   adminAuth,
-  logAdminAction("VIEW_HOMEPAGE_CONTENT"),
+  logAdminAction('VIEW_HOMEPAGE_CONTENT'),
   async (req, res) => {
     try {
       let content = await HomePageContent.getActiveContent();
@@ -34,47 +34,47 @@ router.get(
         data: { content },
       });
     } catch (error) {
-      console.error("Get homepage content error:", error);
+      console.error('Get homepage content error:', error);
       res.status(500).json({
         success: false,
-        message: "Error fetching homepage content",
+        message: 'Error fetching homepage content',
       });
     }
-  },
+  }
 );
 
 // @route   PUT /api/admin/homepage-content
 // @desc    Update home page content
 // @access  Private (Admin)
 router.put(
-  "/",
+  '/',
   [
     adminAuth,
-    body("name")
+    body('name')
       .optional()
       .isLength({ min: 1, max: 100 })
-      .withMessage("Name must be 1-100 characters"),
-    body("globalSettings.theme")
+      .withMessage('Name must be 1-100 characters'),
+    body('globalSettings.theme')
       .optional()
-      .isIn(["default", "modern", "classic", "minimal"])
-      .withMessage("Invalid theme"),
-    body("globalSettings.primaryColor")
-      .optional()
-      .isHexColor()
-      .withMessage("Primary color must be a valid hex color"),
-    body("globalSettings.secondaryColor")
+      .isIn(['default', 'modern', 'classic', 'minimal'])
+      .withMessage('Invalid theme'),
+    body('globalSettings.primaryColor')
       .optional()
       .isHexColor()
-      .withMessage("Secondary color must be a valid hex color"),
+      .withMessage('Primary color must be a valid hex color'),
+    body('globalSettings.secondaryColor')
+      .optional()
+      .isHexColor()
+      .withMessage('Secondary color must be a valid hex color'),
   ],
-  logAdminAction("UPDATE_HOMEPAGE_CONTENT"),
+  logAdminAction('UPDATE_HOMEPAGE_CONTENT'),
   async (req, res) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({
           success: false,
-          message: "Validation errors",
+          message: 'Validation errors',
           errors: errors.array(),
         });
       }
@@ -94,53 +94,53 @@ router.put(
 
       res.json({
         success: true,
-        message: "Homepage content updated successfully",
+        message: 'Homepage content updated successfully',
         data: { content },
       });
     } catch (error) {
-      console.error("Update homepage content error:", error);
+      console.error('Update homepage content error:', error);
       res.status(500).json({
         success: false,
-        message: "Error updating homepage content",
+        message: 'Error updating homepage content',
       });
     }
-  },
+  }
 );
 
 // @route   POST /api/admin/homepage-content/sections
 // @desc    Add new section to home page
 // @access  Private (Admin)
 router.post(
-  "/sections",
+  '/sections',
   [
     adminAuth,
-    body("type")
+    body('type')
       .isIn([
-        "hero_banner",
-        "featured_products",
-        "special_offers",
-        "categories",
-        "about_us",
-        "why_choose_us",
-        "newsletter",
-        "testimonials",
-        "custom_html",
+        'hero_banner',
+        'featured_products',
+        'special_offers',
+        'categories',
+        'about_us',
+        'why_choose_us',
+        'newsletter',
+        'testimonials',
+        'custom_html',
       ])
-      .withMessage("Invalid section type"),
-    body("title").notEmpty().withMessage("Title is required"),
-    body("isActive")
+      .withMessage('Invalid section type'),
+    body('title').notEmpty().withMessage('Title is required'),
+    body('isActive')
       .optional()
       .isBoolean()
-      .withMessage("isActive must be boolean"),
+      .withMessage('isActive must be boolean'),
   ],
-  logAdminAction("ADD_HOMEPAGE_SECTION"),
+  logAdminAction('ADD_HOMEPAGE_SECTION'),
   async (req, res) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({
           success: false,
-          message: "Validation errors",
+          message: 'Validation errors',
           errors: errors.array(),
         });
       }
@@ -156,43 +156,43 @@ router.post(
 
       res.status(201).json({
         success: true,
-        message: "Section added successfully",
+        message: 'Section added successfully',
         data: { content },
       });
     } catch (error) {
-      console.error("Add homepage section error:", error);
+      console.error('Add homepage section error:', error);
       res.status(500).json({
         success: false,
-        message: "Error adding section",
+        message: 'Error adding section',
       });
     }
-  },
+  }
 );
 
 // @route   PUT /api/admin/homepage-content/sections/:sectionId
 // @desc    Update home page section
 // @access  Private (Admin)
 router.put(
-  "/sections/:sectionId",
+  '/sections/:sectionId',
   [
     adminAuth,
-    body("title")
+    body('title')
       .optional()
       .isLength({ min: 1, max: 200 })
-      .withMessage("Title must be 1-200 characters"),
-    body("isActive")
+      .withMessage('Title must be 1-200 characters'),
+    body('isActive')
       .optional()
       .isBoolean()
-      .withMessage("isActive must be boolean"),
+      .withMessage('isActive must be boolean'),
   ],
-  logAdminAction("UPDATE_HOMEPAGE_SECTION"),
+  logAdminAction('UPDATE_HOMEPAGE_SECTION'),
   async (req, res) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({
           success: false,
-          message: "Validation errors",
+          message: 'Validation errors',
           errors: errors.array(),
         });
       }
@@ -202,7 +202,7 @@ router.put(
       if (!content) {
         return res.status(404).json({
           success: false,
-          message: "Homepage content not found",
+          message: 'Homepage content not found',
         });
       }
 
@@ -213,34 +213,34 @@ router.put(
 
       res.json({
         success: true,
-        message: "Section updated successfully",
+        message: 'Section updated successfully',
         data: { content },
       });
     } catch (error) {
-      console.error("Update homepage section error:", error);
+      console.error('Update homepage section error:', error);
 
-      if (error.message === "Section not found") {
+      if (error.message === 'Section not found') {
         return res.status(404).json({
           success: false,
-          message: "Section not found",
+          message: 'Section not found',
         });
       }
 
       res.status(500).json({
         success: false,
-        message: "Error updating section",
+        message: 'Error updating section',
       });
     }
-  },
+  }
 );
 
 // @route   DELETE /api/admin/homepage-content/sections/:sectionId
 // @desc    Remove section from home page
 // @access  Private (Admin)
 router.delete(
-  "/sections/:sectionId",
+  '/sections/:sectionId',
   adminAuth,
-  logAdminAction("DELETE_HOMEPAGE_SECTION"),
+  logAdminAction('DELETE_HOMEPAGE_SECTION'),
   async (req, res) => {
     try {
       const content = await HomePageContent.getActiveContent();
@@ -248,7 +248,7 @@ router.delete(
       if (!content) {
         return res.status(404).json({
           success: false,
-          message: "Homepage content not found",
+          message: 'Homepage content not found',
         });
       }
 
@@ -256,52 +256,52 @@ router.delete(
 
       res.json({
         success: true,
-        message: "Section removed successfully",
+        message: 'Section removed successfully',
         data: { content },
       });
     } catch (error) {
-      console.error("Remove homepage section error:", error);
+      console.error('Remove homepage section error:', error);
 
-      if (error.message === "Section not found") {
+      if (error.message === 'Section not found') {
         return res.status(404).json({
           success: false,
-          message: "Section not found",
+          message: 'Section not found',
         });
       }
 
       res.status(500).json({
         success: false,
-        message: "Error removing section",
+        message: 'Error removing section',
       });
     }
-  },
+  }
 );
 
 // @route   PUT /api/admin/homepage-content/sections/reorder
 // @desc    Reorder home page sections
 // @access  Private (Admin)
 router.put(
-  "/sections/reorder",
+  '/sections/reorder',
   [
     adminAuth,
-    body("sectionOrders")
+    body('sectionOrders')
       .isArray()
-      .withMessage("Section orders must be an array"),
-    body("sectionOrders.*.sectionId")
+      .withMessage('Section orders must be an array'),
+    body('sectionOrders.*.sectionId')
       .notEmpty()
-      .withMessage("Section ID is required"),
-    body("sectionOrders.*.displayOrder")
+      .withMessage('Section ID is required'),
+    body('sectionOrders.*.displayOrder')
       .isInt({ min: 0 })
-      .withMessage("Display order must be a non-negative integer"),
+      .withMessage('Display order must be a non-negative integer'),
   ],
-  logAdminAction("REORDER_HOMEPAGE_SECTIONS"),
+  logAdminAction('REORDER_HOMEPAGE_SECTIONS'),
   async (req, res) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({
           success: false,
-          message: "Validation errors",
+          message: 'Validation errors',
           errors: errors.array(),
         });
       }
@@ -311,7 +311,7 @@ router.put(
       if (!content) {
         return res.status(404).json({
           success: false,
-          message: "Homepage content not found",
+          message: 'Homepage content not found',
         });
       }
 
@@ -320,35 +320,35 @@ router.put(
 
       res.json({
         success: true,
-        message: "Sections reordered successfully",
+        message: 'Sections reordered successfully',
         data: { content },
       });
     } catch (error) {
-      console.error("Reorder homepage sections error:", error);
+      console.error('Reorder homepage sections error:', error);
       res.status(500).json({
         success: false,
-        message: "Error reordering sections",
+        message: 'Error reordering sections',
       });
     }
-  },
+  }
 );
 
 // @route   POST /api/admin/homepage-content/upload-banner
 // @desc    Upload banner image for home page
 // @access  Private (Admin)
 router.post(
-  "/upload-banner",
+  '/upload-banner',
   adminAuth,
-  bannerImageUpload.single("banner"),
+  bannerImageUpload.single('banner'),
   optimizeImage,
   createThumbnails,
-  logAdminAction("UPLOAD_BANNER"),
+  logAdminAction('UPLOAD_BANNER'),
   async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({
           success: false,
-          message: "No banner image uploaded",
+          message: 'No banner image uploaded',
         });
       }
 
@@ -357,7 +357,7 @@ router.post(
 
       res.json({
         success: true,
-        message: "Banner uploaded successfully",
+        message: 'Banner uploaded successfully',
         data: {
           url: bannerUrl,
           thumbnail: thumbnailUrl,
@@ -366,7 +366,7 @@ router.post(
         },
       });
     } catch (error) {
-      console.error("Upload banner error:", error);
+      console.error('Upload banner error:', error);
 
       if (req.file) {
         deleteUploadedFiles([req.file]);
@@ -374,10 +374,10 @@ router.post(
 
       res.status(500).json({
         success: false,
-        message: "Error uploading banner",
+        message: 'Error uploading banner',
       });
     }
-  },
+  }
 );
 
 // Error handling middleware

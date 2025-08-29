@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const couponSchema = new mongoose.Schema(
   {
@@ -18,7 +18,7 @@ const couponSchema = new mongoose.Schema(
     },
     discountType: {
       type: String,
-      enum: ["percentage", "fixed"],
+      enum: ['percentage', 'fixed'],
       required: true,
     },
     discountValue: {
@@ -63,7 +63,7 @@ const couponSchema = new mongoose.Schema(
       {
         user: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
+          ref: 'User',
           required: true,
         },
         usedAt: {
@@ -86,25 +86,25 @@ const couponSchema = new mongoose.Schema(
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     categories: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Category",
+        ref: 'Category',
       },
     ], // If empty, applies to all categories
     products: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
+        ref: 'Product',
       },
     ], // If empty, applies to all products
     userTypes: [
       {
         type: String,
-        enum: ["new", "existing", "premium"],
+        enum: ['new', 'existing', 'premium'],
       },
     ], // If empty, applies to all users
     metadata: {
@@ -115,7 +115,7 @@ const couponSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 // Indexes for better performance (code already has unique index)
@@ -123,7 +123,7 @@ couponSchema.index({ isActive: 1, validFrom: 1, validUntil: 1 });
 couponSchema.index({ createdBy: 1 });
 
 // Virtual for checking if coupon is currently valid
-couponSchema.virtual("isCurrentlyValid").get(function () {
+couponSchema.virtual('isCurrentlyValid').get(function () {
   const now = new Date();
   return (
     this.isActive &&
@@ -140,7 +140,7 @@ couponSchema.methods.canUserUse = function (userId) {
   if (this.maxUsagePerUser === 0) return true; // No per-user limit
 
   const userUsageCount = this.usedBy.filter(
-    (usage) => usage.user.toString() === userId.toString(),
+    (usage) => usage.user.toString() === userId.toString()
   ).length;
 
   return userUsageCount < this.maxUsagePerUser;
@@ -151,7 +151,7 @@ couponSchema.methods.calculateDiscount = function (orderAmount) {
   if (orderAmount < this.minOrderAmount) return 0;
 
   let discount = 0;
-  if (this.discountType === "percentage") {
+  if (this.discountType === 'percentage') {
     discount = (orderAmount * this.discountValue) / 100;
     if (this.maxDiscountAmount > 0) {
       discount = Math.min(discount, this.maxDiscountAmount);
@@ -164,13 +164,13 @@ couponSchema.methods.calculateDiscount = function (orderAmount) {
 };
 
 // Pre-save middleware to validate dates
-couponSchema.pre("save", function (next) {
+couponSchema.pre('save', function (next) {
   if (this.validFrom >= this.validUntil) {
-    next(new Error("Valid from date must be before valid until date"));
+    next(new Error('Valid from date must be before valid until date'));
   }
 
-  if (this.discountType === "percentage" && this.discountValue > 100) {
-    next(new Error("Percentage discount cannot exceed 100%"));
+  if (this.discountType === 'percentage' && this.discountValue > 100) {
+    next(new Error('Percentage discount cannot exceed 100%'));
   }
 
   next();
@@ -183,11 +183,11 @@ couponSchema.statics.findValidForUser = function (userId, orderAmount = 0) {
     isActive: true,
     validFrom: { $lte: now },
     validUntil: { $gte: now },
-    usageCount: { $lt: "$maxUsage" },
+    usageCount: { $lt: '$maxUsage' },
     minOrderAmount: { $lte: orderAmount },
   }).then((coupons) => {
     return coupons.filter((coupon) => coupon.canUserUse(userId));
   });
 };
 
-module.exports = mongoose.model("Coupon", couponSchema);
+module.exports = mongoose.model('Coupon', couponSchema);

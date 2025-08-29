@@ -1,9 +1,9 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const orderItemSchema = new mongoose.Schema({
   product: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Product",
+    ref: 'Product',
     required: true,
   },
   name: {
@@ -55,7 +55,7 @@ const shippingAddressSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-    default: "USA",
+    default: 'USA',
   },
   phone: {
     type: String,
@@ -71,7 +71,7 @@ const orderSchema = new mongoose.Schema(
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
       index: true,
     },
@@ -87,18 +87,18 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: [
-        "credit_card",
-        "debit_card",
-        "paypal",
-        "stripe",
-        "cash_on_delivery",
+        'credit_card',
+        'debit_card',
+        'paypal',
+        'stripe',
+        'cash_on_delivery',
       ],
     },
     paymentStatus: {
       type: String,
       required: true,
-      enum: ["pending", "paid", "failed", "refunded", "partially_refunded"],
-      default: "pending",
+      enum: ['pending', 'paid', 'failed', 'refunded', 'partially_refunded'],
+      default: 'pending',
     },
     paymentDetails: {
       transactionId: String,
@@ -109,15 +109,15 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: [
-        "pending",
-        "confirmed",
-        "processing",
-        "shipped",
-        "delivered",
-        "cancelled",
-        "returned",
+        'pending',
+        'confirmed',
+        'processing',
+        'shipped',
+        'delivered',
+        'cancelled',
+        'returned',
       ],
-      default: "pending",
+      default: 'pending',
     },
     statusHistory: [
       {
@@ -162,12 +162,12 @@ const orderSchema = new mongoose.Schema(
     currency: {
       type: String,
       required: true,
-      default: "USD",
+      default: 'USD',
     },
     shippingMethod: {
       type: String,
-      enum: ["standard", "express", "overnight", "pickup"],
-      default: "standard",
+      enum: ['standard', 'express', 'overnight', 'pickup'],
+      default: 'standard',
     },
     trackingNumber: {
       type: String,
@@ -182,7 +182,7 @@ const orderSchema = new mongoose.Schema(
     notes: {
       type: String,
       trim: true,
-      maxlength: [500, "Notes cannot exceed 500 characters"],
+      maxlength: [500, 'Notes cannot exceed 500 characters'],
     },
     couponCode: {
       type: String,
@@ -200,24 +200,24 @@ const orderSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 // Generate order number before saving
-orderSchema.pre("save", async function (next) {
+orderSchema.pre('save', async function (next) {
   if (!this.orderNumber) {
     const timestamp = Date.now().toString();
     const random = Math.floor(Math.random() * 1000)
       .toString()
-      .padStart(3, "0");
+      .padStart(3, '0');
     this.orderNumber = `ORD-${timestamp.slice(-6)}${random}`;
   }
   next();
 });
 
 // Update status history when order status changes
-orderSchema.pre("save", function (next) {
-  if (this.isModified("orderStatus")) {
+orderSchema.pre('save', function (next) {
+  if (this.isModified('orderStatus')) {
     this.statusHistory.push({
       status: this.orderStatus,
       timestamp: new Date(),
@@ -227,12 +227,12 @@ orderSchema.pre("save", function (next) {
 });
 
 // Virtual for total items count
-orderSchema.virtual("totalItems").get(function () {
+orderSchema.virtual('totalItems').get(function () {
   return this.items.reduce((total, item) => total + item.quantity, 0);
 });
 
 // Virtual for order age
-orderSchema.virtual("orderAge").get(function () {
+orderSchema.virtual('orderAge').get(function () {
   const now = new Date();
   const created = this.createdAt;
   const diffTime = Math.abs(now - created);
@@ -241,12 +241,12 @@ orderSchema.virtual("orderAge").get(function () {
 });
 
 // Ensure virtual fields are serialized
-orderSchema.set("toJSON", { virtuals: true });
-orderSchema.set("toObject", { virtuals: true });
+orderSchema.set('toJSON', { virtuals: true });
+orderSchema.set('toObject', { virtuals: true });
 
 // Indexes for better performance (orderNumber already has unique index)
 orderSchema.index({ orderStatus: 1 });
 orderSchema.index({ paymentStatus: 1 });
 orderSchema.index({ createdAt: -1 });
 
-module.exports = mongoose.model("Order", orderSchema);
+module.exports = mongoose.model('Order', orderSchema);

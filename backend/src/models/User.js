@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema(
   {
@@ -27,8 +27,8 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["user", "admin"],
-      default: "user",
+      enum: ['user', 'admin'],
+      default: 'user',
     },
     phone: {
       type: String,
@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema(
       city: { type: String, trim: true },
       state: { type: String, trim: true },
       zipCode: { type: String, trim: true },
-      country: { type: String, trim: true, default: "India" },
+      country: { type: String, trim: true, default: 'India' },
     },
     emailVerified: {
       type: Boolean,
@@ -49,7 +49,7 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model('User', userSchema);

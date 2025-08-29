@@ -1,31 +1,31 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 // Schema for individual content sections
 const contentSectionSchema = new mongoose.Schema({
   type: {
     type: String,
     enum: [
-      "hero_banner",
-      "featured_products",
-      "special_offers",
-      "categories",
-      "about_us",
-      "why_choose_us",
-      "newsletter",
-      "testimonials",
-      "custom_html",
+      'hero_banner',
+      'featured_products',
+      'special_offers',
+      'categories',
+      'about_us',
+      'why_choose_us',
+      'newsletter',
+      'testimonials',
+      'custom_html',
     ],
     required: true,
   },
   title: {
     type: String,
     trim: true,
-    maxlength: [200, "Title cannot exceed 200 characters"],
+    maxlength: [200, 'Title cannot exceed 200 characters'],
   },
   subtitle: {
     type: String,
     trim: true,
-    maxlength: [300, "Subtitle cannot exceed 300 characters"],
+    maxlength: [300, 'Subtitle cannot exceed 300 characters'],
   },
   content: {
     type: mongoose.Schema.Types.Mixed, // Flexible content structure
@@ -42,11 +42,11 @@ const contentSectionSchema = new mongoose.Schema({
   settings: {
     backgroundColor: {
       type: String,
-      default: "#ffffff",
+      default: '#ffffff',
     },
     textColor: {
       type: String,
-      default: "#000000",
+      default: '#000000',
     },
     padding: {
       top: { type: Number, default: 0 },
@@ -72,7 +72,7 @@ const homePageContentSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
-      default: "default",
+      default: 'default',
     },
     isActive: {
       type: Boolean,
@@ -82,20 +82,20 @@ const homePageContentSchema = new mongoose.Schema(
     globalSettings: {
       theme: {
         type: String,
-        enum: ["default", "modern", "classic", "minimal"],
-        default: "default",
+        enum: ['default', 'modern', 'classic', 'minimal'],
+        default: 'default',
       },
       primaryColor: {
         type: String,
-        default: "#ea580c", // Orange-600
+        default: '#ea580c', // Orange-600
       },
       secondaryColor: {
         type: String,
-        default: "#f97316", // Orange-500
+        default: '#f97316', // Orange-500
       },
       fontFamily: {
         type: String,
-        default: "Inter, sans-serif",
+        default: 'Inter, sans-serif',
       },
       customCSS: {
         type: String,
@@ -106,12 +106,12 @@ const homePageContentSchema = new mongoose.Schema(
       title: {
         type: String,
         trim: true,
-        maxlength: [60, "SEO title cannot exceed 60 characters"],
+        maxlength: [60, 'SEO title cannot exceed 60 characters'],
       },
       description: {
         type: String,
         trim: true,
-        maxlength: [160, "SEO description cannot exceed 160 characters"],
+        maxlength: [160, 'SEO description cannot exceed 160 characters'],
       },
       keywords: [
         {
@@ -130,22 +130,22 @@ const homePageContentSchema = new mongoose.Schema(
     },
     modifiedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
     },
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 // Indexes
 homePageContentSchema.index({ name: 1 });
 homePageContentSchema.index({ isActive: 1 });
-homePageContentSchema.index({ "sections.type": 1 });
-homePageContentSchema.index({ "sections.displayOrder": 1 });
+homePageContentSchema.index({ 'sections.type': 1 });
+homePageContentSchema.index({ 'sections.displayOrder': 1 });
 
 // Pre-save middleware to update lastModified
-homePageContentSchema.pre("save", function (next) {
+homePageContentSchema.pre('save', function (next) {
   this.lastModified = new Date();
   next();
 });
@@ -171,7 +171,7 @@ homePageContentSchema.methods.addSection = function (sectionData) {
 homePageContentSchema.methods.updateSection = function (sectionId, updateData) {
   const section = this.sections.id(sectionId);
   if (!section) {
-    throw new Error("Section not found");
+    throw new Error('Section not found');
   }
 
   Object.assign(section, updateData);
@@ -182,7 +182,7 @@ homePageContentSchema.methods.updateSection = function (sectionId, updateData) {
 homePageContentSchema.methods.removeSection = function (sectionId) {
   const section = this.sections.id(sectionId);
   if (!section) {
-    throw new Error("Section not found");
+    throw new Error('Section not found');
   }
 
   section.remove();
@@ -203,46 +203,46 @@ homePageContentSchema.methods.reorderSections = function (sectionOrders) {
 
 // Static method to get active home page content
 homePageContentSchema.statics.getActiveContent = function () {
-  return this.findOne({ isActive: true }).populate("modifiedBy", "name email");
+  return this.findOne({ isActive: true }).populate('modifiedBy', 'name email');
 };
 
 // Static method to create default content
 homePageContentSchema.statics.createDefaultContent = function () {
   const defaultSections = [
     {
-      type: "hero_banner",
-      title: "Authentic. Pure. Homemade",
+      type: 'hero_banner',
+      title: 'Authentic. Pure. Homemade',
       subtitle:
-        "Indulge in elegant homemade food products, made with the finest ingredients and traditional recipes.",
+        'Indulge in elegant homemade food products, made with the finest ingredients and traditional recipes.',
       displayOrder: 0,
       isActive: true,
       content: {
-        buttonText: "Shop Now",
-        buttonLink: "/products",
-        backgroundImage: "",
+        buttonText: 'Shop Now',
+        buttonLink: '/products',
+        backgroundImage: '',
         showFeaturedProducts: true,
       },
     },
     {
-      type: "about_us",
-      title: "Thank You for Trusting Us",
+      type: 'about_us',
+      title: 'Thank You for Trusting Us',
       subtitle:
-        "We dedicate ourselves to purity, authenticity, and traditional methods.",
+        'We dedicate ourselves to purity, authenticity, and traditional methods.',
       displayOrder: 1,
       isActive: true,
       content: {
         description:
-          "We dedicate ourselves to purity, authenticity, and traditional methods in creating homemade food products. Our commitment to traditional recipes and homemade goodness ensures every product carries the essence of home-cooked meals.",
+          'We dedicate ourselves to purity, authenticity, and traditional methods in creating homemade food products. Our commitment to traditional recipes and homemade goodness ensures every product carries the essence of home-cooked meals.',
         stats: [
-          { label: "Premium Products", value: "100+" },
-          { label: "Happy Customers", value: "5000+" },
+          { label: 'Premium Products', value: '100+' },
+          { label: 'Happy Customers', value: '5000+' },
         ],
       },
     },
     {
-      type: "special_offers",
-      title: "🔥 Special Offers",
-      subtitle: "Limited time deals on premium spices",
+      type: 'special_offers',
+      title: '🔥 Special Offers',
+      subtitle: 'Limited time deals on premium spices',
       displayOrder: 2,
       isActive: true,
       content: {
@@ -251,10 +251,10 @@ homePageContentSchema.statics.createDefaultContent = function () {
       },
     },
     {
-      type: "featured_products",
-      title: "Demanded Products",
+      type: 'featured_products',
+      title: 'Demanded Products',
       subtitle:
-        "Handpicked favorites that our customers love most - premium quality spices and seasonings",
+        'Handpicked favorites that our customers love most - premium quality spices and seasonings',
       displayOrder: 3,
       isActive: true,
       content: {
@@ -263,10 +263,10 @@ homePageContentSchema.statics.createDefaultContent = function () {
       },
     },
     {
-      type: "categories",
-      title: "Popular Categories",
+      type: 'categories',
+      title: 'Popular Categories',
       subtitle:
-        "Explore our carefully curated categories of premium spices and seasonings",
+        'Explore our carefully curated categories of premium spices and seasonings',
       displayOrder: 4,
       isActive: true,
       content: {
@@ -275,8 +275,8 @@ homePageContentSchema.statics.createDefaultContent = function () {
       },
     },
     {
-      type: "why_choose_us",
-      title: "Why Choose Gruhapaaka?",
+      type: 'why_choose_us',
+      title: 'Why Choose Gruhapaaka?',
       subtitle:
         "We're committed to bringing you the finest homemade food products with unmatched quality and traditional taste",
       displayOrder: 5,
@@ -284,20 +284,20 @@ homePageContentSchema.statics.createDefaultContent = function () {
       content: {
         features: [
           {
-            icon: "🏠",
-            title: "Homemade Quality",
+            icon: '🏠',
+            title: 'Homemade Quality',
             description:
-              "Made with love in home kitchens using traditional recipes and the finest ingredients.",
+              'Made with love in home kitchens using traditional recipes and the finest ingredients.',
           },
           {
-            icon: "🚚",
-            title: "Fast Delivery",
+            icon: '🚚',
+            title: 'Fast Delivery',
             description:
-              "Free shipping on orders over $50. Get your homemade delicacies delivered fresh to your doorstep.",
+              'Free shipping on orders over $50. Get your homemade delicacies delivered fresh to your doorstep.',
           },
           {
-            icon: "🔒",
-            title: "Quality Guarantee",
+            icon: '🔒',
+            title: 'Quality Guarantee',
             description:
               "100% satisfaction guarantee. If you're not happy, we'll make it right.",
           },
@@ -305,25 +305,25 @@ homePageContentSchema.statics.createDefaultContent = function () {
       },
     },
     {
-      type: "newsletter",
-      title: "Stay Updated with Gruhapaaka",
+      type: 'newsletter',
+      title: 'Stay Updated with Gruhapaaka',
       subtitle:
-        "Get the latest updates on new homemade products, special offers, and traditional recipes delivered to your inbox.",
+        'Get the latest updates on new homemade products, special offers, and traditional recipes delivered to your inbox.',
       displayOrder: 6,
       isActive: true,
       content: {
-        placeholder: "Enter your email",
-        buttonText: "Subscribe",
-        backgroundColor: "#ea580c",
+        placeholder: 'Enter your email',
+        buttonText: 'Subscribe',
+        backgroundColor: '#ea580c',
       },
     },
   ];
 
   return this.create({
-    name: "default",
+    name: 'default',
     isActive: true,
     sections: defaultSections,
   });
 };
 
-module.exports = mongoose.model("HomePageContent", homePageContentSchema);
+module.exports = mongoose.model('HomePageContent', homePageContentSchema);

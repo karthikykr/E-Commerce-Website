@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const bannerSchema = new mongoose.Schema(
   {
@@ -6,17 +6,17 @@ const bannerSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      maxlength: [100, "Title cannot exceed 100 characters"],
+      maxlength: [100, 'Title cannot exceed 100 characters'],
     },
     subtitle: {
       type: String,
       trim: true,
-      maxlength: [200, "Subtitle cannot exceed 200 characters"],
+      maxlength: [200, 'Subtitle cannot exceed 200 characters'],
     },
     description: {
       type: String,
       trim: true,
-      maxlength: [500, "Description cannot exceed 500 characters"],
+      maxlength: [500, 'Description cannot exceed 500 characters'],
     },
     image: {
       url: {
@@ -56,7 +56,7 @@ const bannerSchema = new mongoose.Schema(
       text: {
         type: String,
         trim: true,
-        maxlength: [50, "Link text cannot exceed 50 characters"],
+        maxlength: [50, 'Link text cannot exceed 50 characters'],
       },
       openInNewTab: {
         type: Boolean,
@@ -65,8 +65,8 @@ const bannerSchema = new mongoose.Schema(
     },
     position: {
       type: String,
-      enum: ["hero", "top", "middle", "bottom", "sidebar"],
-      default: "hero",
+      enum: ['hero', 'top', 'middle', 'bottom', 'sidebar'],
+      default: 'hero',
     },
     displayOrder: {
       type: Number,
@@ -86,11 +86,11 @@ const bannerSchema = new mongoose.Schema(
     settings: {
       backgroundColor: {
         type: String,
-        default: "#ffffff",
+        default: '#ffffff',
       },
       textColor: {
         type: String,
-        default: "#000000",
+        default: '#000000',
       },
       overlayOpacity: {
         type: Number,
@@ -100,13 +100,13 @@ const bannerSchema = new mongoose.Schema(
       },
       textAlignment: {
         type: String,
-        enum: ["left", "center", "right"],
-        default: "center",
+        enum: ['left', 'center', 'right'],
+        default: 'center',
       },
       animation: {
         type: String,
-        enum: ["none", "fade", "slide", "zoom"],
-        default: "none",
+        enum: ['none', 'fade', 'slide', 'zoom'],
+        default: 'none',
       },
       autoPlay: {
         type: Boolean,
@@ -135,17 +135,17 @@ const bannerSchema = new mongoose.Schema(
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
     },
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 // Indexes for better performance
@@ -154,7 +154,7 @@ bannerSchema.index({ startDate: 1, endDate: 1 });
 bannerSchema.index({ isActive: 1, startDate: 1, endDate: 1 });
 
 // Virtual for checking if banner is currently active
-bannerSchema.virtual("isCurrentlyActive").get(function () {
+bannerSchema.virtual('isCurrentlyActive').get(function () {
   const now = new Date();
   const isWithinDateRange =
     (!this.startDate || this.startDate <= now) &&
@@ -186,8 +186,8 @@ bannerSchema.statics.getActiveByPosition = function (position) {
     $or: [{ endDate: { $exists: false } }, { endDate: { $gte: now } }],
   })
     .sort({ displayOrder: 1, createdAt: -1 })
-    .populate("createdBy", "name email")
-    .populate("updatedBy", "name email");
+    .populate('createdBy', 'name email')
+    .populate('updatedBy', 'name email');
 };
 
 // Static method to get all active banners
@@ -199,16 +199,16 @@ bannerSchema.statics.getAllActive = function () {
     $or: [{ endDate: { $exists: false } }, { endDate: { $gte: now } }],
   })
     .sort({ position: 1, displayOrder: 1, createdAt: -1 })
-    .populate("createdBy", "name email")
-    .populate("updatedBy", "name email");
+    .populate('createdBy', 'name email')
+    .populate('updatedBy', 'name email');
 };
 
 // Pre-save middleware to update updatedBy
-bannerSchema.pre("save", function (next) {
+bannerSchema.pre('save', function (next) {
   if (this.isModified() && !this.isNew) {
     this.updatedBy = this.createdBy; // Will be overridden by the route handler
   }
   next();
 });
 
-module.exports = mongoose.model("Banner", bannerSchema);
+module.exports = mongoose.model('Banner', bannerSchema);

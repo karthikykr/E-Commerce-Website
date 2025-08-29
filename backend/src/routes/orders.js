@@ -1,15 +1,15 @@
-const express = require("express");
-const { body, validationResult } = require("express-validator");
-const { Order, Cart, Product } = require("../models");
-const auth = require("../middleware/auth");
-const { adminAuth } = require("../middleware/adminAuth");
+const express = require('express');
+const { body, validationResult } = require('express-validator');
+const { Order, Cart, Product } = require('../models');
+const auth = require('../middleware/auth');
+const { adminAuth } = require('../middleware/adminAuth');
 
 const router = express.Router();
 
 // @route   GET /api/orders
 // @desc    Get all orders for current user or all orders for admin
 // @access  Private
-router.get("/", auth, async (req, res) => {
+router.get('/', auth, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -18,7 +18,7 @@ router.get("/", auth, async (req, res) => {
     let query = {};
 
     // If not admin, only show user's orders
-    if (req.user.role !== "admin") {
+    if (req.user.role !== 'admin') {
       query.user = req.user._id;
     }
 
@@ -28,8 +28,8 @@ router.get("/", auth, async (req, res) => {
     }
 
     const orders = await Order.find(query)
-      .populate("user", "name email phone")
-      .populate("items.product", "name images")
+      .populate('user', 'name email phone')
+      .populate('items.product', 'name images')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -49,10 +49,10 @@ router.get("/", auth, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Get orders error:", error);
+    console.error('Get orders error:', error);
     res.status(500).json({
       success: false,
-      message: "Server error while fetching orders",
+      message: 'Server error while fetching orders',
     });
   }
 });
@@ -60,15 +60,15 @@ router.get("/", auth, async (req, res) => {
 // @route   GET /api/orders/admin
 // @desc    Get all orders (Admin only)
 // @access  Private (Admin)
-router.get("/admin", adminAuth, async (req, res) => {
+router.get('/admin', adminAuth, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
 
     const orders = await Order.find()
-      .populate("user", "name email")
-      .populate("items.product", "name price")
+      .populate('user', 'name email')
+      .populate('items.product', 'name price')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -89,10 +89,10 @@ router.get("/admin", adminAuth, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Get admin orders error:", error);
+    console.error('Get admin orders error:', error);
     res.status(500).json({
       success: false,
-      message: "Server error while fetching orders",
+      message: 'Server error while fetching orders',
     });
   }
 });
@@ -100,40 +100,40 @@ router.get("/admin", adminAuth, async (req, res) => {
 // @route   GET /api/orders/admin/stats
 // @desc    Get order statistics (Admin only)
 // @access  Private (Admin)
-router.get("/admin/stats", adminAuth, async (req, res) => {
+router.get('/admin/stats', adminAuth, async (req, res) => {
   try {
     const totalOrders = await Order.countDocuments();
     const pendingOrders = await Order.countDocuments({
-      orderStatus: "pending",
+      orderStatus: 'pending',
     });
     const processingOrders = await Order.countDocuments({
-      orderStatus: "processing",
+      orderStatus: 'processing',
     });
     const shippedOrders = await Order.countDocuments({
-      orderStatus: "shipped",
+      orderStatus: 'shipped',
     });
     const deliveredOrders = await Order.countDocuments({
-      orderStatus: "delivered",
+      orderStatus: 'delivered',
     });
     const cancelledOrders = await Order.countDocuments({
-      orderStatus: "cancelled",
+      orderStatus: 'cancelled',
     });
 
     // Calculate total revenue
     const revenueResult = await Order.aggregate([
       {
         $match: {
-          orderStatus: { $in: ["delivered", "shipped", "processing"] },
+          orderStatus: { $in: ['delivered', 'shipped', 'processing'] },
         },
       },
-      { $group: { _id: null, totalRevenue: { $sum: "$total" } } },
+      { $group: { _id: null, totalRevenue: { $sum: '$total' } } },
     ]);
     const totalRevenue =
       revenueResult.length > 0 ? revenueResult[0].totalRevenue : 0;
 
     // Get recent orders
     const recentOrders = await Order.find()
-      .populate("user", "name email")
+      .populate('user', 'name email')
       .sort({ createdAt: -1 })
       .limit(5);
 
@@ -153,10 +153,10 @@ router.get("/admin/stats", adminAuth, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Get order stats error:", error);
+    console.error('Get order stats error:', error);
     res.status(500).json({
       success: false,
-      message: "Server error while fetching order statistics",
+      message: 'Server error while fetching order statistics',
     });
   }
 });
@@ -164,23 +164,23 @@ router.get("/admin/stats", adminAuth, async (req, res) => {
 // @route   GET /api/orders/:id
 // @desc    Get order by ID
 // @access  Private
-router.get("/:id", auth, async (req, res) => {
+router.get('/:id', auth, async (req, res) => {
   try {
     let query = { _id: req.params.id };
 
     // If not admin, only allow access to own orders
-    if (req.user.role !== "admin") {
+    if (req.user.role !== 'admin') {
       query.user = req.user._id;
     }
 
     const order = await Order.findOne(query)
-      .populate("user", "name email phone")
-      .populate("items.product", "name images description");
+      .populate('user', 'name email phone')
+      .populate('items.product', 'name images description');
 
     if (!order) {
       return res.status(404).json({
         success: false,
-        message: "Order not found",
+        message: 'Order not found',
       });
     }
 
@@ -189,10 +189,10 @@ router.get("/:id", auth, async (req, res) => {
       data: { order },
     });
   } catch (error) {
-    console.error("Get order error:", error);
+    console.error('Get order error:', error);
     res.status(500).json({
       success: false,
-      message: "Server error while fetching order",
+      message: 'Server error while fetching order',
     });
   }
 });
@@ -201,26 +201,26 @@ router.get("/:id", auth, async (req, res) => {
 // @desc    Create a new order from cart
 // @access  Private
 router.post(
-  "/",
+  '/',
   [
     auth,
-    body("shippingAddress")
+    body('shippingAddress')
       .notEmpty()
-      .withMessage("Shipping address is required"),
-    body("paymentMethod").notEmpty().withMessage("Payment method is required"),
+      .withMessage('Shipping address is required'),
+    body('paymentMethod').notEmpty().withMessage('Payment method is required'),
   ],
   async (req, res) => {
     try {
-      console.log("=== CREATE ORDER REQUEST ===");
-      console.log("User ID:", req.user._id);
-      console.log("Request body:", JSON.stringify(req.body, null, 2));
+      console.log('=== CREATE ORDER REQUEST ===');
+      console.log('User ID:', req.user._id);
+      console.log('Request body:', JSON.stringify(req.body, null, 2));
 
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        console.log("Validation errors:", errors.array());
+        console.log('Validation errors:', errors.array());
         return res.status(400).json({
           success: false,
-          message: "Validation errors",
+          message: 'Validation errors',
           errors: errors.array(),
         });
       }
@@ -230,13 +230,13 @@ router.post(
 
       // Get user's cart
       const cart = await Cart.findOne({ user: req.user._id }).populate(
-        "items.product",
+        'items.product'
       );
 
       if (!cart || cart.items.length === 0) {
         return res.status(400).json({
           success: false,
-          message: "Cart is empty",
+          message: 'Cart is empty',
         });
       }
 
@@ -258,7 +258,7 @@ router.post(
 
       // Create order items
       const orderItems = cart.items.map((item) => {
-        console.log("Processing cart item:", {
+        console.log('Processing cart item:', {
           productId: item.product._id,
           productName: item.product.name,
           price: item.price,
@@ -276,7 +276,7 @@ router.post(
             imageUrl = item.product.images[0].url || item.product.images[0];
           }
         } catch (imageError) {
-          console.log("Error processing image:", imageError);
+          console.log('Error processing image:', imageError);
         }
 
         return {
@@ -316,49 +316,49 @@ router.post(
       await cart.save();
 
       // Populate order for response
-      await order.populate("items.product", "name images");
+      await order.populate('items.product', 'name images');
 
       res.status(201).json({
         success: true,
-        message: "Order created successfully",
+        message: 'Order created successfully',
         data: { order },
       });
     } catch (error) {
-      console.error("Create order error:", error);
-      console.error("Error details:", error.message);
-      console.error("Error stack:", error.stack);
+      console.error('Create order error:', error);
+      console.error('Error details:', error.message);
+      console.error('Error stack:', error.stack);
       res.status(500).json({
         success: false,
-        message: "Server error while creating order",
+        message: 'Server error while creating order',
         error:
-          process.env.NODE_ENV === "development" ? error.message : undefined,
+          process.env.NODE_ENV === 'development' ? error.message : undefined,
       });
     }
-  },
+  }
 );
 
 // @route   PUT /api/orders/:id/status
 // @desc    Update order status (Admin only)
 // @access  Private (Admin)
 router.put(
-  "/:id/status",
+  '/:id/status',
   [
     adminAuth,
-    body("status")
+    body('status')
       .isIn([
-        "pending",
-        "confirmed",
-        "processing",
-        "shipped",
-        "delivered",
-        "cancelled",
-        "returned",
+        'pending',
+        'confirmed',
+        'processing',
+        'shipped',
+        'delivered',
+        'cancelled',
+        'returned',
       ])
-      .withMessage("Invalid order status"),
-    body("note")
+      .withMessage('Invalid order status'),
+    body('note')
       .optional()
       .isLength({ max: 500 })
-      .withMessage("Note cannot exceed 500 characters"),
+      .withMessage('Note cannot exceed 500 characters'),
   ],
   async (req, res) => {
     try {
@@ -366,7 +366,7 @@ router.put(
       if (!errors.isEmpty()) {
         return res.status(400).json({
           success: false,
-          message: "Validation errors",
+          message: 'Validation errors',
           errors: errors.array(),
         });
       }
@@ -377,7 +377,7 @@ router.put(
       if (!order) {
         return res.status(404).json({
           success: false,
-          message: "Order not found",
+          message: 'Order not found',
         });
       }
 
@@ -395,14 +395,14 @@ router.put(
       });
 
       // Set delivery dates
-      if (status === "shipped" && !order.estimatedDelivery) {
-        const estimatedDays = order.shippingMethod === "express" ? 2 : 5;
+      if (status === 'shipped' && !order.estimatedDelivery) {
+        const estimatedDays = order.shippingMethod === 'express' ? 2 : 5;
         order.estimatedDelivery = new Date(
-          Date.now() + estimatedDays * 24 * 60 * 60 * 1000,
+          Date.now() + estimatedDays * 24 * 60 * 60 * 1000
         );
       }
 
-      if (status === "delivered") {
+      if (status === 'delivered') {
         order.actualDelivery = new Date();
       }
 
@@ -410,17 +410,17 @@ router.put(
 
       res.json({
         success: true,
-        message: "Order status updated successfully",
+        message: 'Order status updated successfully',
         data: { order },
       });
     } catch (error) {
-      console.error("Update order status error:", error);
+      console.error('Update order status error:', error);
       res.status(500).json({
         success: false,
-        message: "Server error while updating order status",
+        message: 'Server error while updating order status',
       });
     }
-  },
+  }
 );
 
 module.exports = router;

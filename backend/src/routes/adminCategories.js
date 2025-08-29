@@ -1,7 +1,7 @@
-const express = require("express");
-const { body, validationResult } = require("express-validator");
-const { adminAuth, logAdminAction } = require("../middleware/adminAuth");
-const { Category, Product } = require("../models");
+const express = require('express');
+const { body, validationResult } = require('express-validator');
+const { adminAuth, logAdminAction } = require('../middleware/adminAuth');
+const { Category, Product } = require('../models');
 
 const router = express.Router();
 
@@ -9,17 +9,17 @@ const router = express.Router();
 // @desc    Get all categories with admin details
 // @access  Private (Admin)
 router.get(
-  "/",
+  '/',
   adminAuth,
-  logAdminAction("VIEW_CATEGORIES"),
+  logAdminAction('VIEW_CATEGORIES'),
   async (req, res) => {
     try {
       const {
         page = 1,
         limit = 20,
-        search = "",
-        sortBy = "sortOrder",
-        sortOrder = "asc",
+        search = '',
+        sortBy = 'sortOrder',
+        sortOrder = 'asc',
       } = req.query;
 
       // Build query
@@ -27,14 +27,14 @@ router.get(
 
       if (search) {
         query.$or = [
-          { name: { $regex: search, $options: "i" } },
-          { description: { $regex: search, $options: "i" } },
+          { name: { $regex: search, $options: 'i' } },
+          { description: { $regex: search, $options: 'i' } },
         ];
       }
 
       // Build sort object
       const sort = {};
-      sort[sortBy] = sortOrder === "desc" ? -1 : 1;
+      sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
 
       // Execute query with pagination
       const categories = await Category.find(query)
@@ -52,7 +52,7 @@ router.get(
             ...category.toObject(),
             productCount,
           };
-        }),
+        })
       );
 
       const totalCategories = await Category.countDocuments(query);
@@ -72,32 +72,32 @@ router.get(
         },
       });
     } catch (error) {
-      console.error("Get categories error:", error);
+      console.error('Get categories error:', error);
       res.status(500).json({
         success: false,
-        message: "Error fetching categories",
+        message: 'Error fetching categories',
       });
     }
-  },
+  }
 );
 
 // @route   GET /api/admin/categories/:id
 // @desc    Get category details by ID
 // @access  Private (Admin)
-router.get("/:id", adminAuth, async (req, res) => {
+router.get('/:id', adminAuth, async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
 
     if (!category) {
       return res.status(404).json({
         success: false,
-        message: "Category not found",
+        message: 'Category not found',
       });
     }
 
     // Get products in this category
     const products = await Product.find({ category: category._id })
-      .select("name slug price stockQuantity isActive")
+      .select('name slug price stockQuantity isActive')
       .limit(10);
 
     const productCount = await Product.countDocuments({
@@ -115,10 +115,10 @@ router.get("/:id", adminAuth, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Get category details error:", error);
+    console.error('Get category details error:', error);
     res.status(500).json({
       success: false,
-      message: "Error fetching category details",
+      message: 'Error fetching category details',
     });
   }
 });
@@ -127,24 +127,24 @@ router.get("/:id", adminAuth, async (req, res) => {
 // @desc    Create new category
 // @access  Private (Admin)
 router.post(
-  "/",
+  '/',
   [
     adminAuth,
-    body("name").notEmpty().withMessage("Category name is required"),
-    body("description").notEmpty().withMessage("Description is required"),
-    body("sortOrder")
+    body('name').notEmpty().withMessage('Category name is required'),
+    body('description').notEmpty().withMessage('Description is required'),
+    body('sortOrder')
       .optional()
       .isInt({ min: 0 })
-      .withMessage("Sort order must be a non-negative integer"),
+      .withMessage('Sort order must be a non-negative integer'),
   ],
-  logAdminAction("CREATE_CATEGORY"),
+  logAdminAction('CREATE_CATEGORY'),
   async (req, res) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({
           success: false,
-          message: "Validation errors",
+          message: 'Validation errors',
           errors: errors.array(),
         });
       }
@@ -154,15 +154,15 @@ router.post(
       // Generate slug from name
       const slug = name
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
 
       // Check if slug already exists
       const existingCategory = await Category.findOne({ slug });
       if (existingCategory) {
         return res.status(400).json({
           success: false,
-          message: "Category with this name already exists",
+          message: 'Category with this name already exists',
         });
       }
 
@@ -186,43 +186,43 @@ router.post(
 
       res.status(201).json({
         success: true,
-        message: "Category created successfully",
+        message: 'Category created successfully',
         data: { category },
       });
     } catch (error) {
-      console.error("Create category error:", error);
+      console.error('Create category error:', error);
       res.status(500).json({
         success: false,
-        message: "Error creating category",
+        message: 'Error creating category',
       });
     }
-  },
+  }
 );
 
 // @route   PUT /api/admin/categories/:id
 // @desc    Update category
 // @access  Private (Admin)
 router.put(
-  "/:id",
+  '/:id',
   [
     adminAuth,
-    body("name")
+    body('name')
       .optional()
       .notEmpty()
-      .withMessage("Category name cannot be empty"),
-    body("sortOrder")
+      .withMessage('Category name cannot be empty'),
+    body('sortOrder')
       .optional()
       .isInt({ min: 0 })
-      .withMessage("Sort order must be a non-negative integer"),
+      .withMessage('Sort order must be a non-negative integer'),
   ],
-  logAdminAction("UPDATE_CATEGORY"),
+  logAdminAction('UPDATE_CATEGORY'),
   async (req, res) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({
           success: false,
-          message: "Validation errors",
+          message: 'Validation errors',
           errors: errors.array(),
         });
       }
@@ -232,7 +232,7 @@ router.put(
       if (!category) {
         return res.status(404).json({
           success: false,
-          message: "Category not found",
+          message: 'Category not found',
         });
       }
 
@@ -243,8 +243,8 @@ router.put(
       if (updateFields.name && updateFields.name !== category.name) {
         const newSlug = updateFields.name
           .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/(^-|-$)/g, "");
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '');
         const existingCategory = await Category.findOne({
           slug: newSlug,
           _id: { $ne: category._id },
@@ -253,7 +253,7 @@ router.put(
         if (existingCategory) {
           return res.status(400).json({
             success: false,
-            message: "Category with this name already exists",
+            message: 'Category with this name already exists',
           });
         }
 
@@ -265,26 +265,26 @@ router.put(
 
       res.json({
         success: true,
-        message: "Category updated successfully",
+        message: 'Category updated successfully',
         data: { category },
       });
     } catch (error) {
-      console.error("Update category error:", error);
+      console.error('Update category error:', error);
       res.status(500).json({
         success: false,
-        message: "Error updating category",
+        message: 'Error updating category',
       });
     }
-  },
+  }
 );
 
 // @route   DELETE /api/admin/categories/:id
 // @desc    Delete category
 // @access  Private (Admin)
 router.delete(
-  "/:id",
+  '/:id',
   adminAuth,
-  logAdminAction("DELETE_CATEGORY"),
+  logAdminAction('DELETE_CATEGORY'),
   async (req, res) => {
     try {
       const category = await Category.findById(req.params.id);
@@ -292,7 +292,7 @@ router.delete(
       if (!category) {
         return res.status(404).json({
           success: false,
-          message: "Category not found",
+          message: 'Category not found',
         });
       }
 
@@ -311,25 +311,25 @@ router.delete(
 
       res.json({
         success: true,
-        message: "Category deleted successfully",
+        message: 'Category deleted successfully',
       });
     } catch (error) {
-      console.error("Delete category error:", error);
+      console.error('Delete category error:', error);
       res.status(500).json({
         success: false,
-        message: "Error deleting category",
+        message: 'Error deleting category',
       });
     }
-  },
+  }
 );
 
 // @route   PUT /api/admin/categories/:id/toggle-status
 // @desc    Toggle category active status
 // @access  Private (Admin)
 router.put(
-  "/:id/toggle-status",
+  '/:id/toggle-status',
   adminAuth,
-  logAdminAction("TOGGLE_CATEGORY_STATUS"),
+  logAdminAction('TOGGLE_CATEGORY_STATUS'),
   async (req, res) => {
     try {
       const category = await Category.findById(req.params.id);
@@ -337,7 +337,7 @@ router.put(
       if (!category) {
         return res.status(404).json({
           success: false,
-          message: "Category not found",
+          message: 'Category not found',
         });
       }
 
@@ -346,7 +346,7 @@ router.put(
 
       res.json({
         success: true,
-        message: `Category ${category.isActive ? "activated" : "deactivated"} successfully`,
+        message: `Category ${category.isActive ? 'activated' : 'deactivated'} successfully`,
         data: {
           category: {
             id: category._id,
@@ -356,36 +356,36 @@ router.put(
         },
       });
     } catch (error) {
-      console.error("Toggle category status error:", error);
+      console.error('Toggle category status error:', error);
       res.status(500).json({
         success: false,
-        message: "Error updating category status",
+        message: 'Error updating category status',
       });
     }
-  },
+  }
 );
 
 // @route   PUT /api/admin/categories/reorder
 // @desc    Reorder categories
 // @access  Private (Admin)
 router.put(
-  "/reorder",
+  '/reorder',
   [
     adminAuth,
-    body("categories").isArray().withMessage("Categories must be an array"),
-    body("categories.*.id").isMongoId().withMessage("Invalid category ID"),
-    body("categories.*.sortOrder")
+    body('categories').isArray().withMessage('Categories must be an array'),
+    body('categories.*.id').isMongoId().withMessage('Invalid category ID'),
+    body('categories.*.sortOrder')
       .isInt({ min: 0 })
-      .withMessage("Sort order must be a non-negative integer"),
+      .withMessage('Sort order must be a non-negative integer'),
   ],
-  logAdminAction("REORDER_CATEGORIES"),
+  logAdminAction('REORDER_CATEGORIES'),
   async (req, res) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({
           success: false,
-          message: "Validation errors",
+          message: 'Validation errors',
           errors: errors.array(),
         });
       }
@@ -394,23 +394,23 @@ router.put(
 
       // Update sort order for each category
       const updatePromises = categories.map(({ id, sortOrder }) =>
-        Category.findByIdAndUpdate(id, { sortOrder }, { new: true }),
+        Category.findByIdAndUpdate(id, { sortOrder }, { new: true })
       );
 
       await Promise.all(updatePromises);
 
       res.json({
         success: true,
-        message: "Categories reordered successfully",
+        message: 'Categories reordered successfully',
       });
     } catch (error) {
-      console.error("Reorder categories error:", error);
+      console.error('Reorder categories error:', error);
       res.status(500).json({
         success: false,
-        message: "Error reordering categories",
+        message: 'Error reordering categories',
       });
     }
-  },
+  }
 );
 
 module.exports = router;
