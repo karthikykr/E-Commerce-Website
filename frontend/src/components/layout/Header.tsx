@@ -200,7 +200,7 @@ export const Header = () => {
                 >
                   <div className="h-10 w-10 bg-gradient-to-r from-orange-600 to-red-600 rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-200">
                     <span className="text-white text-sm font-bold">
-                      {user.name.charAt(0).toUpperCase()}
+                      {user?.name?.charAt(0)?.toUpperCase() || ''}
                     </span>
                   </div>
                   <div className="hidden md:block text-left">

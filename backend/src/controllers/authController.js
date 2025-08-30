@@ -8,31 +8,6 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Admin credentials from .env
-    // const adminEmails = process.env.ADMIN_EMAILS?.split(',') || [];
-    // const adminPassword = process.env.ADMIN_PASSWORD;
-
-    // Handle admin login
-    // if (adminEmails.includes(email) && password === adminPassword) {
-    //   const adminUser = {
-    //     _id: email === adminEmails[0] ? 'admin-hardcoded-id' : 'admin-kaushik-id',
-    //     name: email === adminEmails[0] ? 'Admin User' : 'Kaushik B Shetty',
-    //     email,
-    //     role: 'admin',
-    //     authMethod: 'email',
-    //     isActive: true,
-    //     lastLogin: new Date()
-    //   };
-
-    //   const token = generateToken(adminUser._id, adminUser.role);
-
-    //   return res.json({
-    //     success: true,
-    //     message: 'Admin login successful',
-    //     data: { user: adminUser, token },
-    //   });
-    // }
-
     // Handle regular user login
     const user = await User.findOne({ email }).select('+password');
 
@@ -50,27 +25,21 @@ exports.login = async (req, res) => {
         .json({ success: false, message: 'Invalid credentials' });
     }
 
-    // Update last login
-    // user.lastLogin = new Date();
-    // await user.save();
-
     // Generate token
     const token = generateToken(user._id, user.role);
 
     return res.json({
       success: true,
       message: 'Login successful',
-      data: {
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          phone: user.phone,
-          address: user.address,
-          role: user.role,
-        },
-        token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        address: user.address,
+        role: user.role,
       },
+      token: token,
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -115,15 +84,13 @@ exports.register = async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
-      data: {
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        },
-        token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
       },
+      token: token,
     });
   } catch (error) {
     console.error('Registration error:', error);

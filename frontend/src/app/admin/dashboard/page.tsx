@@ -42,7 +42,7 @@ interface Product {
 }
 
 export default function AdminDashboard() {
-  const { user, isLoading, isAdmin } = useAuth();
+  const { user, isLoading } = useAuth();
   const router = useRouter();
   const {
     getDashboardStats,
@@ -58,17 +58,15 @@ export default function AdminDashboard() {
     if (!isLoading) {
       if (!user) {
         router.push('/auth/login');
-      } else if (!isAdmin) {
-        router.push('/');
       }
     }
-  }, [user, router, isLoading, isAdmin]);
+  }, [user, router, isLoading]);
 
   useEffect(() => {
-    if (user && isAdmin) {
+    if (user) {
       fetchDashboardData();
     }
-  }, [user, isAdmin]);
+  }, [user]);
 
   const fetchDashboardData = async () => {
     try {

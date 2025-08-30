@@ -71,11 +71,11 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({
     // Handle authentication errors
     if (response.status === 401) {
       // Token might be expired or invalid
-      Cookies.remove('auth-token');
-      Cookies.remove('user-data');
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      throw new Error('Authentication failed. Please login again.');
+      // Cookies.remove('auth-token');
+      // Cookies.remove('user-data');
+      // localStorage.removeItem('token');
+      // localStorage.removeItem('user');
+      // throw new Error('Authentication failed. Please login again.');
     }
 
     return response;
