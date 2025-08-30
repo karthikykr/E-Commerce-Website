@@ -30,7 +30,9 @@ export default function ProductDetailPage() {
         setError(null);
 
         // Fetch the specific product
-        const productResponse = await fetch(`http://localhost:5000/api/products/${productId}`);
+        const productResponse = await fetch(
+          `http://localhost:5000/api/products/${productId}`
+        );
         const productData = await productResponse.json();
 
         if (productData.success && productData.data) {
@@ -38,14 +40,16 @@ export default function ProductDetailPage() {
           setProduct(fetchedProduct);
 
           // Fetch related products from the same category
-          const relatedResponse = await fetch(`http://localhost:5000/api/products?category=${fetchedProduct.category._id || fetchedProduct.category.id}&limit=4`);
+          const relatedResponse = await fetch(
+            `http://localhost:5000/api/products?category=${fetchedProduct.category._id || fetchedProduct.category.id}&limit=4`
+          );
           const relatedData = await relatedResponse.json();
 
           if (relatedData.success && relatedData.data?.products) {
             // Filter out the current product from related products
-            const filtered = relatedData.data.products.filter((p: Product) =>
-              (p._id || p.id) !== productId
-            ).slice(0, 4);
+            const filtered = relatedData.data.products
+              .filter((p: Product) => (p._id || p.id) !== productId)
+              .slice(0, 4);
             setRelatedProducts(filtered);
           }
         } else {
@@ -85,7 +89,9 @@ export default function ProductDetailPage() {
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             {error || 'Product Not Found'}
           </h1>
-          <p className="text-gray-600 mb-8">The product you're looking for doesn't exist.</p>
+          <p className="text-gray-600 mb-8">
+            The product you're looking for doesn't exist.
+          </p>
           <Link href="/products">
             <Button>Back to Products</Button>
           </Link>
@@ -96,11 +102,18 @@ export default function ProductDetailPage() {
   }
 
   const discountPercentage = product.originalPrice
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    ? Math.round(
+        ((product.originalPrice - product.price) / product.originalPrice) * 100
+      )
     : 0;
 
   const { addToCart, isLoading: cartLoading } = useCart();
-  const { addToWishlist, removeFromWishlist, isInWishlist, isLoading: wishlistLoading } = useWishlist();
+  const {
+    addToWishlist,
+    removeFromWishlist,
+    isInWishlist,
+    isLoading: wishlistLoading,
+  } = useWishlist();
 
   const productIdForActions = product._id || product.id;
 
@@ -128,16 +141,37 @@ export default function ProductDetailPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Breadcrumb - Mobile Responsive */}
         <nav className="mb-4 sm:mb-6 lg:mb-8">
           <ol className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm text-gray-500 overflow-x-auto">
-            <li><Link href="/" className="hover:text-orange-600 whitespace-nowrap">Home</Link></li>
+            <li>
+              <Link
+                href="/"
+                className="hover:text-orange-600 whitespace-nowrap"
+              >
+                Home
+              </Link>
+            </li>
             <li>/</li>
-            <li><Link href="/products" className="hover:text-orange-600 whitespace-nowrap">Products</Link></li>
+            <li>
+              <Link
+                href="/products"
+                className="hover:text-orange-600 whitespace-nowrap"
+              >
+                Products
+              </Link>
+            </li>
             <li>/</li>
-            <li><Link href={`/categories/${product.category.slug}`} className="hover:text-orange-600 whitespace-nowrap">{product.category.name}</Link></li>
+            <li>
+              <Link
+                href={`/categories/${product.category.slug}`}
+                className="hover:text-orange-600 whitespace-nowrap"
+              >
+                {product.category.name}
+              </Link>
+            </li>
             <li>/</li>
             <li className="text-gray-900 truncate">{product.name}</li>
           </ol>
@@ -149,7 +183,9 @@ export default function ProductDetailPage() {
             {/* Product Image - Mobile Responsive */}
             <div className="space-y-4">
               <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
-                <div className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl">{product.category.image}</div>
+                <div className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl">
+                  {product.category.image}
+                </div>
               </div>
               {/* Thumbnail images would go here in a real app */}
             </div>
@@ -158,13 +194,18 @@ export default function ProductDetailPage() {
             <div className="space-y-4 sm:space-y-6">
               {/* Category */}
               <div>
-                <Link href={`/categories/${product.category.slug}`} className="text-orange-600 hover:text-orange-700 font-medium text-sm sm:text-base">
+                <Link
+                  href={`/categories/${product.category.slug}`}
+                  className="text-orange-600 hover:text-orange-700 font-medium text-sm sm:text-base"
+                >
                   {product.category.name}
                 </Link>
               </div>
 
               {/* Product Name */}
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{product.name}</h1>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+                {product.name}
+              </h1>
 
               {/* Rating - Mobile Responsive */}
               <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
@@ -173,7 +214,9 @@ export default function ProductDetailPage() {
                     <svg
                       key={i}
                       className={`h-4 w-4 sm:h-5 sm:w-5 ${
-                        i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-300'
+                        i < Math.floor(product.rating)
+                          ? 'text-yellow-400'
+                          : 'text-gray-300'
                       }`}
                       fill="currentColor"
                       viewBox="0 0 20 20"
@@ -189,10 +232,14 @@ export default function ProductDetailPage() {
 
               {/* Price - Mobile Responsive */}
               <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-                <span className="text-2xl sm:text-3xl font-bold text-gray-900">${product.price}</span>
+                <span className="text-2xl sm:text-3xl font-bold text-gray-900">
+                  ${product.price}
+                </span>
                 {product.originalPrice && (
                   <div className="flex items-center space-x-2">
-                    <span className="text-lg sm:text-xl text-gray-500 line-through">${product.originalPrice}</span>
+                    <span className="text-lg sm:text-xl text-gray-500 line-through">
+                      ${product.originalPrice}
+                    </span>
                     <span className="bg-red-100 text-red-800 px-2 py-1 rounded-md text-xs sm:text-sm font-semibold">
                       Save {discountPercentage}%
                     </span>
@@ -202,28 +249,45 @@ export default function ProductDetailPage() {
 
               {/* Stock Status - Mobile Responsive */}
               <div className="flex items-center space-x-2">
-                <div className={`h-3 w-3 rounded-full ${product.inStock ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                <span className={`text-sm sm:text-base font-medium ${product.inStock ? 'text-green-700' : 'text-red-700'}`}>
-                  {product.inStock ? `In Stock (${product.stockQuantity} available)` : 'Out of Stock'}
+                <div
+                  className={`h-3 w-3 rounded-full ${product.inStock ? 'bg-green-500' : 'bg-red-500'}`}
+                ></div>
+                <span
+                  className={`text-sm sm:text-base font-medium ${product.inStock ? 'text-green-700' : 'text-red-700'}`}
+                >
+                  {product.inStock
+                    ? `In Stock (${product.stockQuantity} available)`
+                    : 'Out of Stock'}
                 </span>
               </div>
 
               {/* Product Details - Mobile Responsive */}
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-sm sm:text-base text-gray-600">Weight:</span>
-                  <span className="text-sm sm:text-base font-medium">{product.weight}</span>
+                  <span className="text-sm sm:text-base text-gray-600">
+                    Weight:
+                  </span>
+                  <span className="text-sm sm:text-base font-medium">
+                    {product.weight}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm sm:text-base text-gray-600">Origin:</span>
-                  <span className="text-sm sm:text-base font-medium">{product.origin}</span>
+                  <span className="text-sm sm:text-base text-gray-600">
+                    Origin:
+                  </span>
+                  <span className="text-sm sm:text-base font-medium">
+                    {product.origin}
+                  </span>
                 </div>
               </div>
 
               {/* Tags */}
               <div className="flex flex-wrap gap-2">
-                {product.tags.map(tag => (
-                  <span key={tag} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
+                {product.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm"
+                  >
                     {tag}
                   </span>
                 ))}
@@ -233,7 +297,9 @@ export default function ProductDetailPage() {
               {product.inStock && (
                 <div className="space-y-4">
                   <div className="flex items-center space-x-4">
-                    <label className="text-gray-700 font-medium">Quantity:</label>
+                    <label className="text-gray-700 font-medium">
+                      Quantity:
+                    </label>
                     <div className="flex items-center border border-gray-300 rounded-lg">
                       <button
                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -241,9 +307,15 @@ export default function ProductDetailPage() {
                       >
                         -
                       </button>
-                      <span className="px-4 py-2 border-x border-gray-300">{quantity}</span>
+                      <span className="px-4 py-2 border-x border-gray-300">
+                        {quantity}
+                      </span>
                       <button
-                        onClick={() => setQuantity(Math.min(product.stockQuantity, quantity + 1))}
+                        onClick={() =>
+                          setQuantity(
+                            Math.min(product.stockQuantity, quantity + 1)
+                          )
+                        }
                         className="px-3 py-2 hover:bg-gray-100"
                       >
                         +
@@ -252,7 +324,11 @@ export default function ProductDetailPage() {
                   </div>
 
                   <div className="flex space-x-4">
-                    <Button onClick={handleAddToCart} className="flex-1" size="lg">
+                    <Button
+                      onClick={handleAddToCart}
+                      className="flex-1"
+                      size="lg"
+                    >
                       Add to Cart - ${(product.price * quantity).toFixed(2)}
                     </Button>
                     <Button
@@ -263,11 +339,20 @@ export default function ProductDetailPage() {
                     >
                       <svg
                         className={`h-5 w-5 ${isInWishlist(productIdForActions) ? 'text-red-500 fill-current' : ''}`}
-                        fill={isInWishlist(productIdForActions) ? 'currentColor' : 'none'}
+                        fill={
+                          isInWishlist(productIdForActions)
+                            ? 'currentColor'
+                            : 'none'
+                        }
                         stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                        />
                       </svg>
                     </Button>
                   </div>
@@ -281,7 +366,7 @@ export default function ProductDetailPage() {
         <div className="bg-white rounded-lg shadow-md mb-8">
           <div className="border-b border-gray-200">
             <nav className="flex space-x-8 px-8">
-              {['description', 'specifications', 'reviews'].map(tab => (
+              {['description', 'specifications', 'reviews'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setSelectedTab(tab)}
@@ -300,8 +385,12 @@ export default function ProductDetailPage() {
           <div className="p-8">
             {selectedTab === 'description' && (
               <div>
-                <h3 className="text-lg font-semibold mb-4">Product Description</h3>
-                <p className="text-gray-700 leading-relaxed">{product.description}</p>
+                <h3 className="text-lg font-semibold mb-4">
+                  Product Description
+                </h3>
+                <p className="text-gray-700 leading-relaxed">
+                  {product.description}
+                </p>
               </div>
             )}
 
@@ -323,7 +412,9 @@ export default function ProductDetailPage() {
                   </div>
                   <div>
                     <dt className="font-medium text-gray-900">Stock</dt>
-                    <dd className="text-gray-700">{product.stockQuantity} units</dd>
+                    <dd className="text-gray-700">
+                      {product.stockQuantity} units
+                    </dd>
                   </div>
                 </dl>
               </div>
@@ -341,10 +432,15 @@ export default function ProductDetailPage() {
         {/* Related Products */}
         {relatedProducts.length > 0 && (
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Related Products</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              Related Products
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {relatedProducts.map(relatedProduct => (
-                <ProductCard key={relatedProduct._id || relatedProduct.id} product={relatedProduct} />
+              {relatedProducts.map((relatedProduct) => (
+                <ProductCard
+                  key={relatedProduct._id || relatedProduct.id}
+                  product={relatedProduct}
+                />
               ))}
             </div>
           </div>

@@ -8,7 +8,10 @@ import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardHeader, CardBody, StatsCard } from '@/components/ui/Card';
-import { ProfileSkeleton, OrderHistorySkeleton } from '@/components/ui/Skeleton';
+import {
+  ProfileSkeleton,
+  OrderHistorySkeleton,
+} from '@/components/ui/Skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
@@ -81,7 +84,7 @@ export default function AccountPage() {
       setIsLoading(true);
       const response = await fetch('http://localhost:5000/api/orders', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
 
@@ -111,7 +114,7 @@ export default function AccountPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify(profileData),
       });
@@ -189,12 +192,14 @@ export default function AccountPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">My Account</h1>
-          <p className="text-gray-600 mt-2">Manage your account settings and view your order history</p>
+          <p className="text-gray-600 mt-2">
+            Manage your account settings and view your order history
+          </p>
         </div>
 
         {/* Stats Cards */}
@@ -205,16 +210,8 @@ export default function AccountPage() {
             icon="🛒"
             change={{ value: 12, type: 'increase' }}
           />
-          <StatsCard
-            title="Wishlist Items"
-            value={wishlistCount}
-            icon="❤️"
-          />
-          <StatsCard
-            title="Total Orders"
-            value={orders.length}
-            icon="📦"
-          />
+          <StatsCard title="Wishlist Items" value={wishlistCount} icon="❤️" />
+          <StatsCard title="Total Orders" value={orders.length} icon="📦" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -228,9 +225,10 @@ export default function AccountPage() {
                     onClick={() => setActiveTab(tab.id)}
                     className={`
                       w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors
-                      ${activeTab === tab.id
-                        ? 'bg-orange-100 text-orange-700 border-r-2 border-orange-500'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      ${
+                        activeTab === tab.id
+                          ? 'bg-orange-100 text-orange-700 border-r-2 border-orange-500'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }
                     `}
                   >
@@ -255,67 +253,111 @@ export default function AccountPage() {
             {activeTab === 'profile' && (
               <Card padding="lg">
                 <CardHeader>
-                  <h2 className="text-xl font-semibold text-gray-900">Profile Information</h2>
-                  <p className="text-gray-600 mt-1">Update your personal information</p>
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Profile Information
+                  </h2>
+                  <p className="text-gray-600 mt-1">
+                    Update your personal information
+                  </p>
                 </CardHeader>
-                
+
                 <CardBody>
                   <form onSubmit={handleProfileUpdate} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <Input
                         label="First Name"
                         value={profileData.firstName}
-                        onChange={(e) => setProfileData({...profileData, firstName: e.target.value})}
+                        onChange={(e) =>
+                          setProfileData({
+                            ...profileData,
+                            firstName: e.target.value,
+                          })
+                        }
                         required
                       />
                       <Input
                         label="Last Name"
                         value={profileData.lastName}
-                        onChange={(e) => setProfileData({...profileData, lastName: e.target.value})}
+                        onChange={(e) =>
+                          setProfileData({
+                            ...profileData,
+                            lastName: e.target.value,
+                          })
+                        }
                         required
                       />
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <Input
                         label="Email"
                         type="email"
                         value={profileData.email}
-                        onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                        onChange={(e) =>
+                          setProfileData({
+                            ...profileData,
+                            email: e.target.value,
+                          })
+                        }
                         required
                       />
                       <Input
                         label="Phone"
                         type="tel"
                         value={profileData.phone}
-                        onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                        onChange={(e) =>
+                          setProfileData({
+                            ...profileData,
+                            phone: e.target.value,
+                          })
+                        }
                       />
                     </div>
-                    
+
                     <Input
                       label="Address"
                       value={profileData.address}
-                      onChange={(e) => setProfileData({...profileData, address: e.target.value})}
+                      onChange={(e) =>
+                        setProfileData({
+                          ...profileData,
+                          address: e.target.value,
+                        })
+                      }
                     />
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <Input
                         label="City"
                         value={profileData.city}
-                        onChange={(e) => setProfileData({...profileData, city: e.target.value})}
+                        onChange={(e) =>
+                          setProfileData({
+                            ...profileData,
+                            city: e.target.value,
+                          })
+                        }
                       />
                       <Input
                         label="State"
                         value={profileData.state}
-                        onChange={(e) => setProfileData({...profileData, state: e.target.value})}
+                        onChange={(e) =>
+                          setProfileData({
+                            ...profileData,
+                            state: e.target.value,
+                          })
+                        }
                       />
                       <Input
                         label="ZIP Code"
                         value={profileData.zipCode}
-                        onChange={(e) => setProfileData({...profileData, zipCode: e.target.value})}
+                        onChange={(e) =>
+                          setProfileData({
+                            ...profileData,
+                            zipCode: e.target.value,
+                          })
+                        }
                       />
                     </div>
-                    
+
                     <div className="flex justify-end">
                       <Button
                         type="submit"
@@ -335,18 +377,26 @@ export default function AccountPage() {
             {activeTab === 'orders' && (
               <Card padding="lg">
                 <CardHeader>
-                  <h2 className="text-xl font-semibold text-gray-900">Order History</h2>
-                  <p className="text-gray-600 mt-1">View and track your orders</p>
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Order History
+                  </h2>
+                  <p className="text-gray-600 mt-1">
+                    View and track your orders
+                  </p>
                 </CardHeader>
-                
+
                 <CardBody>
                   {isLoading ? (
                     <OrderHistorySkeleton count={3} />
                   ) : orders.length === 0 ? (
                     <div className="text-center py-12">
                       <div className="text-6xl mb-4">📦</div>
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">No orders yet</h3>
-                      <p className="text-gray-600 mb-8">Start shopping to see your orders here</p>
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                        No orders yet
+                      </h3>
+                      <p className="text-gray-600 mb-8">
+                        Start shopping to see your orders here
+                      </p>
                       <Link href="/products">
                         <Button variant="gradient" size="lg">
                           Start Shopping
@@ -356,33 +406,49 @@ export default function AccountPage() {
                   ) : (
                     <div className="space-y-4">
                       {orders.map((order) => (
-                        <div key={order._id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div
+                          key={order._id}
+                          className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                        >
                           <div className="flex justify-between items-start mb-4">
                             <div>
-                              <h4 className="font-semibold text-gray-900">Order #{order.orderNumber}</h4>
+                              <h4 className="font-semibold text-gray-900">
+                                Order #{order.orderNumber}
+                              </h4>
                               <p className="text-sm text-gray-600">
                                 {new Date(order.createdAt).toLocaleDateString()}
                               </p>
                             </div>
                             <div className="flex space-x-2">
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.orderStatus)}`}>
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.orderStatus)}`}
+                              >
                                 {order.orderStatus}
                               </span>
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.paymentStatus)}`}>
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.paymentStatus)}`}
+                              >
                                 {order.paymentStatus}
                               </span>
                             </div>
                           </div>
-                          
+
                           <div className="space-y-2 mb-4">
                             {order.items.slice(0, 2).map((item, index) => (
-                              <div key={index} className="flex items-center space-x-3">
+                              <div
+                                key={index}
+                                className="flex items-center space-x-3"
+                              >
                                 <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
                                   <span className="text-sm">🌶️</span>
                                 </div>
                                 <div className="flex-1">
-                                  <p className="text-sm font-medium text-gray-900">{item.product.name}</p>
-                                  <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                                  <p className="text-sm font-medium text-gray-900">
+                                    {item.product.name}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    Qty: {item.quantity}
+                                  </p>
                                 </div>
                                 <p className="text-sm font-medium text-gray-900">
                                   ${(item.price * item.quantity).toFixed(2)}
@@ -395,7 +461,7 @@ export default function AccountPage() {
                               </p>
                             )}
                           </div>
-                          
+
                           <div className="flex justify-between items-center pt-4 border-t border-gray-200">
                             <p className="font-semibold text-gray-900">
                               Total: ${order.total.toFixed(2)}
@@ -418,15 +484,23 @@ export default function AccountPage() {
             {activeTab === 'wishlist' && (
               <Card padding="lg">
                 <CardHeader>
-                  <h2 className="text-xl font-semibold text-gray-900">My Wishlist</h2>
-                  <p className="text-gray-600 mt-1">Items you've saved for later</p>
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    My Wishlist
+                  </h2>
+                  <p className="text-gray-600 mt-1">
+                    Items you've saved for later
+                  </p>
                 </CardHeader>
-                
+
                 <CardBody>
                   <div className="text-center py-12">
                     <div className="text-6xl mb-4">❤️</div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">Your wishlist is empty</h3>
-                    <p className="text-gray-600 mb-8">Save items you love to your wishlist</p>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      Your wishlist is empty
+                    </h3>
+                    <p className="text-gray-600 mb-8">
+                      Save items you love to your wishlist
+                    </p>
                     <Link href="/products">
                       <Button variant="gradient" size="lg">
                         Browse Products
@@ -441,38 +515,64 @@ export default function AccountPage() {
             {activeTab === 'settings' && (
               <Card padding="lg">
                 <CardHeader>
-                  <h2 className="text-xl font-semibold text-gray-900">Account Settings</h2>
-                  <p className="text-gray-600 mt-1">Manage your account preferences</p>
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Account Settings
+                  </h2>
+                  <p className="text-gray-600 mt-1">
+                    Manage your account preferences
+                  </p>
                 </CardHeader>
-                
+
                 <CardBody>
                   <div className="space-y-6">
                     <div className="border border-gray-200 rounded-lg p-4">
-                      <h4 className="font-medium text-gray-900 mb-2">Change Password</h4>
-                      <p className="text-sm text-gray-600 mb-4">Update your password to keep your account secure</p>
-                      <Button variant="outline">
+                      <h4 className="font-medium text-gray-900 mb-2">
                         Change Password
-                      </Button>
+                      </h4>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Update your password to keep your account secure
+                      </p>
+                      <Button variant="outline">Change Password</Button>
                     </div>
-                    
+
                     <div className="border border-gray-200 rounded-lg p-4">
-                      <h4 className="font-medium text-gray-900 mb-2">Email Notifications</h4>
-                      <p className="text-sm text-gray-600 mb-4">Manage your email preferences</p>
+                      <h4 className="font-medium text-gray-900 mb-2">
+                        Email Notifications
+                      </h4>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Manage your email preferences
+                      </p>
                       <div className="space-y-2">
                         <label className="flex items-center">
-                          <input type="checkbox" className="rounded border-gray-300 text-orange-600 focus:ring-orange-500" defaultChecked />
-                          <span className="ml-2 text-sm text-gray-700">Order updates</span>
+                          <input
+                            type="checkbox"
+                            className="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                            defaultChecked
+                          />
+                          <span className="ml-2 text-sm text-gray-700">
+                            Order updates
+                          </span>
                         </label>
                         <label className="flex items-center">
-                          <input type="checkbox" className="rounded border-gray-300 text-orange-600 focus:ring-orange-500" defaultChecked />
-                          <span className="ml-2 text-sm text-gray-700">Promotional emails</span>
+                          <input
+                            type="checkbox"
+                            className="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                            defaultChecked
+                          />
+                          <span className="ml-2 text-sm text-gray-700">
+                            Promotional emails
+                          </span>
                         </label>
                       </div>
                     </div>
-                    
+
                     <div className="border border-red-200 rounded-lg p-4 bg-red-50">
-                      <h4 className="font-medium text-red-900 mb-2">Delete Account</h4>
-                      <p className="text-sm text-red-700 mb-4">Permanently delete your account and all data</p>
+                      <h4 className="font-medium text-red-900 mb-2">
+                        Delete Account
+                      </h4>
+                      <p className="text-sm text-red-700 mb-4">
+                        Permanently delete your account and all data
+                      </p>
                       <Button variant="danger" size="sm">
                         Delete Account
                       </Button>

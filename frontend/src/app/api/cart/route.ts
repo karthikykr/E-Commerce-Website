@@ -2,16 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { products } from '@/data/products';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_SECRET =
+  process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
 // Mock cart storage (in production, use a database)
-let userCarts: Record<string, any[]> = {};
+const userCarts: Record<string, any[]> = {};
 
 // Helper function to verify JWT token
 function verifyToken(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
-  const token = authHeader?.replace('Bearer ', '') || request.cookies.get('auth-token')?.value;
-  
+  const token =
+    authHeader?.replace('Bearer ', '') ||
+    request.cookies.get('auth-token')?.value;
+
   if (!token) {
     return null;
   }
@@ -35,25 +38,31 @@ export async function GET(request: NextRequest) {
     }
 
     const userCart = userCarts[user.userId] || [];
-    const cartWithProducts = userCart.map(item => {
-      const product = products.find(p => p.id === item.productId);
+    const cartWithProducts = userCart.map((item) => {
+      const product = products.find((p) => p.id === item.productId);
       return {
         ...item,
         product,
-        total: product ? product.price * item.quantity : 0
+        total: product ? product.price * item.quantity : 0,
       };
     });
 
-    const totalAmount = cartWithProducts.reduce((sum, item) => sum + item.total, 0);
-    const totalItems = cartWithProducts.reduce((sum, item) => sum + item.quantity, 0);
+    const totalAmount = cartWithProducts.reduce(
+      (sum, item) => sum + item.total,
+      0
+    );
+    const totalItems = cartWithProducts.reduce(
+      (sum, item) => sum + item.quantity,
+      0
+    );
 
     return NextResponse.json({
       success: true,
       cart: {
         items: cartWithProducts,
         totalAmount,
-        totalItems
-      }
+        totalItems,
+      },
     });
   } catch (error) {
     console.error('Get cart error:', error);
@@ -84,7 +93,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const product = products.find(p => p.id === productId);
+    const product = products.find((p) => p.id === productId);
     if (!product) {
       return NextResponse.json(
         { success: false, message: 'Product not found' },
@@ -103,11 +112,14 @@ export async function POST(request: NextRequest) {
       userCarts[user.userId] = [];
     }
 
-    const existingItemIndex = userCarts[user.userId].findIndex(item => item.productId === productId);
-    
+    const existingItemIndex = userCarts[user.userId].findIndex(
+      (item) => item.productId === productId
+    );
+
     if (existingItemIndex >= 0) {
       // Update quantity if item already exists
-      const newQuantity = userCarts[user.userId][existingItemIndex].quantity + quantity;
+      const newQuantity =
+        userCarts[user.userId][existingItemIndex].quantity + quantity;
       if (newQuantity > product.stockQuantity) {
         return NextResponse.json(
           { success: false, message: 'Not enough stock available' },
@@ -127,13 +139,13 @@ export async function POST(request: NextRequest) {
         id: Date.now().toString(),
         productId,
         quantity,
-        addedAt: new Date()
+        addedAt: new Date(),
       });
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Item added to cart successfully'
+      message: 'Item added to cart successfully',
     });
   } catch (error) {
     console.error('Add to cart error:', error);
@@ -171,7 +183,9 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const itemIndex = userCarts[user.userId].findIndex(item => item.productId === productId);
+    const itemIndex = userCarts[user.userId].findIndex(
+      (item) => item.productId === productId
+    );
     if (itemIndex === -1) {
       return NextResponse.json(
         { success: false, message: 'Item not found in cart' },
@@ -183,7 +197,7 @@ export async function PUT(request: NextRequest) {
       // Remove item if quantity is 0
       userCarts[user.userId].splice(itemIndex, 1);
     } else {
-      const product = products.find(p => p.id === productId);
+      const product = products.find((p) => p.id === productId);
       if (product && quantity > product.stockQuantity) {
         return NextResponse.json(
           { success: false, message: 'Not enough stock available' },
@@ -195,7 +209,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Cart updated successfully'
+      message: 'Cart updated successfully',
     });
   } catch (error) {
     console.error('Update cart error:', error);
@@ -232,7 +246,10 @@ export async function DELETE(request: NextRequest) {
 
     if (!productId) {
       return NextResponse.json(
-        { success: false, message: 'Product ID is required in query parameter or request body' },
+        {
+          success: false,
+          message: 'Product ID is required in query parameter or request body',
+        },
         { status: 400 }
       );
     }
@@ -244,7 +261,9 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const itemIndex = userCarts[user.userId].findIndex(item => item.productId === productId);
+    const itemIndex = userCarts[user.userId].findIndex(
+      (item) => item.productId === productId
+    );
     if (itemIndex === -1) {
       return NextResponse.json(
         { success: false, message: 'Item not found in cart' },
@@ -257,7 +276,10 @@ export async function DELETE(request: NextRequest) {
     // Calculate totals
     const items = userCarts[user.userId];
     const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-    const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const totalAmount = items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
 
     return NextResponse.json({
       success: true,
@@ -266,9 +288,9 @@ export async function DELETE(request: NextRequest) {
         cart: {
           items,
           totalItems,
-          totalAmount
-        }
-      }
+          totalAmount,
+        },
+      },
     });
   } catch (error) {
     console.error('Remove from cart error:', error);

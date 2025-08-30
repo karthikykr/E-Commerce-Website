@@ -60,8 +60,8 @@ export default function AdminOrders() {
       const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:5000/api/admin/orders', {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       const data = await response.json();
@@ -88,14 +88,17 @@ export default function AdminOrders() {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/admin/orders/${orderId}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ orderStatus: newStatus })
-      });
+      const response = await fetch(
+        `http://localhost:5000/api/admin/orders/${orderId}/status`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ orderStatus: newStatus }),
+        }
+      );
 
       console.log('📡 Response status:', response.status);
 
@@ -104,19 +107,23 @@ export default function AdminOrders() {
 
       if (data.success) {
         console.log('✅ Order status updated successfully');
-        setOrders(orders.map(order =>
-          order._id === orderId
-            ? { ...order, orderStatus: newStatus }
-            : order
-        ));
+        setOrders(
+          orders.map((order) =>
+            order._id === orderId ? { ...order, orderStatus: newStatus } : order
+          )
+        );
         setError(null); // Clear any previous errors
       } else {
         console.error('❌ Update failed:', data.message);
-        setError(`Failed to update order status: ${data.message || 'Unknown error'}`);
+        setError(
+          `Failed to update order status: ${data.message || 'Unknown error'}`
+        );
       }
     } catch (error) {
       console.error('❌ Network error updating order:', error);
-      setError('Network error while updating order. Please check your connection.');
+      setError(
+        'Network error while updating order. Please check your connection.'
+      );
     }
   };
 
@@ -152,14 +159,26 @@ export default function AdminOrders() {
       <div className="space-y-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Orders</h2>
-          <p className="text-gray-600 mt-1">Manage customer orders and track fulfillment</p>
+          <p className="text-gray-600 mt-1">
+            Manage customer orders and track fulfillment
+          </p>
         </div>
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <div className="flex">
-              <svg className="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="w-5 h-5 text-red-400 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
               <p className="text-red-700">{error}</p>
             </div>
@@ -202,7 +221,10 @@ export default function AdminOrders() {
                 </thead>
                 <tbody className="bg-white">
                   {orders.map((order) => (
-                    <tr key={order._id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <tr
+                      key={order._id}
+                      className="border-b border-gray-100 hover:bg-gray-50"
+                    >
                       <td className="px-6 py-4 text-sm font-medium text-gray-900">
                         #{order._id ? order._id.slice(-6) : 'N/A'}
                       </td>
@@ -217,23 +239,33 @@ export default function AdminOrders() {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
-                        {order.items?.length || 0} item{(order.items?.length || 0) !== 1 ? 's' : ''}
+                        {order.items?.length || 0} item
+                        {(order.items?.length || 0) !== 1 ? 's' : ''}
                       </td>
                       <td className="px-6 py-4 text-sm font-medium text-gray-900">
                         ${(order.total || 0).toFixed(2)}
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(order.orderStatus || 'pending')}`}>
-                          {(order.orderStatus || 'pending').charAt(0).toUpperCase() + (order.orderStatus || 'pending').slice(1)}
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(order.orderStatus || 'pending')}`}
+                        >
+                          {(order.orderStatus || 'pending')
+                            .charAt(0)
+                            .toUpperCase() +
+                            (order.orderStatus || 'pending').slice(1)}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">
-                        {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'Unknown date'}
+                        {order.createdAt
+                          ? new Date(order.createdAt).toLocaleDateString()
+                          : 'Unknown date'}
                       </td>
                       <td className="px-6 py-4">
                         <select
                           value={order.orderStatus || 'pending'}
-                          onChange={(e) => updateOrderStatus(order._id, e.target.value)}
+                          onChange={(e) =>
+                            updateOrderStatus(order._id, e.target.value)
+                          }
                           className="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                         >
                           <option value="pending">Pending</option>
@@ -248,14 +280,28 @@ export default function AdminOrders() {
                 </tbody>
               </table>
             </div>
-            
+
             {orders.length === 0 && (
               <div className="text-center py-16">
-                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                <svg
+                  className="mx-auto h-12 w-12 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                  />
                 </svg>
-                <h3 className="mt-4 text-lg font-medium text-gray-900">No orders</h3>
-                <p className="mt-2 text-gray-500">Orders will appear here when customers make purchases.</p>
+                <h3 className="mt-4 text-lg font-medium text-gray-900">
+                  No orders
+                </h3>
+                <p className="mt-2 text-gray-500">
+                  Orders will appear here when customers make purchases.
+                </p>
               </div>
             )}
           </div>

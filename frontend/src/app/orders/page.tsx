@@ -80,7 +80,7 @@ export default function OrdersPage() {
 
       const response = await fetch('http://localhost:5000/api/orders', {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -137,7 +137,7 @@ export default function OrdersPage() {
     }
   };
 
-  const filteredOrders = orders.filter(order => {
+  const filteredOrders = orders.filter((order) => {
     if (filter === 'all') return true;
     return order.orderStatus.toLowerCase() === filter.toLowerCase();
   });
@@ -160,16 +160,20 @@ export default function OrdersPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50">
       <Header />
-      
+
       <main className="container mx-auto px-4 py-8">
         {/* Page Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">My Orders</h1>
-              <p className="text-gray-600">Track and manage your order history</p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                My Orders
+              </h1>
+              <p className="text-gray-600">
+                Track and manage your order history
+              </p>
             </div>
-            <Link 
+            <Link
               href="/products"
               className="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition-colors"
             >
@@ -181,7 +185,14 @@ export default function OrdersPage() {
         {/* Filter Tabs */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <div className="flex flex-wrap gap-2">
-            {['all', 'pending', 'processing', 'shipped', 'delivered', 'cancelled'].map((status) => (
+            {[
+              'all',
+              'pending',
+              'processing',
+              'shipped',
+              'delivered',
+              'cancelled',
+            ].map((status) => (
               <button
                 key={status}
                 onClick={() => setFilter(status)}
@@ -193,7 +204,8 @@ export default function OrdersPage() {
               >
                 {status.charAt(0).toUpperCase() + status.slice(1)}
                 {status === 'all' && ` (${orders.length})`}
-                {status !== 'all' && ` (${orders.filter(o => o.orderStatus.toLowerCase() === status).length})`}
+                {status !== 'all' &&
+                  ` (${orders.filter((o) => o.orderStatus.toLowerCase() === status).length})`}
               </button>
             ))}
           </div>
@@ -212,12 +224,22 @@ export default function OrdersPage() {
           <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                <svg
+                  className="h-5 w-5 text-red-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </div>
               <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">Error loading orders</h3>
+                <h3 className="text-sm font-medium text-red-800">
+                  Error loading orders
+                </h3>
                 <p className="text-sm text-red-700 mt-1">{error}</p>
               </div>
               <div className="ml-auto">
@@ -236,20 +258,29 @@ export default function OrdersPage() {
         {!loading && !error && filteredOrders.length === 0 && (
           <div className="bg-white rounded-lg shadow-sm p-12 text-center">
             <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              <svg
+                className="w-12 h-12 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                />
               </svg>
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               {filter === 'all' ? 'No orders yet' : `No ${filter} orders`}
             </h3>
             <p className="text-gray-600 mb-6">
-              {filter === 'all' 
+              {filter === 'all'
                 ? "You haven't placed any orders yet. Start shopping to see your orders here!"
-                : `You don't have any ${filter} orders at the moment.`
-              }
+                : `You don't have any ${filter} orders at the moment.`}
             </p>
-            <Link 
+            <Link
               href="/products"
               className="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition-colors inline-block"
             >
@@ -262,7 +293,10 @@ export default function OrdersPage() {
         {!loading && !error && filteredOrders.length > 0 && (
           <div className="space-y-6">
             {filteredOrders.map((order) => (
-              <div key={order._id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <div
+                key={order._id}
+                className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+              >
                 {/* Order Header */}
                 <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -272,20 +306,30 @@ export default function OrdersPage() {
                           Order #{order.orderNumber || order._id.slice(-6)}
                         </h3>
                         <p className="text-sm text-gray-600">
-                          Placed on {new Date(order.createdAt).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
+                          Placed on{' '}
+                          {new Date(order.createdAt).toLocaleDateString(
+                            'en-US',
+                            {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                            }
+                          )}
                         </p>
                       </div>
                     </div>
                     <div className="mt-4 sm:mt-0 flex items-center space-x-4">
-                      <span className={`inline-flex px-3 py-1 text-xs font-medium rounded-full ${getStatusColor(order.orderStatus)}`}>
-                        {order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1)}
+                      <span
+                        className={`inline-flex px-3 py-1 text-xs font-medium rounded-full ${getStatusColor(order.orderStatus)}`}
+                      >
+                        {order.orderStatus.charAt(0).toUpperCase() +
+                          order.orderStatus.slice(1)}
                       </span>
-                      <span className={`inline-flex px-3 py-1 text-xs font-medium rounded-full ${getPaymentStatusColor(order.paymentStatus)}`}>
-                        {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}
+                      <span
+                        className={`inline-flex px-3 py-1 text-xs font-medium rounded-full ${getPaymentStatusColor(order.paymentStatus)}`}
+                      >
+                        {order.paymentStatus.charAt(0).toUpperCase() +
+                          order.paymentStatus.slice(1)}
                       </span>
                     </div>
                   </div>
@@ -299,21 +343,37 @@ export default function OrdersPage() {
                       <div key={index} className="flex items-center space-x-4">
                         <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
                           {item.product?.images?.[0]?.url || item.image ? (
-                            <img 
-                              src={item.product?.images?.[0]?.url || item.image} 
+                            <img
+                              src={item.product?.images?.[0]?.url || item.image}
                               alt={item.product?.name || item.name}
                               className="w-full h-full object-cover rounded-lg"
                             />
                           ) : (
-                            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            <svg
+                              className="w-8 h-8 text-gray-400"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                              />
                             </svg>
                           )}
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-medium text-gray-900">{item.product?.name || item.name}</h4>
-                          <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
-                          <p className="text-sm font-medium text-gray-900">₹{(item.price * item.quantity).toFixed(2)}</p>
+                          <h4 className="font-medium text-gray-900">
+                            {item.product?.name || item.name}
+                          </h4>
+                          <p className="text-sm text-gray-600">
+                            Quantity: {item.quantity}
+                          </p>
+                          <p className="text-sm font-medium text-gray-900">
+                            ₹{(item.price * item.quantity).toFixed(2)}
+                          </p>
                         </div>
                       </div>
                     ))}
@@ -323,20 +383,30 @@ export default function OrdersPage() {
                   <div className="border-t border-gray-200 pt-4">
                     <div className="flex justify-between items-center mb-4">
                       <div className="text-sm text-gray-600">
-                        <p><span className="font-medium">Payment Method:</span> {order.paymentMethod}</p>
+                        <p>
+                          <span className="font-medium">Payment Method:</span>{' '}
+                          {order.paymentMethod}
+                        </p>
                         {order.trackingNumber && (
-                          <p><span className="font-medium">Tracking:</span> {order.trackingNumber}</p>
+                          <p>
+                            <span className="font-medium">Tracking:</span>{' '}
+                            {order.trackingNumber}
+                          </p>
                         )}
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-bold text-gray-900">Total: ₹{order.total.toFixed(2)}</p>
-                        <p className="text-sm text-gray-600">{order.items.length} item(s)</p>
+                        <p className="text-lg font-bold text-gray-900">
+                          Total: ₹{order.total.toFixed(2)}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {order.items.length} item(s)
+                        </p>
                       </div>
                     </div>
 
                     {/* Action Buttons */}
                     <div className="flex flex-col sm:flex-row gap-3">
-                      <Link 
+                      <Link
                         href={`/orders/${order._id}`}
                         className="flex-1 bg-orange-600 text-white text-center py-2 px-4 rounded-lg hover:bg-orange-700 transition-colors"
                       >
@@ -347,7 +417,9 @@ export default function OrdersPage() {
                           Reorder
                         </button>
                       )}
-                      {['pending', 'processing'].includes(order.orderStatus.toLowerCase()) && (
+                      {['pending', 'processing'].includes(
+                        order.orderStatus.toLowerCase()
+                      ) && (
                         <button className="flex-1 bg-red-100 text-red-700 py-2 px-4 rounded-lg hover:bg-red-200 transition-colors">
                           Cancel Order
                         </button>

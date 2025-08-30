@@ -22,14 +22,18 @@ export default function CreateFeaturedProduct() {
     tags: '',
     animation: 'bounce',
     rotation: 'rotate-1',
-    hoverRotation: 'rotate-0'
+    hoverRotation: 'rotate-0',
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,24 +56,27 @@ export default function CreateFeaturedProduct() {
     try {
       const token = localStorage.getItem('token');
       const submitData = new FormData();
-      
+
       // Add form fields
       Object.entries(formData).forEach(([key, value]) => {
         submitData.append(key, value);
       });
-      
+
       // Add image file
       if (imageFile) {
         submitData.append('image', imageFile);
       }
 
-      const response = await fetch('http://localhost:5000/api/featured-products', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: submitData,
-      });
+      const response = await fetch(
+        'http://localhost:5000/api/featured-products',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: submitData,
+        }
+      );
 
       const data = await response.json();
 
@@ -97,10 +104,14 @@ export default function CreateFeaturedProduct() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Create Featured Product</h1>
-              <p className="text-gray-600">Add a new product to the homepage showcase</p>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Create Featured Product
+              </h1>
+              <p className="text-gray-600">
+                Add a new product to the homepage showcase
+              </p>
             </div>
-            <Link 
+            <Link
               href="/admin/featured-products"
               className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
             >
@@ -116,8 +127,16 @@ export default function CreateFeaturedProduct() {
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
             <div className="flex">
               <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                <svg
+                  className="h-5 w-5 text-red-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </div>
               <div className="ml-3">
@@ -285,13 +304,27 @@ export default function CreateFeaturedProduct() {
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               >
-                <option value="from-red-100 via-red-200 to-red-300">Red Gradient</option>
-                <option value="from-orange-100 via-orange-200 to-orange-300">Orange Gradient</option>
-                <option value="from-yellow-100 via-yellow-200 to-amber-200">Yellow Gradient</option>
-                <option value="from-green-100 via-green-200 to-emerald-200">Green Gradient</option>
-                <option value="from-blue-100 via-blue-200 to-blue-300">Blue Gradient</option>
-                <option value="from-purple-100 via-purple-200 to-purple-300">Purple Gradient</option>
-                <option value="from-pink-100 via-pink-200 to-pink-300">Pink Gradient</option>
+                <option value="from-red-100 via-red-200 to-red-300">
+                  Red Gradient
+                </option>
+                <option value="from-orange-100 via-orange-200 to-orange-300">
+                  Orange Gradient
+                </option>
+                <option value="from-yellow-100 via-yellow-200 to-amber-200">
+                  Yellow Gradient
+                </option>
+                <option value="from-green-100 via-green-200 to-emerald-200">
+                  Green Gradient
+                </option>
+                <option value="from-blue-100 via-blue-200 to-blue-300">
+                  Blue Gradient
+                </option>
+                <option value="from-purple-100 via-purple-200 to-purple-300">
+                  Purple Gradient
+                </option>
+                <option value="from-pink-100 via-pink-200 to-pink-300">
+                  Pink Gradient
+                </option>
               </select>
             </div>
 
@@ -335,15 +368,32 @@ export default function CreateFeaturedProduct() {
                 <div className="space-y-1 text-center">
                   {imagePreview ? (
                     <div className="mb-4">
-                      <img src={imagePreview} alt="Preview" className="mx-auto h-32 w-32 object-cover rounded-lg" />
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="mx-auto h-32 w-32 object-cover rounded-lg"
+                      />
                     </div>
                   ) : (
-                    <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                      <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                    <svg
+                      className="mx-auto h-12 w-12 text-gray-400"
+                      stroke="currentColor"
+                      fill="none"
+                      viewBox="0 0 48 48"
+                    >
+                      <path
+                        d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   )}
                   <div className="flex text-sm text-gray-600">
-                    <label htmlFor="image-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-orange-600 hover:text-orange-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-orange-500">
+                    <label
+                      htmlFor="image-upload"
+                      className="relative cursor-pointer bg-white rounded-md font-medium text-orange-600 hover:text-orange-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-orange-500"
+                    >
                       <span>Upload a file</span>
                       <input
                         id="image-upload"
@@ -357,7 +407,9 @@ export default function CreateFeaturedProduct() {
                     </label>
                     <p className="pl-1">or drag and drop</p>
                   </div>
-                  <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                  <p className="text-xs text-gray-500">
+                    PNG, JPG, GIF up to 5MB
+                  </p>
                 </div>
               </div>
             </div>

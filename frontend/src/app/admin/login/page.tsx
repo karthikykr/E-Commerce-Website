@@ -13,7 +13,7 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   const { login } = useAuth();
   const { addToast } = useToast();
   const router = useRouter();
@@ -25,7 +25,7 @@ export default function AdminLoginPage() {
 
     try {
       const success = await login(email, password);
-      
+
       if (success) {
         // Check if user is admin
         const userData = JSON.parse(localStorage.getItem('user') || '{}');
@@ -82,8 +82,12 @@ export default function AdminLoginPage() {
           <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-blue-900">Demo Admin Credentials</p>
-                <p className="text-xs text-blue-700 mt-1">Click to auto-fill the form</p>
+                <p className="text-sm font-medium text-blue-900">
+                  Demo Admin Credentials
+                </p>
+                <p className="text-xs text-blue-700 mt-1">
+                  Click to auto-fill the form
+                </p>
               </div>
               <Button
                 type="button"
@@ -108,8 +112,18 @@ export default function AdminLoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               leftIcon={
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
+                  />
                 </svg>
               }
             />
@@ -124,8 +138,18 @@ export default function AdminLoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               leftIcon={
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  />
                 </svg>
               }
             />
@@ -144,17 +168,23 @@ export default function AdminLoginPage() {
 
           {/* Admin Credentials Display */}
           <div className="mt-6 p-4 bg-gray-50 rounded-lg border">
-            <h4 className="text-sm font-semibold text-gray-900 mb-2">Admin Credentials:</h4>
+            <h4 className="text-sm font-semibold text-gray-900 mb-2">
+              Admin Credentials:
+            </h4>
             <div className="text-sm text-gray-700 space-y-1">
-              <p><strong>Email:</strong> admin@spicestore.com</p>
-              <p><strong>Password:</strong> admin123</p>
+              <p>
+                <strong>Email:</strong> admin@spicestore.com
+              </p>
+              <p>
+                <strong>Password:</strong> admin123
+              </p>
             </div>
           </div>
 
           {/* Back to Main Site */}
           <div className="mt-6 text-center">
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="text-sm text-orange-600 hover:text-orange-700 font-medium transition-colors"
             >
               ← Back to Main Site
@@ -164,7 +194,9 @@ export default function AdminLoginPage() {
 
         {/* Features */}
         <div className="text-center">
-          <p className="text-sm text-gray-600 mb-4">Admin Dashboard Features:</p>
+          <p className="text-sm text-gray-600 mb-4">
+            Admin Dashboard Features:
+          </p>
           <div className="flex justify-center space-x-6 text-xs text-gray-500">
             <span>📊 Analytics</span>
             <span>📦 Orders</span>

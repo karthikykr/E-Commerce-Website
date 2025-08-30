@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 
 // Mock database - In a real app, you'd use a proper database
-let users = [
+const users = [
   {
     id: '1',
     name: 'Admin User',
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already exists
-    const existingUser = users.find(u => u.email === email);
+    const existingUser = users.find((u) => u.email === email);
     if (existingUser) {
       return NextResponse.json(
         { success: false, message: 'User with this email already exists' },
@@ -58,7 +58,10 @@ export async function POST(request: NextRequest) {
     // Validate password length
     if (password.length < 6) {
       return NextResponse.json(
-        { success: false, message: 'Password must be at least 6 characters long' },
+        {
+          success: false,
+          message: 'Password must be at least 6 characters long',
+        },
         { status: 400 }
       );
     }
@@ -90,7 +93,6 @@ export async function POST(request: NextRequest) {
       message: 'Registration successful',
       user: userWithoutPassword,
     });
-
   } catch (error) {
     console.error('Registration error:', error);
     return NextResponse.json(

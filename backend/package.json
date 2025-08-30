@@ -14,7 +14,8 @@
     "test-api": "node api-test.js",
     "check-mongodb": "node check-mongodb.js",
     "setup-db": "node setup-database.js",
-    "create-admin": "node create-admin.js"
+    "create-admin": "node create-admin.js",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "axios": "^1.10.0",
@@ -31,7 +32,8 @@
     "sharp": "^0.34.3"
   },
   "devDependencies": {
-    "nodemon": "^3.0.2"
+    "nodemon": "^3.0.2",
+    "prettier": "^3.6.2"
   },
   "keywords": [
     "express",

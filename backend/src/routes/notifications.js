@@ -20,10 +20,12 @@ router.get('/', auth, async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-    const totalNotifications = await Notification.countDocuments({ user: req.user._id });
-    const unreadCount = await Notification.countDocuments({ 
-      user: req.user._id, 
-      isRead: false 
+    const totalNotifications = await Notification.countDocuments({
+      user: req.user._id,
+    });
+    const unreadCount = await Notification.countDocuments({
+      user: req.user._id,
+      isRead: false,
     });
 
     res.json({
@@ -36,15 +38,15 @@ router.get('/', auth, async (req, res) => {
           totalPages: Math.ceil(totalNotifications / limit),
           totalNotifications,
           hasNext: page < Math.ceil(totalNotifications / limit),
-          hasPrev: page > 1
-        }
-      }
+          hasPrev: page > 1,
+        },
+      },
     });
   } catch (error) {
     console.error('Get notifications error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error while fetching notifications'
+      message: 'Server error while fetching notifications',
     });
   }
 });
@@ -54,20 +56,20 @@ router.get('/', auth, async (req, res) => {
 // @access  Private
 router.get('/unread-count', auth, async (req, res) => {
   try {
-    const unreadCount = await Notification.countDocuments({ 
-      user: req.user._id, 
-      isRead: false 
+    const unreadCount = await Notification.countDocuments({
+      user: req.user._id,
+      isRead: false,
     });
 
     res.json({
       success: true,
-      data: { unreadCount }
+      data: { unreadCount },
     });
   } catch (error) {
     console.error('Get unread count error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error while fetching unread count'
+      message: 'Server error while fetching unread count',
     });
   }
 });
@@ -79,13 +81,13 @@ router.put('/:id/read', auth, async (req, res) => {
   try {
     const notification = await Notification.findOne({
       _id: req.params.id,
-      user: req.user._id
+      user: req.user._id,
     });
 
     if (!notification) {
       return res.status(404).json({
         success: false,
-        message: 'Notification not found'
+        message: 'Notification not found',
       });
     }
 
@@ -96,13 +98,13 @@ router.put('/:id/read', auth, async (req, res) => {
     res.json({
       success: true,
       message: 'Notification marked as read',
-      data: { notification }
+      data: { notification },
     });
   } catch (error) {
     console.error('Mark notification read error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error while marking notification as read'
+      message: 'Server error while marking notification as read',
     });
   }
 });
@@ -119,13 +121,13 @@ router.put('/mark-all-read', auth, async (req, res) => {
 
     res.json({
       success: true,
-      message: 'All notifications marked as read'
+      message: 'All notifications marked as read',
     });
   } catch (error) {
     console.error('Mark all notifications read error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error while marking all notifications as read'
+      message: 'Server error while marking all notifications as read',
     });
   }
 });
@@ -137,13 +139,13 @@ router.delete('/:id', auth, async (req, res) => {
   try {
     const notification = await Notification.findOne({
       _id: req.params.id,
-      user: req.user._id
+      user: req.user._id,
     });
 
     if (!notification) {
       return res.status(404).json({
         success: false,
-        message: 'Notification not found'
+        message: 'Notification not found',
       });
     }
 
@@ -151,13 +153,13 @@ router.delete('/:id', auth, async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Notification deleted successfully'
+      message: 'Notification deleted successfully',
     });
   } catch (error) {
     console.error('Delete notification error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error while deleting notification'
+      message: 'Server error while deleting notification',
     });
   }
 });
@@ -165,110 +167,125 @@ router.delete('/:id', auth, async (req, res) => {
 // @route   POST /api/notifications/admin/send
 // @desc    Send notification to users (Admin only)
 // @access  Private (Admin)
-router.post('/admin/send', [
-  adminAuth,
-  body('title').notEmpty().withMessage('Title is required'),
-  body('message').notEmpty().withMessage('Message is required'),
-  body('type').isIn(['info', 'success', 'warning', 'error', 'promotion']).withMessage('Invalid notification type'),
-  body('recipients').isArray().withMessage('Recipients must be an array'),
-  body('recipients.*').isMongoId().withMessage('Invalid user ID in recipients')
-], async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
+router.post(
+  '/admin/send',
+  [
+    adminAuth,
+    body('title').notEmpty().withMessage('Title is required'),
+    body('message').notEmpty().withMessage('Message is required'),
+    body('type')
+      .isIn(['info', 'success', 'warning', 'error', 'promotion'])
+      .withMessage('Invalid notification type'),
+    body('recipients').isArray().withMessage('Recipients must be an array'),
+    body('recipients.*')
+      .isMongoId()
+      .withMessage('Invalid user ID in recipients'),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation errors',
+          errors: errors.array(),
+        });
+      }
+
+      const { title, message, type, recipients, actionUrl, metadata } =
+        req.body;
+
+      // Create notifications for all recipients
+      const notifications = recipients.map((userId) => ({
+        user: userId,
+        title,
+        message,
+        type,
+        actionUrl,
+        metadata,
+        sentBy: req.user._id,
+      }));
+
+      await Notification.insertMany(notifications);
+
+      res.status(201).json({
+        success: true,
+        message: `Notification sent to ${recipients.length} users`,
+        data: { sentCount: recipients.length },
+      });
+    } catch (error) {
+      console.error('Send notification error:', error);
+      res.status(500).json({
         success: false,
-        message: 'Validation errors',
-        errors: errors.array()
+        message: 'Server error while sending notification',
       });
     }
-
-    const { title, message, type, recipients, actionUrl, metadata } = req.body;
-
-    // Create notifications for all recipients
-    const notifications = recipients.map(userId => ({
-      user: userId,
-      title,
-      message,
-      type,
-      actionUrl,
-      metadata,
-      sentBy: req.user._id
-    }));
-
-    await Notification.insertMany(notifications);
-
-    res.status(201).json({
-      success: true,
-      message: `Notification sent to ${recipients.length} users`,
-      data: { sentCount: recipients.length }
-    });
-  } catch (error) {
-    console.error('Send notification error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error while sending notification'
-    });
   }
-});
+);
 
 // @route   POST /api/notifications/admin/broadcast
 // @desc    Broadcast notification to all users (Admin only)
 // @access  Private (Admin)
-router.post('/admin/broadcast', [
-  adminAuth,
-  body('title').notEmpty().withMessage('Title is required'),
-  body('message').notEmpty().withMessage('Message is required'),
-  body('type').isIn(['info', 'success', 'warning', 'error', 'promotion']).withMessage('Invalid notification type')
-], async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
+router.post(
+  '/admin/broadcast',
+  [
+    adminAuth,
+    body('title').notEmpty().withMessage('Title is required'),
+    body('message').notEmpty().withMessage('Message is required'),
+    body('type')
+      .isIn(['info', 'success', 'warning', 'error', 'promotion'])
+      .withMessage('Invalid notification type'),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation errors',
+          errors: errors.array(),
+        });
+      }
+
+      const { title, message, type, actionUrl, metadata, userRole } = req.body;
+
+      // Get all users (optionally filter by role)
+      const { User } = require('../models');
+      let userQuery = { isActive: true };
+      if (userRole) {
+        userQuery.role = userRole;
+      }
+
+      const users = await User.find(userQuery).select('_id');
+      const userIds = users.map((user) => user._id);
+
+      // Create notifications for all users
+      const notifications = userIds.map((userId) => ({
+        user: userId,
+        title,
+        message,
+        type,
+        actionUrl,
+        metadata,
+        sentBy: req.user._id,
+      }));
+
+      await Notification.insertMany(notifications);
+
+      res.status(201).json({
+        success: true,
+        message: `Notification broadcasted to ${userIds.length} users`,
+        data: { sentCount: userIds.length },
+      });
+    } catch (error) {
+      console.error('Broadcast notification error:', error);
+      res.status(500).json({
         success: false,
-        message: 'Validation errors',
-        errors: errors.array()
+        message: 'Server error while broadcasting notification',
       });
     }
-
-    const { title, message, type, actionUrl, metadata, userRole } = req.body;
-
-    // Get all users (optionally filter by role)
-    const { User } = require('../models');
-    let userQuery = { isActive: true };
-    if (userRole) {
-      userQuery.role = userRole;
-    }
-
-    const users = await User.find(userQuery).select('_id');
-    const userIds = users.map(user => user._id);
-
-    // Create notifications for all users
-    const notifications = userIds.map(userId => ({
-      user: userId,
-      title,
-      message,
-      type,
-      actionUrl,
-      metadata,
-      sentBy: req.user._id
-    }));
-
-    await Notification.insertMany(notifications);
-
-    res.status(201).json({
-      success: true,
-      message: `Notification broadcasted to ${userIds.length} users`,
-      data: { sentCount: userIds.length }
-    });
-  } catch (error) {
-    console.error('Broadcast notification error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error while broadcasting notification'
-    });
   }
-});
+);
 
 // @route   GET /api/notifications/admin
 // @desc    Get all notifications (Admin only)
@@ -297,15 +314,15 @@ router.get('/admin', adminAuth, async (req, res) => {
           totalPages: Math.ceil(totalNotifications / limit),
           totalNotifications,
           hasNext: page < Math.ceil(totalNotifications / limit),
-          hasPrev: page > 1
-        }
-      }
+          hasPrev: page > 1,
+        },
+      },
     });
   } catch (error) {
     console.error('Get admin notifications error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error while fetching notifications'
+      message: 'Server error while fetching notifications',
     });
   }
 });

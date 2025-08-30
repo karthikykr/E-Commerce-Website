@@ -21,5 +21,5 @@ module.exports = {
   Notification,
   FeaturedProduct,
   HomePageContent,
-  Banner
+  Banner,
 };

@@ -76,13 +76,18 @@ export const buildApiUrl = (endpoint: string): string => {
 
 // Helper function to get auth headers
 export const getAuthHeaders = (): Record<string, string> => {
-  const token = typeof window !== 'undefined' 
-    ? localStorage.getItem('token') || document.cookie.split('; ').find(row => row.startsWith('auth-token='))?.split('=')[1]
-    : null;
+  const token =
+    typeof window !== 'undefined'
+      ? localStorage.getItem('token') ||
+        document.cookie
+          .split('; ')
+          .find((row) => row.startsWith('auth-token='))
+          ?.split('=')[1]
+      : null;
 
   return {
     'Content-Type': 'application/json',
-    ...(token && { 'Authorization': `Bearer ${token}` }),
+    ...(token && { Authorization: `Bearer ${token}` }),
   };
 };
 
@@ -92,7 +97,7 @@ export const apiCall = async <T = any>(
   options: RequestInit = {}
 ): Promise<T> => {
   const url = buildApiUrl(endpoint);
-  
+
   const response = await fetch(url, {
     ...options,
     headers: {
@@ -102,8 +107,12 @@ export const apiCall = async <T = any>(
   });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ message: 'Network error' }));
-    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    const errorData = await response
+      .json()
+      .catch(() => ({ message: 'Network error' }));
+    throw new Error(
+      errorData.message || `HTTP error! status: ${response.status}`
+    );
   }
 
   return response.json();
@@ -113,21 +122,24 @@ export const apiCall = async <T = any>(
 export const api = {
   // Auth methods
   auth: {
-    login: (credentials: { identifier: string; password: string; authMethod: string }) =>
+    login: (credentials: {
+      identifier: string;
+      password: string;
+      authMethod: string;
+    }) =>
       apiCall(API_CONFIG.ENDPOINTS.AUTH.LOGIN, {
         method: 'POST',
         body: JSON.stringify(credentials),
       }),
-    
+
     register: (userData: any) =>
       apiCall(API_CONFIG.ENDPOINTS.AUTH.REGISTER, {
         method: 'POST',
         body: JSON.stringify(userData),
       }),
-    
-    getProfile: () =>
-      apiCall(API_CONFIG.ENDPOINTS.AUTH.PROFILE),
-    
+
+    getProfile: () => apiCall(API_CONFIG.ENDPOINTS.AUTH.PROFILE),
+
     updateProfile: (profileData: any) =>
       apiCall(API_CONFIG.ENDPOINTS.AUTH.PROFILE, {
         method: 'PUT',
@@ -138,37 +150,36 @@ export const api = {
   // Product methods
   products: {
     getAll: (params?: URLSearchParams) => {
-      const endpoint = params 
+      const endpoint = params
         ? `${API_CONFIG.ENDPOINTS.PRODUCTS.LIST}?${params.toString()}`
         : API_CONFIG.ENDPOINTS.PRODUCTS.LIST;
       return apiCall(endpoint);
     },
-    
-    getById: (id: string) =>
-      apiCall(API_CONFIG.ENDPOINTS.PRODUCTS.DETAIL(id)),
+
+    getById: (id: string) => apiCall(API_CONFIG.ENDPOINTS.PRODUCTS.DETAIL(id)),
   },
 
   // Cart methods
   cart: {
     get: () => apiCall(API_CONFIG.ENDPOINTS.CART.GET),
-    
+
     add: (productId: string, quantity: number) =>
       apiCall(API_CONFIG.ENDPOINTS.CART.ADD, {
         method: 'POST',
         body: JSON.stringify({ productId, quantity }),
       }),
-    
+
     update: (productId: string, quantity: number) =>
       apiCall(API_CONFIG.ENDPOINTS.CART.UPDATE, {
         method: 'PUT',
         body: JSON.stringify({ productId, quantity }),
       }),
-    
+
     remove: (productId: string) =>
       apiCall(`${API_CONFIG.ENDPOINTS.CART.REMOVE}?productId=${productId}`, {
         method: 'DELETE',
       }),
-    
+
     clear: () =>
       apiCall(API_CONFIG.ENDPOINTS.CART.CLEAR, {
         method: 'DELETE',
@@ -178,13 +189,13 @@ export const api = {
   // Order methods
   orders: {
     getAll: () => apiCall(API_CONFIG.ENDPOINTS.ORDERS.LIST),
-    
+
     create: (orderData: any) =>
       apiCall(API_CONFIG.ENDPOINTS.ORDERS.CREATE, {
         method: 'POST',
         body: JSON.stringify(orderData),
       }),
-    
+
     updateStatus: (orderId: string, status: string) =>
       apiCall(API_CONFIG.ENDPOINTS.ORDERS.UPDATE_STATUS(orderId), {
         method: 'PUT',
@@ -194,33 +205,32 @@ export const api = {
 
   // Admin methods
   admin: {
-    getDashboardStats: () =>
-      apiCall(API_CONFIG.ENDPOINTS.ADMIN.DASHBOARD),
-    
+    getDashboardStats: () => apiCall(API_CONFIG.ENDPOINTS.ADMIN.DASHBOARD),
+
     products: {
       getAll: () => apiCall(API_CONFIG.ENDPOINTS.ADMIN.PRODUCTS.LIST),
-      
+
       create: (productData: any) =>
         apiCall(API_CONFIG.ENDPOINTS.ADMIN.PRODUCTS.CREATE, {
           method: 'POST',
           body: JSON.stringify(productData),
         }),
-      
+
       update: (id: string, productData: any) =>
         apiCall(API_CONFIG.ENDPOINTS.ADMIN.PRODUCTS.UPDATE(id), {
           method: 'PUT',
           body: JSON.stringify(productData),
         }),
-      
+
       delete: (id: string) =>
         apiCall(API_CONFIG.ENDPOINTS.ADMIN.PRODUCTS.DELETE(id), {
           method: 'DELETE',
         }),
     },
-    
+
     orders: {
       getAll: () => apiCall(API_CONFIG.ENDPOINTS.ADMIN.ORDERS.LIST),
-      
+
       updateStatus: (orderId: string, status: string) =>
         apiCall(API_CONFIG.ENDPOINTS.ADMIN.ORDERS.UPDATE_STATUS(orderId), {
           method: 'PUT',

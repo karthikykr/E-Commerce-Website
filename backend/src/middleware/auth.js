@@ -3,13 +3,13 @@ const { User } = require('../models');
 
 const auth = async (req, res, next) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '') || 
-                  req.cookies?.token;
+    const token =
+      req.header('Authorization')?.replace('Bearer ', '') || req.cookies?.token;
 
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: 'No token provided, authorization denied'
+        message: 'No token provided, authorization denied',
       });
     }
 
@@ -19,14 +19,14 @@ const auth = async (req, res, next) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Token is not valid'
+        message: 'Token is not valid',
       });
     }
 
     if (!user.isActive) {
       return res.status(401).json({
         success: false,
-        message: 'Account is deactivated'
+        message: 'Account is deactivated',
       });
     }
 
@@ -36,7 +36,7 @@ const auth = async (req, res, next) => {
     console.error('Auth middleware error:', error);
     res.status(401).json({
       success: false,
-      message: 'Token is not valid'
+      message: 'Token is not valid',
     });
   }
 };

@@ -7,7 +7,9 @@ dotenv.config();
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/ecommerce');
+    await mongoose.connect(
+      process.env.MONGODB_URI || 'mongodb://localhost:27017/ecommerce'
+    );
     console.log('MongoDB Connected for seeding');
   } catch (error) {
     console.error('Error connecting to MongoDB:', error.message);
@@ -21,71 +23,71 @@ const categories = [
     slug: 'whole-spices',
     description: 'Fresh whole spices for maximum flavor and aroma',
     image: '/images/categories/whole-spices.jpg',
-    sortOrder: 1
+    sortOrder: 1,
   },
   {
     name: 'Ground Spices',
     slug: 'ground-spices',
     description: 'Finely ground spices ready for cooking',
     image: '/images/categories/ground-spices.jpg',
-    sortOrder: 2
+    sortOrder: 2,
   },
   {
     name: 'Spice Blends',
     slug: 'spice-blends',
     description: 'Expertly crafted blends for authentic flavors',
     image: '/images/categories/spice-blends.jpg',
-    sortOrder: 3
+    sortOrder: 3,
   },
   {
     name: 'Herbs',
     slug: 'herbs',
     description: 'Fresh and dried herbs for cooking and seasoning',
     image: '/images/categories/herbs.jpg',
-    sortOrder: 4
+    sortOrder: 4,
   },
   {
     name: 'Seeds',
     slug: 'seeds',
     description: 'Aromatic seeds for cooking and garnishing',
     image: '/images/categories/seeds.jpg',
-    sortOrder: 5
+    sortOrder: 5,
   },
   {
     name: 'Indian Masalas',
     slug: 'indian-masalas',
     description: 'Authentic Indian spice mixes and masalas',
     image: '/images/categories/indian-masalas.jpg',
-    sortOrder: 6
+    sortOrder: 6,
   },
   {
     name: 'International Spices',
     slug: 'international-spices',
     description: 'Exotic spices from around the world',
     image: '/images/categories/international-spices.jpg',
-    sortOrder: 7
+    sortOrder: 7,
   },
   {
     name: 'Organic Spices',
     slug: 'organic-spices',
     description: 'Certified organic spices and herbs',
     image: '/images/categories/organic-spices.jpg',
-    sortOrder: 8
+    sortOrder: 8,
   },
   {
     name: 'Tea & Beverages',
     slug: 'tea-beverages',
     description: 'Spiced teas and beverage mixes',
     image: '/images/categories/tea-beverages.jpg',
-    sortOrder: 9
+    sortOrder: 9,
   },
   {
     name: 'Cooking Essentials',
     slug: 'cooking-essentials',
     description: 'Essential ingredients for Indian cooking',
     image: '/images/categories/cooking-essentials.jpg',
-    sortOrder: 10
-  }
+    sortOrder: 10,
+  },
 ];
 
 const users = [
@@ -101,9 +103,9 @@ const users = [
       city: 'Admin City',
       state: 'AC',
       zipCode: '12345',
-      country: 'USA'
+      country: 'USA',
     },
-    emailVerified: true
+    emailVerified: true,
   },
   {
     name: 'John Doe',
@@ -117,9 +119,9 @@ const users = [
       city: 'User City',
       state: 'UC',
       zipCode: '67890',
-      country: 'USA'
+      country: 'USA',
     },
-    emailVerified: true
+    emailVerified: true,
   },
   {
     name: 'Priya Sharma',
@@ -133,10 +135,10 @@ const users = [
       city: 'Mumbai',
       state: 'Maharashtra',
       zipCode: '400001',
-      country: 'India'
+      country: 'India',
     },
-    emailVerified: false
-  }
+    emailVerified: false,
+  },
 ];
 
 const seedData = async () => {
@@ -162,34 +164,51 @@ const seedData = async () => {
       {
         name: 'Organic Turmeric Powder',
         slug: 'organic-turmeric-powder',
-        description: 'Premium organic turmeric powder with high curcumin content. Perfect for curries, golden milk, and health supplements.',
-        shortDescription: 'Premium organic turmeric powder with high curcumin content.',
+        description:
+          'Premium organic turmeric powder with high curcumin content. Perfect for curries, golden milk, and health supplements.',
+        shortDescription:
+          'Premium organic turmeric powder with high curcumin content.',
         price: 1079,
         originalPrice: 1329,
         category: createdCategories[1]._id, // Ground Spices
-        images: [{ url: '/images/products/turmeric.jpg', alt: 'Organic Turmeric Powder', isPrimary: true }],
+        images: [
+          {
+            url: '/images/products/turmeric.jpg',
+            alt: 'Organic Turmeric Powder',
+            isPrimary: true,
+          },
+        ],
         stockQuantity: 50,
         weight: { value: 100, unit: 'g' },
         origin: 'India',
         tags: ['organic', 'anti-inflammatory', 'golden milk'],
         isFeatured: true,
-        nutritionalInfo: { calories: 354, protein: 7.8, carbohydrates: 64.9,
+        nutritionalInfo: {
+          calories: 354,
+          protein: 7.8,
+          carbohydrates: 64.9,
           fat: 9.9,
-          fiber: 21.1
+          fiber: 21.1,
         },
-        storageInstructions: 'Store in a cool, dry place away from direct sunlight',
-        shelfLife: '2 years'
+        storageInstructions:
+          'Store in a cool, dry place away from direct sunlight',
+        shelfLife: '2 years',
       },
       {
         name: 'Ceylon Cinnamon Sticks',
         slug: 'ceylon-cinnamon-sticks',
-        description: 'Authentic Ceylon cinnamon sticks from Sri Lanka. Sweet and delicate flavor perfect for baking and beverages.',
+        description:
+          'Authentic Ceylon cinnamon sticks from Sri Lanka. Sweet and delicate flavor perfect for baking and beverages.',
         shortDescription: 'Authentic Ceylon cinnamon sticks from Sri Lanka.',
         price: 1579,
         originalPrice: 1909,
         category: createdCategories[0]._id, // Whole Spices
         images: [
-          { url: '/images/products/cinnamon.jpg', alt: 'Ceylon Cinnamon Sticks', isPrimary: true }
+          {
+            url: '/images/products/cinnamon.jpg',
+            alt: 'Ceylon Cinnamon Sticks',
+            isPrimary: true,
+          },
         ],
         stockQuantity: 30,
         weight: { value: 50, unit: 'g' },
@@ -197,17 +216,23 @@ const seedData = async () => {
         tags: ['ceylon', 'sweet', 'baking'],
         isFeatured: true,
         storageInstructions: 'Store in an airtight container',
-        shelfLife: '3 years'
+        shelfLife: '3 years',
       },
       {
         name: 'Garam Masala Blend',
         slug: 'garam-masala-blend',
-        description: 'Traditional Indian spice blend with cardamom, cinnamon, cloves, and more. Perfect for curries and rice dishes.',
-        shortDescription: 'Traditional Indian spice blend for authentic flavors.',
+        description:
+          'Traditional Indian spice blend with cardamom, cinnamon, cloves, and more. Perfect for curries and rice dishes.',
+        shortDescription:
+          'Traditional Indian spice blend for authentic flavors.',
         price: 1249,
         category: createdCategories[2]._id, // Spice Blends
         images: [
-          { url: '/images/products/garam-masala.jpg', alt: 'Garam Masala Blend', isPrimary: true }
+          {
+            url: '/images/products/garam-masala.jpg',
+            alt: 'Garam Masala Blend',
+            isPrimary: true,
+          },
         ],
         stockQuantity: 40,
         weight: { value: 75, unit: 'g' },
@@ -215,59 +240,74 @@ const seedData = async () => {
         tags: ['blend', 'indian', 'curry'],
         isFeatured: true,
         storageInstructions: 'Store in a cool, dry place',
-        shelfLife: '18 months'
+        shelfLife: '18 months',
       },
       {
         name: 'Black Peppercorns',
         slug: 'black-peppercorns',
-        description: 'Premium whole black peppercorns from Kerala, India. Bold and pungent flavor for seasoning and cooking.',
+        description:
+          'Premium whole black peppercorns from Kerala, India. Bold and pungent flavor for seasoning and cooking.',
         shortDescription: 'Premium whole black peppercorns from Kerala.',
         price: 1419,
         category: createdCategories[0]._id, // Whole Spices
         images: [
-          { url: '/images/products/black-pepper.jpg', alt: 'Black Peppercorns', isPrimary: true }
+          {
+            url: '/images/products/black-pepper.jpg',
+            alt: 'Black Peppercorns',
+            isPrimary: true,
+          },
         ],
         stockQuantity: 60,
         weight: { value: 100, unit: 'g' },
         origin: 'India',
         tags: ['pepper', 'whole', 'kerala'],
         storageInstructions: 'Store in an airtight container',
-        shelfLife: '4 years'
+        shelfLife: '4 years',
       },
       {
         name: 'Dried Oregano',
         slug: 'dried-oregano',
-        description: 'Mediterranean dried oregano with intense flavor. Perfect for pizza, pasta, and Mediterranean dishes.',
+        description:
+          'Mediterranean dried oregano with intense flavor. Perfect for pizza, pasta, and Mediterranean dishes.',
         shortDescription: 'Mediterranean dried oregano with intense flavor.',
         price: 749,
         category: createdCategories[3]._id, // Herbs
         images: [
-          { url: '/images/products/oregano.jpg', alt: 'Dried Oregano', isPrimary: true }
+          {
+            url: '/images/products/oregano.jpg',
+            alt: 'Dried Oregano',
+            isPrimary: true,
+          },
         ],
         stockQuantity: 35,
         weight: { value: 25, unit: 'g' },
         origin: 'Greece',
         tags: ['mediterranean', 'pizza', 'pasta'],
         storageInstructions: 'Store in a cool, dry place',
-        shelfLife: '2 years'
+        shelfLife: '2 years',
       },
       {
         name: 'Cumin Seeds',
         slug: 'cumin-seeds',
-        description: 'Aromatic cumin seeds with earthy flavor. Essential for Indian, Mexican, and Middle Eastern cuisines.',
+        description:
+          'Aromatic cumin seeds with earthy flavor. Essential for Indian, Mexican, and Middle Eastern cuisines.',
         shortDescription: 'Aromatic cumin seeds with earthy flavor.',
         price: 999,
         category: createdCategories[4]._id, // Seeds
         images: [
-          { url: '/images/products/cumin-seeds.jpg', alt: 'Cumin Seeds', isPrimary: true }
+          {
+            url: '/images/products/cumin-seeds.jpg',
+            alt: 'Cumin Seeds',
+            isPrimary: true,
+          },
         ],
         stockQuantity: 45,
         weight: { value: 100, unit: 'g' },
         origin: 'India',
         tags: ['seeds', 'earthy', 'indian'],
         storageInstructions: 'Store in an airtight container',
-        shelfLife: '3 years'
-      }
+        shelfLife: '3 years',
+      },
     ];
 
     const createdProducts = await Product.create(products);
@@ -286,10 +326,10 @@ const seedData = async () => {
         city: 'Mumbai',
         state: 'Maharashtra',
         zipCode: '400001',
-        country: 'India'
+        country: 'India',
       },
       emailVerified: true,
-      isActive: true
+      isActive: true,
     };
 
     const admin = new User(adminUser);

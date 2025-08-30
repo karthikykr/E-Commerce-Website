@@ -9,7 +9,7 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     let content = await HomePageContent.getActiveContent();
-    
+
     // Create default content if none exists
     if (!content) {
       content = await HomePageContent.createDefaultContent();
@@ -17,12 +17,12 @@ router.get('/', async (req, res) => {
 
     // Get active sections
     const activeSections = content.getActiveSections();
-    
+
     // Prepare response data
     const responseData = {
       globalSettings: content.globalSettings,
       seoSettings: content.seoSettings,
-      sections: []
+      sections: [],
     };
 
     // Process each section and fetch related data
@@ -33,22 +33,22 @@ router.get('/', async (req, res) => {
         title: section.title,
         subtitle: section.subtitle,
         content: section.content,
-        settings: section.settings
+        settings: section.settings,
       };
 
       // Fetch dynamic content based on section type
       switch (section.type) {
         case 'featured_products':
           if (section.content.showFeaturedOnly) {
-            const featuredProducts = await Product.find({ 
-              isFeatured: true, 
+            const featuredProducts = await Product.find({
+              isFeatured: true,
               isActive: true,
-              inStock: true 
+              inStock: true,
             })
-            .populate('category', 'name slug')
-            .limit(section.content.maxProducts || 8)
-            .sort({ createdAt: -1 });
-            
+              .populate('category', 'name slug')
+              .limit(section.content.maxProducts || 8)
+              .sort({ createdAt: -1 });
+
             sectionData.products = featuredProducts;
           }
           break;
@@ -59,12 +59,12 @@ router.get('/', async (req, res) => {
               isActive: true,
               inStock: true,
               originalPrice: { $exists: true, $gt: 0 },
-              $expr: { $lt: ['$price', '$originalPrice'] }
+              $expr: { $lt: ['$price', '$originalPrice'] },
             })
-            .populate('category', 'name slug')
-            .limit(section.content.maxProducts || 4)
-            .sort({ createdAt: -1 });
-            
+              .populate('category', 'name slug')
+              .limit(section.content.maxProducts || 4)
+              .sort({ createdAt: -1 });
+
             sectionData.products = discountedProducts;
           }
           break;
@@ -73,7 +73,7 @@ router.get('/', async (req, res) => {
           const categories = await Category.find({ isActive: true })
             .limit(section.content.maxCategories || 4)
             .sort({ displayOrder: 1, name: 1 });
-          
+
           sectionData.categories = categories;
           break;
 
@@ -87,13 +87,13 @@ router.get('/', async (req, res) => {
 
     res.json({
       success: true,
-      data: responseData
+      data: responseData,
     });
   } catch (error) {
     console.error('Get homepage content error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error fetching homepage content'
+      message: 'Error fetching homepage content',
     });
   }
 });
@@ -104,20 +104,20 @@ router.get('/', async (req, res) => {
 router.get('/section/:type', async (req, res) => {
   try {
     const { type } = req.params;
-    
+
     const content = await HomePageContent.getActiveContent();
     if (!content) {
       return res.status(404).json({
         success: false,
-        message: 'Homepage content not found'
+        message: 'Homepage content not found',
       });
     }
 
-    const section = content.sections.find(s => s.type === type && s.isActive);
+    const section = content.sections.find((s) => s.type === type && s.isActive);
     if (!section) {
       return res.status(404).json({
         success: false,
-        message: 'Section not found'
+        message: 'Section not found',
       });
     }
 
@@ -127,22 +127,22 @@ router.get('/section/:type', async (req, res) => {
       title: section.title,
       subtitle: section.subtitle,
       content: section.content,
-      settings: section.settings
+      settings: section.settings,
     };
 
     // Fetch dynamic content based on section type
     switch (type) {
       case 'featured_products':
         if (section.content.showFeaturedOnly) {
-          const featuredProducts = await Product.find({ 
-            isFeatured: true, 
+          const featuredProducts = await Product.find({
+            isFeatured: true,
             isActive: true,
-            inStock: true 
+            inStock: true,
           })
-          .populate('category', 'name slug')
-          .limit(section.content.maxProducts || 8)
-          .sort({ createdAt: -1 });
-          
+            .populate('category', 'name slug')
+            .limit(section.content.maxProducts || 8)
+            .sort({ createdAt: -1 });
+
           sectionData.products = featuredProducts;
         }
         break;
@@ -153,12 +153,12 @@ router.get('/section/:type', async (req, res) => {
             isActive: true,
             inStock: true,
             originalPrice: { $exists: true, $gt: 0 },
-            $expr: { $lt: ['$price', '$originalPrice'] }
+            $expr: { $lt: ['$price', '$originalPrice'] },
           })
-          .populate('category', 'name slug')
-          .limit(section.content.maxProducts || 4)
-          .sort({ createdAt: -1 });
-          
+            .populate('category', 'name slug')
+            .limit(section.content.maxProducts || 4)
+            .sort({ createdAt: -1 });
+
           sectionData.products = discountedProducts;
         }
         break;
@@ -167,20 +167,20 @@ router.get('/section/:type', async (req, res) => {
         const categories = await Category.find({ isActive: true })
           .limit(section.content.maxCategories || 4)
           .sort({ displayOrder: 1, name: 1 });
-        
+
         sectionData.categories = categories;
         break;
     }
 
     res.json({
       success: true,
-      data: sectionData
+      data: sectionData,
     });
   } catch (error) {
     console.error('Get section data error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error fetching section data'
+      message: 'Error fetching section data',
     });
   }
 });
@@ -191,28 +191,30 @@ router.get('/section/:type', async (req, res) => {
 router.get('/preview', async (req, res) => {
   try {
     const { contentId } = req.query;
-    
+
     let content;
     if (contentId) {
       content = await HomePageContent.findById(contentId);
     } else {
       content = await HomePageContent.getActiveContent();
     }
-    
+
     if (!content) {
       return res.status(404).json({
         success: false,
-        message: 'Content not found'
+        message: 'Content not found',
       });
     }
 
     // Get all sections (including inactive ones for preview)
-    const allSections = content.sections.sort((a, b) => a.displayOrder - b.displayOrder);
-    
+    const allSections = content.sections.sort(
+      (a, b) => a.displayOrder - b.displayOrder
+    );
+
     const responseData = {
       globalSettings: content.globalSettings,
       seoSettings: content.seoSettings,
-      sections: []
+      sections: [],
     };
 
     // Process each section
@@ -225,7 +227,7 @@ router.get('/preview', async (req, res) => {
         content: section.content,
         settings: section.settings,
         isActive: section.isActive,
-        displayOrder: section.displayOrder
+        displayOrder: section.displayOrder,
       };
 
       // Add sample data for preview
@@ -251,13 +253,13 @@ router.get('/preview', async (req, res) => {
 
     res.json({
       success: true,
-      data: responseData
+      data: responseData,
     });
   } catch (error) {
     console.error('Get preview content error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error fetching preview content'
+      message: 'Error fetching preview content',
     });
   }
 });

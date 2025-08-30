@@ -47,13 +47,15 @@ export const BannerDisplay: React.FC<BannerDisplayProps> = ({
   position,
   className = '',
   showNavigation = true,
-  autoPlay = false
+  autoPlay = false,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(autoPlay);
 
   // Filter banners by position
-  const filteredBanners = banners.filter(banner => banner.position === position);
+  const filteredBanners = banners.filter(
+    (banner) => banner.position === position
+  );
 
   // Auto-play functionality
   useEffect(() => {
@@ -70,7 +72,7 @@ export const BannerDisplay: React.FC<BannerDisplayProps> = ({
   const handleBannerClick = async (bannerId: string) => {
     try {
       await fetch(`http://localhost:5000/api/banners/${bannerId}/click`, {
-        method: 'POST'
+        method: 'POST',
       });
     } catch (error) {
       console.error('Error tracking banner click:', error);
@@ -88,7 +90,9 @@ export const BannerDisplay: React.FC<BannerDisplayProps> = ({
   };
 
   const goToPrevious = () => {
-    setCurrentIndex((prev) => (prev - 1 + filteredBanners.length) % filteredBanners.length);
+    setCurrentIndex(
+      (prev) => (prev - 1 + filteredBanners.length) % filteredBanners.length
+    );
   };
 
   const goToSlide = (index: number) => {
@@ -122,12 +126,14 @@ export const BannerDisplay: React.FC<BannerDisplayProps> = ({
 
   const renderBannerContent = (banner: Banner) => {
     const BannerWrapper = banner.link.url ? 'a' : 'div';
-    const wrapperProps = banner.link.url ? {
-      href: banner.link.url,
-      target: banner.link.openInNewTab ? '_blank' : '_self',
-      rel: banner.link.openInNewTab ? 'noopener noreferrer' : undefined,
-      onClick: () => handleBannerClick(banner._id)
-    } : {};
+    const wrapperProps = banner.link.url
+      ? {
+          href: banner.link.url,
+          target: banner.link.openInNewTab ? '_blank' : '_self',
+          rel: banner.link.openInNewTab ? 'noopener noreferrer' : undefined,
+          onClick: () => handleBannerClick(banner._id),
+        }
+      : {};
 
     return (
       <BannerWrapper
@@ -146,40 +152,44 @@ export const BannerDisplay: React.FC<BannerDisplayProps> = ({
             lazy={false}
           />
           {/* Overlay */}
-          <div 
+          <div
             className="absolute inset-0 bg-black"
             style={{ opacity: banner.settings.overlayOpacity }}
           />
         </div>
 
         {/* Content */}
-        <div className={`relative z-10 h-full flex items-center justify-center p-8 ${getAnimationClass(banner.settings.animation)}`}>
-          <div className={`max-w-4xl mx-auto ${getTextAlignmentClass(banner.settings.textAlignment)}`}>
-            <h1 
+        <div
+          className={`relative z-10 h-full flex items-center justify-center p-8 ${getAnimationClass(banner.settings.animation)}`}
+        >
+          <div
+            className={`max-w-4xl mx-auto ${getTextAlignmentClass(banner.settings.textAlignment)}`}
+          >
+            <h1
               className="text-4xl md:text-6xl font-bold mb-4 leading-tight"
               style={{ color: banner.settings.textColor }}
             >
               {banner.title}
             </h1>
-            
+
             {banner.subtitle && (
-              <h2 
+              <h2
                 className="text-xl md:text-2xl mb-6 opacity-90"
                 style={{ color: banner.settings.textColor }}
               >
                 {banner.subtitle}
               </h2>
             )}
-            
+
             {banner.description && (
-              <p 
+              <p
                 className="text-lg mb-8 opacity-80 max-w-2xl mx-auto"
                 style={{ color: banner.settings.textColor }}
               >
                 {banner.description}
               </p>
             )}
-            
+
             {banner.link.url && banner.link.text && (
               <Button
                 className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
@@ -200,9 +210,7 @@ export const BannerDisplay: React.FC<BannerDisplayProps> = ({
   return (
     <div className={`relative overflow-hidden ${className}`}>
       {/* Banner Content */}
-      <div className="relative">
-        {renderBannerContent(currentBanner)}
-      </div>
+      <div className="relative">{renderBannerContent(currentBanner)}</div>
 
       {/* Navigation Controls */}
       {showNavigation && filteredBanners.length > 1 && (
@@ -213,18 +221,38 @@ export const BannerDisplay: React.FC<BannerDisplayProps> = ({
             className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-70 transition-all duration-200 z-20"
             aria-label="Previous banner"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </button>
-          
+
           <button
             onClick={goToNext}
             className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-70 transition-all duration-200 z-20"
             aria-label="Next banner"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </button>
 
@@ -235,8 +263,8 @@ export const BannerDisplay: React.FC<BannerDisplayProps> = ({
                 key={index}
                 onClick={() => goToSlide(index)}
                 className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                  index === currentIndex 
-                    ? 'bg-white' 
+                  index === currentIndex
+                    ? 'bg-white'
                     : 'bg-white bg-opacity-50 hover:bg-opacity-75'
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
@@ -252,11 +280,19 @@ export const BannerDisplay: React.FC<BannerDisplayProps> = ({
           >
             {isPlaying ? (
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
               </svg>
             ) : (
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                  clipRule="evenodd"
+                />
               </svg>
             )}
           </button>
@@ -283,12 +319,12 @@ interface SimpleBannerProps {
 export const SimpleBanner: React.FC<SimpleBannerProps> = ({
   banner,
   className = '',
-  height = 'h-64'
+  height = 'h-64',
 }) => {
   const handleBannerClick = async () => {
     try {
       await fetch(`http://localhost:5000/api/banners/${banner._id}/click`, {
-        method: 'POST'
+        method: 'POST',
       });
     } catch (error) {
       console.error('Error tracking banner click:', error);
@@ -296,11 +332,13 @@ export const SimpleBanner: React.FC<SimpleBannerProps> = ({
   };
 
   const BannerWrapper = banner.link.url ? Link : 'div';
-  const wrapperProps = banner.link.url ? {
-    href: banner.link.url,
-    target: banner.link.openInNewTab ? '_blank' : '_self',
-    onClick: handleBannerClick
-  } : {};
+  const wrapperProps = banner.link.url
+    ? {
+        href: banner.link.url,
+        target: banner.link.openInNewTab ? '_blank' : '_self',
+        onClick: handleBannerClick,
+      }
+    : {};
 
   return (
     <BannerWrapper
@@ -316,25 +354,27 @@ export const SimpleBanner: React.FC<SimpleBannerProps> = ({
         objectFit="cover"
         lazy={true}
       />
-      
+
       {/* Overlay */}
-      <div 
+      <div
         className="absolute inset-0 bg-black"
         style={{ opacity: banner.settings.overlayOpacity }}
       />
 
       {/* Content */}
-      <div className={`absolute inset-0 flex items-center justify-center p-6 ${getTextAlignmentClass(banner.settings.textAlignment)}`}>
+      <div
+        className={`absolute inset-0 flex items-center justify-center p-6 ${getTextAlignmentClass(banner.settings.textAlignment)}`}
+      >
         <div>
-          <h3 
+          <h3
             className="text-2xl font-bold mb-2"
             style={{ color: banner.settings.textColor }}
           >
             {banner.title}
           </h3>
-          
+
           {banner.subtitle && (
-            <p 
+            <p
               className="text-lg opacity-90"
               style={{ color: banner.settings.textColor }}
             >

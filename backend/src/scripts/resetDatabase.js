@@ -6,13 +6,15 @@ dotenv.config();
 
 const resetDatabase = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/ecommerce');
+    await mongoose.connect(
+      process.env.MONGODB_URI || 'mongodb://localhost:27017/ecommerce'
+    );
     console.log('MongoDB Connected for reset');
-    
+
     // Drop the entire database
     await mongoose.connection.db.dropDatabase();
     console.log('Database dropped successfully');
-    
+
     // Close connection
     await mongoose.connection.close();
     console.log('Database reset completed');

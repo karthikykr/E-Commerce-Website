@@ -49,14 +49,14 @@ const positionLabels: Record<string, string> = {
   top: '⬆️ Top Banner',
   middle: '➡️ Middle Section',
   bottom: '⬇️ Bottom Banner',
-  sidebar: '📌 Sidebar'
+  sidebar: '📌 Sidebar',
 };
 
 export default function BannersAdmin() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const { addToast } = useToast();
-  
+
   const [banners, setBanners] = useState<Banner[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPosition, setSelectedPosition] = useState<string>('all');
@@ -78,7 +78,7 @@ export default function BannersAdmin() {
     try {
       const token = localStorage.getItem('token');
       let url = 'http://localhost:5000/api/admin/banners?limit=50';
-      
+
       if (selectedPosition !== 'all') {
         url += `&position=${selectedPosition}`;
       }
@@ -88,8 +88,8 @@ export default function BannersAdmin() {
 
       const response = await fetch(url, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       const data = await response.json();
@@ -104,7 +104,7 @@ export default function BannersAdmin() {
         type: 'error',
         title: 'Error',
         message: 'Failed to load banners',
-        duration: 5000
+        duration: 5000,
       });
     } finally {
       setLoading(false);
@@ -120,25 +120,30 @@ export default function BannersAdmin() {
   const toggleBanner = async (bannerId: string) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/admin/banners/${bannerId}/toggle`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`
+      const response = await fetch(
+        `http://localhost:5000/api/admin/banners/${bannerId}/toggle`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
+      );
 
       const data = await response.json();
       if (data.success) {
-        setBanners(banners.map(banner => 
-          banner._id === bannerId 
-            ? { ...banner, isActive: !banner.isActive }
-            : banner
-        ));
+        setBanners(
+          banners.map((banner) =>
+            banner._id === bannerId
+              ? { ...banner, isActive: !banner.isActive }
+              : banner
+          )
+        );
         addToast({
           type: 'success',
           title: 'Success',
           message: data.message,
-          duration: 3000
+          duration: 3000,
         });
       } else {
         throw new Error(data.message);
@@ -149,33 +154,40 @@ export default function BannersAdmin() {
         type: 'error',
         title: 'Error',
         message: 'Failed to toggle banner status',
-        duration: 5000
+        duration: 5000,
       });
     }
   };
 
   const deleteBanner = async (bannerId: string) => {
-    if (!confirm('Are you sure you want to delete this banner? This action cannot be undone.')) {
+    if (
+      !confirm(
+        'Are you sure you want to delete this banner? This action cannot be undone.'
+      )
+    ) {
       return;
     }
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/admin/banners/${bannerId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
+      const response = await fetch(
+        `http://localhost:5000/api/admin/banners/${bannerId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
+      );
 
       const data = await response.json();
       if (data.success) {
-        setBanners(banners.filter(banner => banner._id !== bannerId));
+        setBanners(banners.filter((banner) => banner._id !== bannerId));
         addToast({
           type: 'success',
           title: 'Success',
           message: 'Banner deleted successfully',
-          duration: 3000
+          duration: 3000,
         });
       } else {
         throw new Error(data.message);
@@ -186,7 +198,7 @@ export default function BannersAdmin() {
         type: 'error',
         title: 'Error',
         message: 'Failed to delete banner',
-        duration: 5000
+        duration: 5000,
       });
     }
   };
@@ -209,19 +221,21 @@ export default function BannersAdmin() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Banner Management</h1>
-              <p className="text-gray-600 mt-2">Manage promotional banners and hero sections</p>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Banner Management
+              </h1>
+              <p className="text-gray-600 mt-2">
+                Manage promotional banners and hero sections
+              </p>
             </div>
             <Link href="/admin/banners/add">
-              <Button>
-                ➕ Add New Banner
-              </Button>
+              <Button>➕ Add New Banner</Button>
             </Link>
           </div>
         </div>
@@ -247,7 +261,7 @@ export default function BannersAdmin() {
                   <option value="sidebar">Sidebar</option>
                 </select>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Status
@@ -272,12 +286,14 @@ export default function BannersAdmin() {
             <CardBody>
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">🎯</div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">No Banners Found</h3>
-                <p className="text-gray-600 mb-6">Create your first banner to get started.</p>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  No Banners Found
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  Create your first banner to get started.
+                </p>
                 <Link href="/admin/banners/add">
-                  <Button>
-                    Create Banner
-                  </Button>
+                  <Button>Create Banner</Button>
                 </Link>
               </div>
             </CardBody>
@@ -296,7 +312,7 @@ export default function BannersAdmin() {
                         className="w-24 h-16 object-cover rounded-lg border border-gray-200"
                       />
                     </div>
-                    
+
                     {/* Banner Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between">
@@ -305,59 +321,80 @@ export default function BannersAdmin() {
                             {banner.title}
                           </h3>
                           {banner.subtitle && (
-                            <p className="text-gray-600 mb-2">{banner.subtitle}</p>
+                            <p className="text-gray-600 mb-2">
+                              {banner.subtitle}
+                            </p>
                           )}
                           <div className="flex items-center space-x-4 text-sm text-gray-500">
                             <span className="flex items-center">
-                              {positionLabels[banner.position] || banner.position}
+                              {positionLabels[banner.position] ||
+                                banner.position}
                             </span>
                             <span>Order: {banner.displayOrder}</span>
                             <span>👁️ {banner.analytics.views} views</span>
                             <span>🖱️ {banner.analytics.clicks} clicks</span>
                           </div>
                         </div>
-                        
+
                         {/* Status Badge */}
                         <div className="flex items-center space-x-2">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            banner.isActive 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-gray-100 text-gray-800'
-                          }`}>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              banner.isActive
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-gray-100 text-gray-800'
+                            }`}
+                          >
                             {banner.isActive ? 'Active' : 'Inactive'}
                           </span>
                         </div>
                       </div>
-                      
+
                       {/* Banner Link */}
                       {banner.link.url && (
                         <div className="mt-2">
-                          <span className="text-sm text-gray-500">Links to: </span>
-                          <a 
-                            href={banner.link.url} 
-                            target={banner.link.openInNewTab ? '_blank' : '_self'}
-                            rel={banner.link.openInNewTab ? 'noopener noreferrer' : undefined}
+                          <span className="text-sm text-gray-500">
+                            Links to:{' '}
+                          </span>
+                          <a
+                            href={banner.link.url}
+                            target={
+                              banner.link.openInNewTab ? '_blank' : '_self'
+                            }
+                            rel={
+                              banner.link.openInNewTab
+                                ? 'noopener noreferrer'
+                                : undefined
+                            }
                             className="text-sm text-orange-600 hover:text-orange-700"
                           >
                             {banner.link.text || banner.link.url}
                           </a>
                         </div>
                       )}
-                      
+
                       {/* Date Range */}
                       {(banner.startDate || banner.endDate) && (
                         <div className="mt-2 text-sm text-gray-500">
                           {banner.startDate && (
-                            <span>From: {new Date(banner.startDate).toLocaleDateString()}</span>
+                            <span>
+                              From:{' '}
+                              {new Date(banner.startDate).toLocaleDateString()}
+                            </span>
                           )}
-                          {banner.startDate && banner.endDate && <span> • </span>}
+                          {banner.startDate && banner.endDate && (
+                            <span> • </span>
+                          )}
                           {banner.endDate && (
-                            <span>To: {new Date(banner.endDate).toLocaleDateString()}</span>
+                            <span>
+                              To:{' '}
+                              {new Date(banner.endDate).toLocaleDateString()}
+                            </span>
                           )}
                         </div>
                       )}
                     </div>
-                    
+
                     {/* Actions */}
                     <div className="flex items-center space-x-2">
                       <Button
@@ -367,13 +404,13 @@ export default function BannersAdmin() {
                       >
                         {banner.isActive ? 'Disable' : 'Enable'}
                       </Button>
-                      
+
                       <Link href={`/admin/banners/${banner._id}/edit`}>
                         <Button variant="outline" size="sm">
                           ✏️ Edit
                         </Button>
                       </Link>
-                      
+
                       <Button
                         variant="outline"
                         size="sm"
@@ -390,7 +427,7 @@ export default function BannersAdmin() {
           </div>
         )}
       </div>
-      
+
       <Footer />
     </div>
   );

@@ -34,7 +34,7 @@ export default function AddProduct() {
     specifications: [{ key: '', value: '' }],
     tags: '',
     isActive: true,
-    isFeatured: false
+    isFeatured: false,
   });
 
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -67,63 +67,76 @@ export default function AddProduct() {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value, type } = e.target;
 
     if (name.startsWith('weight.')) {
       const weightField = name.split('.')[1];
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         weight: {
           ...prev.weight,
-          [weightField]: value
-        }
+          [weightField]: value,
+        },
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+        [name]:
+          type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
       }));
     }
   };
 
-  const handleImageChange = (index: number, field: 'url' | 'alt', value: string) => {
+  const handleImageChange = (
+    index: number,
+    field: 'url' | 'alt',
+    value: string
+  ) => {
     const newImages = [...formData.images];
     newImages[index] = { ...newImages[index], [field]: value };
-    setFormData(prev => ({ ...prev, images: newImages }));
+    setFormData((prev) => ({ ...prev, images: newImages }));
   };
 
   const addImageField = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      images: [...prev.images, { url: '', alt: '' }]
+      images: [...prev.images, { url: '', alt: '' }],
     }));
   };
 
   const removeImageField = (index: number) => {
     if (formData.images.length > 1) {
       const newImages = formData.images.filter((_, i) => i !== index);
-      setFormData(prev => ({ ...prev, images: newImages }));
+      setFormData((prev) => ({ ...prev, images: newImages }));
     }
   };
 
-  const handleSpecificationChange = (index: number, field: 'key' | 'value', value: string) => {
+  const handleSpecificationChange = (
+    index: number,
+    field: 'key' | 'value',
+    value: string
+  ) => {
     const newSpecs = [...formData.specifications];
     newSpecs[index] = { ...newSpecs[index], [field]: value };
-    setFormData(prev => ({ ...prev, specifications: newSpecs }));
+    setFormData((prev) => ({ ...prev, specifications: newSpecs }));
   };
 
   const addSpecificationField = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      specifications: [...prev.specifications, { key: '', value: '' }]
+      specifications: [...prev.specifications, { key: '', value: '' }],
     }));
   };
 
   const removeSpecificationField = (index: number) => {
     if (formData.specifications.length > 1) {
       const newSpecs = formData.specifications.filter((_, i) => i !== index);
-      setFormData(prev => ({ ...prev, specifications: newSpecs }));
+      setFormData((prev) => ({ ...prev, specifications: newSpecs }));
     }
   };
 
@@ -135,10 +148,14 @@ export default function AddProduct() {
 
     try {
       const token = localStorage.getItem('token');
-      
+
       // Filter out empty images and specifications
-      const filteredImages = formData.images.filter(img => img.url.trim() !== '');
-      const filteredSpecs = formData.specifications.filter(spec => spec.key.trim() !== '' && spec.value.trim() !== '');
+      const filteredImages = formData.images.filter(
+        (img) => img.url.trim() !== ''
+      );
+      const filteredSpecs = formData.specifications.filter(
+        (spec) => spec.key.trim() !== '' && spec.value.trim() !== ''
+      );
 
       // Generate slug from name
       const generateSlug = (name: string) => {
@@ -156,7 +173,10 @@ export default function AddProduct() {
       // Add basic product data
       formDataToSend.append('name', formData.name);
       formDataToSend.append('description', formData.description);
-      formDataToSend.append('shortDescription', formData.shortDescription || formData.description.substring(0, 100));
+      formDataToSend.append(
+        'shortDescription',
+        formData.shortDescription || formData.description.substring(0, 100)
+      );
       formDataToSend.append('price', formData.price);
       formDataToSend.append('category', formData.category);
       formDataToSend.append('stockQuantity', formData.stockQuantity);
@@ -167,8 +187,11 @@ export default function AddProduct() {
 
       // Add tags
       if (formData.tags) {
-        const tags = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
-        tags.forEach(tag => formDataToSend.append('tags[]', tag));
+        const tags = formData.tags
+          .split(',')
+          .map((tag) => tag.trim())
+          .filter((tag) => tag !== '');
+        tags.forEach((tag) => formDataToSend.append('tags[]', tag));
       }
 
       // Add specifications
@@ -180,25 +203,28 @@ export default function AddProduct() {
       // Add URL-based images
       filteredImages.forEach((img, index) => {
         formDataToSend.append(`images[${index}][url]`, img.url);
-        formDataToSend.append(`images[${index}][alt]`, img.alt || formData.name);
+        formDataToSend.append(
+          `images[${index}][alt]`,
+          img.alt || formData.name
+        );
       });
 
       // Add image files
-      imageFiles.forEach(file => {
+      imageFiles.forEach((file) => {
         formDataToSend.append('images', file);
       });
 
       const response = await fetch('http://localhost:5000/api/admin/products', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
           // Don't set Content-Type for FormData, let browser set it with boundary
         },
-        body: formDataToSend
+        body: formDataToSend,
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
         setSuccess('Product created successfully!');
         setTimeout(() => {
@@ -220,7 +246,9 @@ export default function AddProduct() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Loading...</h1>
-          <p className="text-gray-600">Please wait while we verify your credentials.</p>
+          <p className="text-gray-600">
+            Please wait while we verify your credentials.
+          </p>
         </div>
       </div>
     );
@@ -230,8 +258,12 @@ export default function AddProduct() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-          <p className="text-gray-600 mb-8">You need admin privileges to access this page.</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            Access Denied
+          </h1>
+          <p className="text-gray-600 mb-8">
+            You need admin privileges to access this page.
+          </p>
           <Link href="/">
             <Button>Go Home</Button>
           </Link>
@@ -243,7 +275,7 @@ export default function AddProduct() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <div className="flex items-center space-x-4">
@@ -253,8 +285,12 @@ export default function AddProduct() {
               </button>
             </Link>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Add New Product</h1>
-              <p className="text-gray-600 mt-2">Create a new product for your store</p>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Add New Product
+              </h1>
+              <p className="text-gray-600 mt-2">
+                Create a new product for your store
+              </p>
             </div>
           </div>
         </div>
@@ -276,7 +312,10 @@ export default function AddProduct() {
             {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Product Name *
                 </label>
                 <input
@@ -292,7 +331,10 @@ export default function AddProduct() {
               </div>
 
               <div>
-                <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="category"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Category *
                 </label>
                 <select
@@ -314,7 +356,10 @@ export default function AddProduct() {
             </div>
 
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Description *
               </label>
               <textarea
@@ -330,7 +375,10 @@ export default function AddProduct() {
             </div>
 
             <div>
-              <label htmlFor="shortDescription" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="shortDescription"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Short Description
               </label>
               <textarea
@@ -345,7 +393,10 @@ export default function AddProduct() {
             </div>
 
             <div>
-              <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="tags"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Tags
               </label>
               <input
@@ -361,7 +412,10 @@ export default function AddProduct() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="price"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Price ($) *
                 </label>
                 <input
@@ -379,7 +433,10 @@ export default function AddProduct() {
               </div>
 
               <div>
-                <label htmlFor="stockQuantity" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="stockQuantity"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Stock Quantity *
                 </label>
                 <input
@@ -399,7 +456,10 @@ export default function AddProduct() {
             {/* Weight Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="weight.value" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="weight.value"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Weight Value
                 </label>
                 <input
@@ -416,7 +476,10 @@ export default function AddProduct() {
               </div>
 
               <div>
-                <label htmlFor="weight.unit" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="weight.unit"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Weight Unit
                 </label>
                 <select
@@ -445,7 +508,10 @@ export default function AddProduct() {
                   onChange={handleInputChange}
                   className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
                 />
-                <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
+                <label
+                  htmlFor="isActive"
+                  className="ml-2 block text-sm text-gray-900"
+                >
                   Product is Active
                 </label>
               </div>
@@ -459,7 +525,10 @@ export default function AddProduct() {
                   onChange={handleInputChange}
                   className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
                 />
-                <label htmlFor="isFeatured" className="ml-2 block text-sm text-gray-900">
+                <label
+                  htmlFor="isFeatured"
+                  className="ml-2 block text-sm text-gray-900"
+                >
                   Featured Product
                 </label>
               </div>
@@ -486,13 +555,18 @@ export default function AddProduct() {
                   Or Add Images by URL
                 </label>
                 {formData.images.map((image, index) => (
-                  <div key={index} className="flex gap-4 mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <div
+                    key={index}
+                    className="flex gap-4 mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50"
+                  >
                     <div className="flex-1">
                       <input
                         type="url"
                         placeholder="Image URL"
                         value={image.url}
-                        onChange={(e) => handleImageChange(index, 'url', e.target.value)}
+                        onChange={(e) =>
+                          handleImageChange(index, 'url', e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       />
                     </div>
@@ -501,7 +575,9 @@ export default function AddProduct() {
                         type="text"
                         placeholder="Alt text"
                         value={image.alt}
-                        onChange={(e) => handleImageChange(index, 'alt', e.target.value)}
+                        onChange={(e) =>
+                          handleImageChange(index, 'alt', e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       />
                     </div>
@@ -530,13 +606,18 @@ export default function AddProduct() {
                 Specifications
               </label>
               {formData.specifications.map((spec, index) => (
-                <div key={index} className="flex gap-4 mb-4 p-4 border border-gray-200 rounded-lg">
+                <div
+                  key={index}
+                  className="flex gap-4 mb-4 p-4 border border-gray-200 rounded-lg"
+                >
                   <div className="flex-1">
                     <input
                       type="text"
                       placeholder="Specification name"
                       value={spec.key}
-                      onChange={(e) => handleSpecificationChange(index, 'key', e.target.value)}
+                      onChange={(e) =>
+                        handleSpecificationChange(index, 'key', e.target.value)
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     />
                   </div>
@@ -545,7 +626,13 @@ export default function AddProduct() {
                       type="text"
                       placeholder="Specification value"
                       value={spec.value}
-                      onChange={(e) => handleSpecificationChange(index, 'value', e.target.value)}
+                      onChange={(e) =>
+                        handleSpecificationChange(
+                          index,
+                          'value',
+                          e.target.value
+                        )
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     />
                   </div>
@@ -567,14 +654,10 @@ export default function AddProduct() {
               </button>
             </div>
 
-
-
             {/* Submit Buttons */}
             <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
               <Link href="/admin/products">
-                <Button variant="outline">
-                  Cancel
-                </Button>
+                <Button variant="outline">Cancel</Button>
               </Link>
               <Button
                 type="submit"

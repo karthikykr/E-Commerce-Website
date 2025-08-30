@@ -95,7 +95,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     return canvas.toDataURL();
   };
 
-  const defaultBlurDataURL = blurDataURL || (width && height ? generateBlurDataURL(width, height) : undefined);
+  const defaultBlurDataURL =
+    blurDataURL ||
+    (width && height ? generateBlurDataURL(width, height) : undefined);
 
   if (hasError && fallback) {
     return <>{fallback}</>;
@@ -103,12 +105,22 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   if (hasError) {
     return (
-      <div 
+      <div
         className={`bg-gray-200 flex items-center justify-center ${className}`}
         style={{ width, height }}
       >
-        <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        <svg
+          className="w-8 h-8 text-gray-400"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+          />
         </svg>
       </div>
     );
@@ -118,7 +130,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     <div ref={imgRef} className={`relative overflow-hidden ${className}`}>
       {/* Loading skeleton */}
       {!isLoaded && (
-        <div 
+        <div
           className="absolute inset-0 bg-gray-200 loading-shimmer"
           style={{ width, height }}
         />
@@ -165,24 +177,13 @@ export const LazyImage: React.FC<LazyImageProps> = ({
   rootMargin = '50px',
   ...props
 }) => {
-  return (
-    <OptimizedImage
-      {...props}
-      loading="lazy"
-      priority={false}
-    />
-  );
+  return <OptimizedImage {...props} loading="lazy" priority={false} />;
 };
 
 // Hero Image Component with priority loading
 export const HeroImage: React.FC<OptimizedImageProps> = (props) => {
   return (
-    <OptimizedImage
-      {...props}
-      priority={true}
-      quality={90}
-      loading="eager"
-    />
+    <OptimizedImage {...props} priority={true} quality={90} loading="eager" />
   );
 };
 
@@ -230,7 +231,8 @@ export const ProductImage: React.FC<ProductImageProps> = ({
 };
 
 // Avatar Image Component
-interface AvatarImageProps extends Omit<OptimizedImageProps, 'width' | 'height'> {
+interface AvatarImageProps
+  extends Omit<OptimizedImageProps, 'width' | 'height'> {
   size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 

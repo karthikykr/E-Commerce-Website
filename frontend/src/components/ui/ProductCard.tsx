@@ -48,7 +48,7 @@ interface ProductCardProps {
 export const ProductCard: React.FC<ProductCardProps> = ({
   product,
   className = '',
-  showQuickAdd = true
+  showQuickAdd = true,
 }) => {
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
@@ -59,16 +59,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
-      minimumFractionDigits: 0
+      minimumFractionDigits: 0,
     }).format(price);
   };
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!product.inStock) return;
-    
+
     setIsAddingToCart(true);
     try {
       await addToCart(product.id || product._id, 1);
@@ -83,7 +83,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const handleToggleWishlist = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     setIsTogglingWishlist(true);
     try {
       const productId = product.id || product._id;
@@ -99,13 +99,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     }
   };
 
-  const primaryImage = product.images?.find(img => img.isPrimary) || product.images?.[0];
-  const discountPercentage = product.originalPrice && product.originalPrice > product.price
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-    : 0;
+  const primaryImage =
+    product.images?.find((img) => img.isPrimary) || product.images?.[0];
+  const discountPercentage =
+    product.originalPrice && product.originalPrice > product.price
+      ? Math.round(
+          ((product.originalPrice - product.price) / product.originalPrice) *
+            100
+        )
+      : 0;
 
   return (
-    <div className={`group relative bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden ${className}`}>
+    <div
+      className={`group relative bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden ${className}`}
+    >
       {/* Discount Badge */}
       {discountPercentage > 0 && (
         <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 bg-red-500 text-white px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-bold shadow-lg">
@@ -121,9 +128,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       >
         <svg
           className={`w-5 h-5 transition-colors duration-200 ${
-            isInWishlist(product.id || product._id) ? 'text-red-500 fill-current' : 'text-gray-400'
+            isInWishlist(product.id || product._id)
+              ? 'text-red-500 fill-current'
+              : 'text-gray-400'
           }`}
-          fill={isInWishlist(product.id || product._id) ? 'currentColor' : 'none'}
+          fill={
+            isInWishlist(product.id || product._id) ? 'currentColor' : 'none'
+          }
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
@@ -150,14 +161,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl opacity-50">🌶️</span>
+              <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl opacity-50">
+                🌶️
+              </span>
             </div>
           )}
 
           {/* Stock Status Overlay */}
           {!product.inStock && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-              <span className="text-white font-bold text-sm sm:text-base md:text-lg">Out of Stock</span>
+              <span className="text-white font-bold text-sm sm:text-base md:text-lg">
+                Out of Stock
+              </span>
             </div>
           )}
         </div>
@@ -192,7 +207,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   <svg
                     key={i}
                     className={`w-3 h-3 sm:w-4 sm:h-4 ${
-                      i < Math.floor(product.rating!) ? 'text-yellow-400' : 'text-gray-300'
+                      i < Math.floor(product.rating!)
+                        ? 'text-yellow-400'
+                        : 'text-gray-300'
                     }`}
                     fill="currentColor"
                     viewBox="0 0 20 20"
@@ -213,11 +230,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               <span className="text-base sm:text-lg md:text-xl font-bold text-orange-600">
                 {formatPrice(product.price)}
               </span>
-              {product.originalPrice && product.originalPrice > product.price && (
-                <span className="text-xs sm:text-sm text-gray-500 line-through">
-                  {formatPrice(product.originalPrice)}
-                </span>
-              )}
+              {product.originalPrice &&
+                product.originalPrice > product.price && (
+                  <span className="text-xs sm:text-sm text-gray-500 line-through">
+                    {formatPrice(product.originalPrice)}
+                  </span>
+                )}
             </div>
           </div>
         </div>

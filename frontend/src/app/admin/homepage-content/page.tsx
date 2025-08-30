@@ -61,18 +61,20 @@ const sectionTypeLabels: Record<string, string> = {
   why_choose_us: '✨ Why Choose Us',
   newsletter: '📧 Newsletter',
   testimonials: '💬 Testimonials',
-  custom_html: '🔧 Custom HTML'
+  custom_html: '🔧 Custom HTML',
 };
 
 export default function HomePageContentAdmin() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const { addToast } = useToast();
-  
+
   const [content, setContent] = useState<HomePageContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<'sections' | 'settings' | 'seo'>('sections');
+  const [activeTab, setActiveTab] = useState<'sections' | 'settings' | 'seo'>(
+    'sections'
+  );
 
   useEffect(() => {
     if (!isLoading) {
@@ -89,11 +91,14 @@ export default function HomePageContentAdmin() {
   const fetchContent = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/admin/homepage-content', {
-        headers: {
-          'Authorization': `Bearer ${token}`
+      const response = await fetch(
+        'http://localhost:5000/api/admin/homepage-content',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
+      );
 
       const data = await response.json();
       if (data.success) {
@@ -107,7 +112,7 @@ export default function HomePageContentAdmin() {
         type: 'error',
         title: 'Error',
         message: 'Failed to load homepage content',
-        duration: 5000
+        duration: 5000,
       });
     } finally {
       setLoading(false);
@@ -118,14 +123,17 @@ export default function HomePageContentAdmin() {
     setSaving(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/admin/homepage-content', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(updateData)
-      });
+      const response = await fetch(
+        'http://localhost:5000/api/admin/homepage-content',
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(updateData),
+        }
+      );
 
       const data = await response.json();
       if (data.success) {
@@ -134,7 +142,7 @@ export default function HomePageContentAdmin() {
           type: 'success',
           title: 'Success',
           message: 'Homepage content updated successfully',
-          duration: 3000
+          duration: 3000,
         });
       } else {
         throw new Error(data.message);
@@ -145,7 +153,7 @@ export default function HomePageContentAdmin() {
         type: 'error',
         title: 'Error',
         message: 'Failed to update homepage content',
-        duration: 5000
+        duration: 5000,
       });
     } finally {
       setSaving(false);
@@ -155,14 +163,17 @@ export default function HomePageContentAdmin() {
   const toggleSection = async (sectionId: string, isActive: boolean) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/admin/homepage-content/sections/${sectionId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ isActive })
-      });
+      const response = await fetch(
+        `http://localhost:5000/api/admin/homepage-content/sections/${sectionId}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ isActive }),
+        }
+      );
 
       const data = await response.json();
       if (data.success) {
@@ -171,7 +182,7 @@ export default function HomePageContentAdmin() {
           type: 'success',
           title: 'Success',
           message: `Section ${isActive ? 'enabled' : 'disabled'} successfully`,
-          duration: 3000
+          duration: 3000,
         });
       } else {
         throw new Error(data.message);
@@ -182,22 +193,27 @@ export default function HomePageContentAdmin() {
         type: 'error',
         title: 'Error',
         message: 'Failed to update section',
-        duration: 5000
+        duration: 5000,
       });
     }
   };
 
-  const reorderSections = async (sectionOrders: Array<{ sectionId: string; displayOrder: number }>) => {
+  const reorderSections = async (
+    sectionOrders: Array<{ sectionId: string; displayOrder: number }>
+  ) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/admin/homepage-content/sections/reorder', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ sectionOrders })
-      });
+      const response = await fetch(
+        'http://localhost:5000/api/admin/homepage-content/sections/reorder',
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ sectionOrders }),
+        }
+      );
 
       const data = await response.json();
       if (data.success) {
@@ -206,7 +222,7 @@ export default function HomePageContentAdmin() {
           type: 'success',
           title: 'Success',
           message: 'Sections reordered successfully',
-          duration: 3000
+          duration: 3000,
         });
       } else {
         throw new Error(data.message);
@@ -217,42 +233,58 @@ export default function HomePageContentAdmin() {
         type: 'error',
         title: 'Error',
         message: 'Failed to reorder sections',
-        duration: 5000
+        duration: 5000,
       });
     }
   };
 
   const moveSectionUp = (index: number) => {
     if (index === 0 || !content) return;
-    
-    const sections = [...content.sections].sort((a, b) => a.displayOrder - b.displayOrder);
+
+    const sections = [...content.sections].sort(
+      (a, b) => a.displayOrder - b.displayOrder
+    );
     const sectionOrders = sections.map((section, i) => {
       if (i === index) {
-        return { sectionId: section._id, displayOrder: sections[index - 1].displayOrder };
+        return {
+          sectionId: section._id,
+          displayOrder: sections[index - 1].displayOrder,
+        };
       } else if (i === index - 1) {
-        return { sectionId: section._id, displayOrder: sections[index].displayOrder };
+        return {
+          sectionId: section._id,
+          displayOrder: sections[index].displayOrder,
+        };
       } else {
         return { sectionId: section._id, displayOrder: section.displayOrder };
       }
     });
-    
+
     reorderSections(sectionOrders);
   };
 
   const moveSectionDown = (index: number) => {
     if (!content || index === content.sections.length - 1) return;
-    
-    const sections = [...content.sections].sort((a, b) => a.displayOrder - b.displayOrder);
+
+    const sections = [...content.sections].sort(
+      (a, b) => a.displayOrder - b.displayOrder
+    );
     const sectionOrders = sections.map((section, i) => {
       if (i === index) {
-        return { sectionId: section._id, displayOrder: sections[index + 1].displayOrder };
+        return {
+          sectionId: section._id,
+          displayOrder: sections[index + 1].displayOrder,
+        };
       } else if (i === index + 1) {
-        return { sectionId: section._id, displayOrder: sections[index].displayOrder };
+        return {
+          sectionId: section._id,
+          displayOrder: sections[index].displayOrder,
+        };
       } else {
         return { sectionId: section._id, displayOrder: section.displayOrder };
       }
     });
-    
+
     reorderSections(sectionOrders);
   };
 
@@ -280,11 +312,13 @@ export default function HomePageContentAdmin() {
             <CardBody>
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">📄</div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">No Content Found</h3>
-                <p className="text-gray-600 mb-6">Homepage content could not be loaded.</p>
-                <Button onClick={fetchContent}>
-                  Try Again
-                </Button>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  No Content Found
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  Homepage content could not be loaded.
+                </p>
+                <Button onClick={fetchContent}>Try Again</Button>
               </div>
             </CardBody>
           </Card>
@@ -294,27 +328,31 @@ export default function HomePageContentAdmin() {
     );
   }
 
-  const sortedSections = [...content.sections].sort((a, b) => a.displayOrder - b.displayOrder);
+  const sortedSections = [...content.sections].sort(
+    (a, b) => a.displayOrder - b.displayOrder
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Homepage Content Management</h1>
-              <p className="text-gray-600 mt-2">Manage your website's homepage content and layout</p>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Homepage Content Management
+              </h1>
+              <p className="text-gray-600 mt-2">
+                Manage your website's homepage content and layout
+              </p>
             </div>
             <div className="flex space-x-4">
               <Link href="/admin/homepage-content/preview" target="_blank">
-                <Button variant="outline">
-                  👁️ Preview
-                </Button>
+                <Button variant="outline">👁️ Preview</Button>
               </Link>
-              <Button 
+              <Button
                 onClick={() => window.open('/', '_blank')}
                 variant="outline"
               >
@@ -322,10 +360,11 @@ export default function HomePageContentAdmin() {
               </Button>
             </div>
           </div>
-          
+
           {content.modifiedBy && (
             <div className="mt-4 text-sm text-gray-500">
-              Last modified by {content.modifiedBy.name} on {new Date(content.lastModified).toLocaleString()}
+              Last modified by {content.modifiedBy.name} on{' '}
+              {new Date(content.lastModified).toLocaleString()}
             </div>
           )}
         </div>
@@ -335,9 +374,13 @@ export default function HomePageContentAdmin() {
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-8">
               {[
-                { id: 'sections', label: '📄 Sections', count: content.sections.length },
+                {
+                  id: 'sections',
+                  label: '📄 Sections',
+                  count: content.sections.length,
+                },
                 { id: 'settings', label: '⚙️ Global Settings' },
-                { id: 'seo', label: '🔍 SEO Settings' }
+                { id: 'seo', label: '🔍 SEO Settings' },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -368,9 +411,7 @@ export default function HomePageContentAdmin() {
               <CardBody>
                 <div className="text-center py-6">
                   <Link href="/admin/homepage-content/sections/add">
-                    <Button>
-                      ➕ Add New Section
-                    </Button>
+                    <Button>➕ Add New Section</Button>
                   </Link>
                 </div>
               </CardBody>
@@ -382,18 +423,26 @@ export default function HomePageContentAdmin() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <span className="text-2xl">{sectionTypeLabels[section.type]?.split(' ')[0] || '📄'}</span>
+                      <span className="text-2xl">
+                        {sectionTypeLabels[section.type]?.split(' ')[0] || '📄'}
+                      </span>
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900">{section.title}</h3>
-                        <p className="text-sm text-gray-500">{sectionTypeLabels[section.type] || section.type}</p>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {section.title}
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                          {sectionTypeLabels[section.type] || section.type}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        section.isActive 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          section.isActive
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
                         {section.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </div>
@@ -427,18 +476,22 @@ export default function HomePageContentAdmin() {
                       >
                         ↓
                       </Button>
-                      
+
                       {/* Toggle Active */}
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => toggleSection(section._id, !section.isActive)}
+                        onClick={() =>
+                          toggleSection(section._id, !section.isActive)
+                        }
                       >
                         {section.isActive ? 'Disable' : 'Enable'}
                       </Button>
-                      
+
                       {/* Edit */}
-                      <Link href={`/admin/homepage-content/sections/${section._id}/edit`}>
+                      <Link
+                        href={`/admin/homepage-content/sections/${section._id}/edit`}
+                      >
                         <Button variant="outline" size="sm">
                           ✏️ Edit
                         </Button>
@@ -465,12 +518,14 @@ export default function HomePageContentAdmin() {
                   </label>
                   <select
                     value={content.globalSettings.theme}
-                    onChange={(e) => updateContent({
-                      globalSettings: {
-                        ...content.globalSettings,
-                        theme: e.target.value
-                      }
-                    })}
+                    onChange={(e) =>
+                      updateContent({
+                        globalSettings: {
+                          ...content.globalSettings,
+                          theme: e.target.value,
+                        },
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                   >
                     <option value="default">Default</option>
@@ -479,7 +534,7 @@ export default function HomePageContentAdmin() {
                     <option value="minimal">Minimal</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Primary Color
@@ -487,16 +542,18 @@ export default function HomePageContentAdmin() {
                   <input
                     type="color"
                     value={content.globalSettings.primaryColor}
-                    onChange={(e) => updateContent({
-                      globalSettings: {
-                        ...content.globalSettings,
-                        primaryColor: e.target.value
-                      }
-                    })}
+                    onChange={(e) =>
+                      updateContent({
+                        globalSettings: {
+                          ...content.globalSettings,
+                          primaryColor: e.target.value,
+                        },
+                      })
+                    }
                     className="w-full h-10 border border-gray-300 rounded-lg"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Secondary Color
@@ -504,16 +561,18 @@ export default function HomePageContentAdmin() {
                   <input
                     type="color"
                     value={content.globalSettings.secondaryColor}
-                    onChange={(e) => updateContent({
-                      globalSettings: {
-                        ...content.globalSettings,
-                        secondaryColor: e.target.value
-                      }
-                    })}
+                    onChange={(e) =>
+                      updateContent({
+                        globalSettings: {
+                          ...content.globalSettings,
+                          secondaryColor: e.target.value,
+                        },
+                      })
+                    }
                     className="w-full h-10 border border-gray-300 rounded-lg"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Font Family
@@ -521,30 +580,34 @@ export default function HomePageContentAdmin() {
                   <input
                     type="text"
                     value={content.globalSettings.fontFamily}
-                    onChange={(e) => updateContent({
-                      globalSettings: {
-                        ...content.globalSettings,
-                        fontFamily: e.target.value
-                      }
-                    })}
+                    onChange={(e) =>
+                      updateContent({
+                        globalSettings: {
+                          ...content.globalSettings,
+                          fontFamily: e.target.value,
+                        },
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                     placeholder="Inter, sans-serif"
                   />
                 </div>
               </div>
-              
+
               <div className="mt-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Custom CSS
                 </label>
                 <textarea
                   value={content.globalSettings.customCSS || ''}
-                  onChange={(e) => updateContent({
-                    globalSettings: {
-                      ...content.globalSettings,
-                      customCSS: e.target.value
-                    }
-                  })}
+                  onChange={(e) =>
+                    updateContent({
+                      globalSettings: {
+                        ...content.globalSettings,
+                        customCSS: e.target.value,
+                      },
+                    })
+                  }
                   rows={6}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                   placeholder="/* Add custom CSS here */"
@@ -569,12 +632,14 @@ export default function HomePageContentAdmin() {
                   <input
                     type="text"
                     value={content.seoSettings.title || ''}
-                    onChange={(e) => updateContent({
-                      seoSettings: {
-                        ...content.seoSettings,
-                        title: e.target.value
-                      }
-                    })}
+                    onChange={(e) =>
+                      updateContent({
+                        seoSettings: {
+                          ...content.seoSettings,
+                          title: e.target.value,
+                        },
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                     placeholder="Gruhapaaka - Authentic Homemade Food Products"
                     maxLength={60}
@@ -583,29 +648,32 @@ export default function HomePageContentAdmin() {
                     {(content.seoSettings.title || '').length}/60 characters
                   </p>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Meta Description
                   </label>
                   <textarea
                     value={content.seoSettings.description || ''}
-                    onChange={(e) => updateContent({
-                      seoSettings: {
-                        ...content.seoSettings,
-                        description: e.target.value
-                      }
-                    })}
+                    onChange={(e) =>
+                      updateContent({
+                        seoSettings: {
+                          ...content.seoSettings,
+                          description: e.target.value,
+                        },
+                      })
+                    }
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                     placeholder="Indulge in elegant homemade food products, made with the finest ingredients and traditional recipes."
                     maxLength={160}
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    {(content.seoSettings.description || '').length}/160 characters
+                    {(content.seoSettings.description || '').length}/160
+                    characters
                   </p>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Keywords (comma-separated)
@@ -613,17 +681,22 @@ export default function HomePageContentAdmin() {
                   <input
                     type="text"
                     value={content.seoSettings.keywords?.join(', ') || ''}
-                    onChange={(e) => updateContent({
-                      seoSettings: {
-                        ...content.seoSettings,
-                        keywords: e.target.value.split(',').map(k => k.trim()).filter(k => k)
-                      }
-                    })}
+                    onChange={(e) =>
+                      updateContent({
+                        seoSettings: {
+                          ...content.seoSettings,
+                          keywords: e.target.value
+                            .split(',')
+                            .map((k) => k.trim())
+                            .filter((k) => k),
+                        },
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                     placeholder="homemade food, spices, traditional recipes, authentic"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Open Graph Image URL
@@ -631,12 +704,14 @@ export default function HomePageContentAdmin() {
                   <input
                     type="url"
                     value={content.seoSettings.ogImage || ''}
-                    onChange={(e) => updateContent({
-                      seoSettings: {
-                        ...content.seoSettings,
-                        ogImage: e.target.value
-                      }
-                    })}
+                    onChange={(e) =>
+                      updateContent({
+                        seoSettings: {
+                          ...content.seoSettings,
+                          ogImage: e.target.value,
+                        },
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                     placeholder="https://example.com/og-image.jpg"
                   />
@@ -646,7 +721,7 @@ export default function HomePageContentAdmin() {
           </Card>
         )}
       </div>
-      
+
       <Footer />
     </div>
   );

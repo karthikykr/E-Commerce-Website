@@ -23,7 +23,14 @@ interface Category {
 export default function AdminCategories() {
   const { user, isLoading, isAdmin } = useAuth();
   const router = useRouter();
-  const { getCategories, createCategory, updateCategory, deleteCategory, toggleCategoryStatus, loading } = useAdminAPI();
+  const {
+    getCategories,
+    createCategory,
+    updateCategory,
+    deleteCategory,
+    toggleCategoryStatus,
+    loading,
+  } = useAdminAPI();
   const { showToast } = useToast();
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -55,7 +62,7 @@ export default function AdminCategories() {
         search: searchTerm,
         sortBy,
         sortOrder,
-        limit: 50
+        limit: 50,
       });
 
       if (response.success) {
@@ -81,7 +88,10 @@ export default function AdminCategories() {
     }
   };
 
-  const handleUpdateCategory = async (categoryId: string, categoryData: any) => {
+  const handleUpdateCategory = async (
+    categoryId: string,
+    categoryData: any
+  ) => {
     try {
       const response = await updateCategory(categoryId, categoryData);
       if (response.success) {
@@ -192,33 +202,43 @@ export default function AdminCategories() {
         {/* Categories Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {categories.map((category) => (
-            <div key={category._id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div
+              key={category._id}
+              className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+            >
               <div className="aspect-w-16 aspect-h-9 bg-gray-100">
                 <img
                   src={category.image}
                   alt={category.name}
                   className="w-full h-32 object-cover"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/images/placeholder-category.jpg';
+                    (e.target as HTMLImageElement).src =
+                      '/images/placeholder-category.jpg';
                   }}
                 />
               </div>
 
               <div className="p-4">
                 <div className="flex items-start justify-between mb-2">
-                  <h3 className="text-lg font-semibold text-gray-900">{category.name}</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {category.name}
+                  </h3>
                   <div className="flex items-center gap-2">
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      category.isActive
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}>
+                    <span
+                      className={`px-2 py-1 text-xs rounded-full ${
+                        category.isActive
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}
+                    >
                       {category.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </div>
                 </div>
 
-                <p className="text-gray-600 text-sm mb-3 line-clamp-2">{category.description}</p>
+                <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                  {category.description}
+                </p>
 
                 <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                   <span>{category.productCount} products</span>
@@ -250,7 +270,11 @@ export default function AdminCategories() {
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         : 'bg-red-500 hover:bg-red-600 text-white'
                     }`}
-                    title={category.productCount > 0 ? 'Cannot delete category with products' : 'Delete category'}
+                    title={
+                      category.productCount > 0
+                        ? 'Cannot delete category with products'
+                        : 'Delete category'
+                    }
                   >
                     Delete
                   </button>
@@ -262,8 +286,12 @@ export default function AdminCategories() {
 
         {categories.length === 0 && (
           <div className="text-center py-12">
-            <div className="text-gray-400 text-lg mb-2">No categories found</div>
-            <p className="text-gray-500">Create your first category to get started</p>
+            <div className="text-gray-400 text-lg mb-2">
+              No categories found
+            </div>
+            <p className="text-gray-500">
+              Create your first category to get started
+            </p>
           </div>
         )}
       </div>
@@ -276,9 +304,10 @@ export default function AdminCategories() {
             setShowCreateModal(false);
             setEditingCategory(null);
           }}
-          onSave={editingCategory ?
-            (data) => handleUpdateCategory(editingCategory._id, data) :
-            handleCreateCategory
+          onSave={
+            editingCategory
+              ? (data) => handleUpdateCategory(editingCategory._id, data)
+              : handleCreateCategory
           }
         />
       )}
@@ -287,7 +316,11 @@ export default function AdminCategories() {
 }
 
 // Category Modal Component
-function CategoryModal({ category, onClose, onSave }: {
+function CategoryModal({
+  category,
+  onClose,
+  onSave,
+}: {
   category: Category | null;
   onClose: () => void;
   onSave: (data: any) => void;
@@ -296,7 +329,7 @@ function CategoryModal({ category, onClose, onSave }: {
     name: category?.name || '',
     description: category?.description || '',
     image: category?.image || '',
-    sortOrder: category?.sortOrder || 1
+    sortOrder: category?.sortOrder || 1,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -313,21 +346,29 @@ function CategoryModal({ category, onClose, onSave }: {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Name
+            </label>
             <input
               type="text"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Description
+            </label>
             <textarea
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
               rows={3}
               required
@@ -335,22 +376,33 @@ function CategoryModal({ category, onClose, onSave }: {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Image URL
+            </label>
             <input
               type="text"
               value={formData.image}
-              onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, image: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
               placeholder="/images/categories/category-name.jpg"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Sort Order</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Sort Order
+            </label>
             <input
               type="number"
               value={formData.sortOrder}
-              onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value) })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  sortOrder: parseInt(e.target.value),
+                })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
               min="1"
             />
@@ -376,4 +428,3 @@ function CategoryModal({ category, onClose, onSave }: {
     </div>
   );
 }
-

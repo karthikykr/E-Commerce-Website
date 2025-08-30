@@ -20,9 +20,9 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     // Generate unique filename
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     cb(null, 'featured-' + uniqueSuffix + path.extname(file.originalname));
-  }
+  },
 });
 
 const fileFilter = (req, file, cb) => {
@@ -38,8 +38,8 @@ const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
-  }
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
 });
 
 // @route   GET /api/featured-products
@@ -48,7 +48,7 @@ const upload = multer({
 router.get('/', async (req, res) => {
   try {
     const { active = 'true' } = req.query;
-    
+
     let query = {};
     if (active === 'true') {
       query.isActive = true;
@@ -56,20 +56,22 @@ router.get('/', async (req, res) => {
 
     const featuredProducts = await FeaturedProduct.find(query)
       .sort({ displayOrder: 1 })
-      .select('name price originalPrice image emoji backgroundColor position animation rotation hoverRotation discountPercentage');
+      .select(
+        'name price originalPrice image emoji backgroundColor position animation rotation hoverRotation discountPercentage'
+      );
 
     res.json({
       success: true,
       data: {
         featuredProducts,
-        count: featuredProducts.length
-      }
+        count: featuredProducts.length,
+      },
     });
   } catch (error) {
     console.error('Get featured products error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error fetching featured products'
+      message: 'Error fetching featured products',
     });
   }
 });
@@ -80,14 +82,14 @@ router.get('/', async (req, res) => {
 router.get('/homepage', async (req, res) => {
   try {
     const featuredProducts = await FeaturedProduct.getHomepageProducts();
-    
+
     // Group by position for easier frontend consumption
     const groupedProducts = {
       heroMain: [],
-      heroBottom: []
+      heroBottom: [],
     };
 
-    featuredProducts.forEach(product => {
+    featuredProducts.forEach((product) => {
       if (product.position.startsWith('hero-main')) {
         groupedProducts.heroMain.push(product);
       } else if (product.position.startsWith('hero-bottom')) {
@@ -99,14 +101,14 @@ router.get('/homepage', async (req, res) => {
       success: true,
       data: {
         featuredProducts: groupedProducts,
-        total: featuredProducts.length
-      }
+        total: featuredProducts.length,
+      },
     });
   } catch (error) {
     console.error('Get homepage featured products error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error fetching homepage featured products'
+      message: 'Error fetching homepage featured products',
     });
   }
 });
@@ -116,31 +118,37 @@ router.get('/homepage', async (req, res) => {
 // @access  Private (Admin)
 router.get('/admin', adminAuth, async (req, res) => {
   try {
-    const { page = 1, limit = 10, search = '', position = '', active = '' } = req.query;
-    
+    const {
+      page = 1,
+      limit = 10,
+      search = '',
+      position = '',
+      active = '',
+    } = req.query;
+
     let query = {};
-    
+
     // Search filter
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } },
-        { category: { $regex: search, $options: 'i' } }
+        { category: { $regex: search, $options: 'i' } },
       ];
     }
-    
+
     // Position filter
     if (position) {
       query.position = position;
     }
-    
+
     // Active filter
     if (active !== '') {
       query.isActive = active === 'true';
     }
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    
+
     const featuredProducts = await FeaturedProduct.find(query)
       .populate('createdBy', 'name email')
       .populate('updatedBy', 'name email')
@@ -159,15 +167,15 @@ router.get('/admin', adminAuth, async (req, res) => {
           totalPages: Math.ceil(total / parseInt(limit)),
           totalItems: total,
           hasNext: page < Math.ceil(total / parseInt(limit)),
-          hasPrev: page > 1
-        }
-      }
+          hasPrev: page > 1,
+        },
+      },
     });
   } catch (error) {
     console.error('Get admin featured products error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error fetching featured products for admin'
+      message: 'Error fetching featured products for admin',
     });
   }
 });
@@ -184,19 +192,19 @@ router.get('/:id', async (req, res) => {
     if (!featuredProduct) {
       return res.status(404).json({
         success: false,
-        message: 'Featured product not found'
+        message: 'Featured product not found',
       });
     }
 
     res.json({
       success: true,
-      data: { featuredProduct }
+      data: { featuredProduct },
     });
   } catch (error) {
     console.error('Get featured product error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error fetching featured product'
+      message: 'Error fetching featured product',
     });
   }
 });
@@ -204,110 +212,119 @@ router.get('/:id', async (req, res) => {
 // @route   POST /api/featured-products
 // @desc    Create new featured product
 // @access  Private (Admin)
-router.post('/', [
-  adminAuth,
-  upload.single('image'),
-  body('name').notEmpty().withMessage('Product name is required'),
-  body('price').isNumeric().withMessage('Price must be a number'),
-  body('position').isIn(['hero-main-1', 'hero-main-2', 'hero-bottom-1', 'hero-bottom-2', 'hero-bottom-3'])
-    .withMessage('Invalid position')
-], async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
+router.post(
+  '/',
+  [
+    adminAuth,
+    upload.single('image'),
+    body('name').notEmpty().withMessage('Product name is required'),
+    body('price').isNumeric().withMessage('Price must be a number'),
+    body('position')
+      .isIn([
+        'hero-main-1',
+        'hero-main-2',
+        'hero-bottom-1',
+        'hero-bottom-2',
+        'hero-bottom-3',
+      ])
+      .withMessage('Invalid position'),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation errors',
+          errors: errors.array(),
+        });
+      }
+
+      const {
+        name,
+        description,
+        price,
+        originalPrice,
+        emoji,
+        backgroundColor,
+        position,
+        category,
+        tags,
+        animation,
+        rotation,
+        hoverRotation,
+      } = req.body;
+
+      // Check if position is already taken
+      const existingProduct = await FeaturedProduct.findOne({ position });
+      if (existingProduct) {
+        return res.status(400).json({
+          success: false,
+          message: `Position ${position} is already occupied by another product`,
+        });
+      }
+
+      // Handle image upload
+      let imageData = {};
+      if (req.file) {
+        imageData = {
+          url: `/uploads/featured-products/${req.file.filename}`,
+          alt: name,
+        };
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: 'Product image is required',
+        });
+      }
+
+      const featuredProduct = new FeaturedProduct({
+        name,
+        description,
+        price: parseFloat(price),
+        originalPrice: originalPrice ? parseFloat(originalPrice) : undefined,
+        image: imageData,
+        emoji: emoji || '🌶️',
+        backgroundColor:
+          backgroundColor || 'from-red-100 via-red-200 to-red-300',
+        position,
+        category,
+        tags: tags ? tags.split(',').map((tag) => tag.trim()) : [],
+        animation: animation || 'bounce',
+        rotation: rotation || 'rotate-1',
+        hoverRotation: hoverRotation || 'rotate-0',
+        createdBy: req.user._id,
+        updatedBy: req.user._id,
+      });
+
+      await featuredProduct.save();
+
+      res.status(201).json({
+        success: true,
+        message: 'Featured product created successfully',
+        data: { featuredProduct },
+      });
+    } catch (error) {
+      console.error('Create featured product error:', error);
+      res.status(500).json({
         success: false,
-        message: 'Validation errors',
-        errors: errors.array()
+        message: 'Error creating featured product',
       });
     }
-
-    const {
-      name,
-      description,
-      price,
-      originalPrice,
-      emoji,
-      backgroundColor,
-      position,
-      category,
-      tags,
-      animation,
-      rotation,
-      hoverRotation
-    } = req.body;
-
-    // Check if position is already taken
-    const existingProduct = await FeaturedProduct.findOne({ position });
-    if (existingProduct) {
-      return res.status(400).json({
-        success: false,
-        message: `Position ${position} is already occupied by another product`
-      });
-    }
-
-    // Handle image upload
-    let imageData = {};
-    if (req.file) {
-      imageData = {
-        url: `/uploads/featured-products/${req.file.filename}`,
-        alt: name
-      };
-    } else {
-      return res.status(400).json({
-        success: false,
-        message: 'Product image is required'
-      });
-    }
-
-    const featuredProduct = new FeaturedProduct({
-      name,
-      description,
-      price: parseFloat(price),
-      originalPrice: originalPrice ? parseFloat(originalPrice) : undefined,
-      image: imageData,
-      emoji: emoji || '🌶️',
-      backgroundColor: backgroundColor || 'from-red-100 via-red-200 to-red-300',
-      position,
-      category,
-      tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
-      animation: animation || 'bounce',
-      rotation: rotation || 'rotate-1',
-      hoverRotation: hoverRotation || 'rotate-0',
-      createdBy: req.user._id,
-      updatedBy: req.user._id
-    });
-
-    await featuredProduct.save();
-
-    res.status(201).json({
-      success: true,
-      message: 'Featured product created successfully',
-      data: { featuredProduct }
-    });
-  } catch (error) {
-    console.error('Create featured product error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error creating featured product'
-    });
   }
-});
+);
 
 // @route   PUT /api/featured-products/:id
 // @desc    Update featured product
 // @access  Private (Admin)
-router.put('/:id', [
-  adminAuth,
-  upload.single('image')
-], async (req, res) => {
+router.put('/:id', [adminAuth, upload.single('image')], async (req, res) => {
   try {
     const featuredProduct = await FeaturedProduct.findById(req.params.id);
-    
+
     if (!featuredProduct) {
       return res.status(404).json({
         success: false,
-        message: 'Featured product not found'
+        message: 'Featured product not found',
       });
     }
 
@@ -324,19 +341,19 @@ router.put('/:id', [
       animation,
       rotation,
       hoverRotation,
-      isActive
+      isActive,
     } = req.body;
 
     // Check if position is being changed and if new position is available
     if (position && position !== featuredProduct.position) {
-      const existingProduct = await FeaturedProduct.findOne({ 
-        position, 
-        _id: { $ne: req.params.id } 
+      const existingProduct = await FeaturedProduct.findOne({
+        position,
+        _id: { $ne: req.params.id },
       });
       if (existingProduct) {
         return res.status(400).json({
           success: false,
-          message: `Position ${position} is already occupied by another product`
+          message: `Position ${position} is already occupied by another product`,
         });
       }
     }
@@ -344,16 +361,23 @@ router.put('/:id', [
     // Handle image upload
     if (req.file) {
       // Delete old image file if it exists
-      if (featuredProduct.image.url && featuredProduct.image.url.startsWith('/uploads/')) {
-        const oldImagePath = path.join(__dirname, '../../', featuredProduct.image.url);
+      if (
+        featuredProduct.image.url &&
+        featuredProduct.image.url.startsWith('/uploads/')
+      ) {
+        const oldImagePath = path.join(
+          __dirname,
+          '../../',
+          featuredProduct.image.url
+        );
         if (fs.existsSync(oldImagePath)) {
           fs.unlinkSync(oldImagePath);
         }
       }
-      
+
       featuredProduct.image = {
         url: `/uploads/featured-products/${req.file.filename}`,
-        alt: name || featuredProduct.name
+        alt: name || featuredProduct.name,
       };
     }
 
@@ -361,17 +385,20 @@ router.put('/:id', [
     if (name) featuredProduct.name = name;
     if (description !== undefined) featuredProduct.description = description;
     if (price) featuredProduct.price = parseFloat(price);
-    if (originalPrice !== undefined) featuredProduct.originalPrice = originalPrice ? parseFloat(originalPrice) : undefined;
+    if (originalPrice !== undefined)
+      featuredProduct.originalPrice = originalPrice
+        ? parseFloat(originalPrice)
+        : undefined;
     if (emoji) featuredProduct.emoji = emoji;
     if (backgroundColor) featuredProduct.backgroundColor = backgroundColor;
     if (position) featuredProduct.position = position;
     if (category !== undefined) featuredProduct.category = category;
-    if (tags) featuredProduct.tags = tags.split(',').map(tag => tag.trim());
+    if (tags) featuredProduct.tags = tags.split(',').map((tag) => tag.trim());
     if (animation) featuredProduct.animation = animation;
     if (rotation) featuredProduct.rotation = rotation;
     if (hoverRotation) featuredProduct.hoverRotation = hoverRotation;
     if (isActive !== undefined) featuredProduct.isActive = isActive === 'true';
-    
+
     featuredProduct.updatedBy = req.user._id;
 
     await featuredProduct.save();
@@ -379,13 +406,13 @@ router.put('/:id', [
     res.json({
       success: true,
       message: 'Featured product updated successfully',
-      data: { featuredProduct }
+      data: { featuredProduct },
     });
   } catch (error) {
     console.error('Update featured product error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error updating featured product'
+      message: 'Error updating featured product',
     });
   }
 });
@@ -396,17 +423,24 @@ router.put('/:id', [
 router.delete('/:id', adminAuth, async (req, res) => {
   try {
     const featuredProduct = await FeaturedProduct.findById(req.params.id);
-    
+
     if (!featuredProduct) {
       return res.status(404).json({
         success: false,
-        message: 'Featured product not found'
+        message: 'Featured product not found',
       });
     }
 
     // Delete image file if it exists
-    if (featuredProduct.image.url && featuredProduct.image.url.startsWith('/uploads/')) {
-      const imagePath = path.join(__dirname, '../../', featuredProduct.image.url);
+    if (
+      featuredProduct.image.url &&
+      featuredProduct.image.url.startsWith('/uploads/')
+    ) {
+      const imagePath = path.join(
+        __dirname,
+        '../../',
+        featuredProduct.image.url
+      );
       if (fs.existsSync(imagePath)) {
         fs.unlinkSync(imagePath);
       }
@@ -416,13 +450,13 @@ router.delete('/:id', adminAuth, async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Featured product deleted successfully'
+      message: 'Featured product deleted successfully',
     });
   } catch (error) {
     console.error('Delete featured product error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error deleting featured product'
+      message: 'Error deleting featured product',
     });
   }
 });
@@ -433,11 +467,11 @@ router.delete('/:id', adminAuth, async (req, res) => {
 router.patch('/:id/toggle-active', adminAuth, async (req, res) => {
   try {
     const featuredProduct = await FeaturedProduct.findById(req.params.id);
-    
+
     if (!featuredProduct) {
       return res.status(404).json({
         success: false,
-        message: 'Featured product not found'
+        message: 'Featured product not found',
       });
     }
 
@@ -446,13 +480,13 @@ router.patch('/:id/toggle-active', adminAuth, async (req, res) => {
     res.json({
       success: true,
       message: `Featured product ${featuredProduct.isActive ? 'activated' : 'deactivated'} successfully`,
-      data: { featuredProduct }
+      data: { featuredProduct },
     });
   } catch (error) {
     console.error('Toggle featured product error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error toggling featured product status'
+      message: 'Error toggling featured product status',
     });
   }
 });
