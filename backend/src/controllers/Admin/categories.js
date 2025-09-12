@@ -5,6 +5,7 @@ const Category = require('../../models/Category');
 exports.createCategory = async (req, res) => {
   try {
     const { name, description, parentCategory, sortOrder } = req.body;
+    const user =req.user;
 
     const img = req.files.image[0];
     const imageData = {
@@ -24,6 +25,7 @@ exports.createCategory = async (req, res) => {
       image: imageData || '',
       parentCategory: parentCategory || null,
       sortOrder: sortOrder || 0,
+      userId:user.id,
     });
 
     await category.save();
