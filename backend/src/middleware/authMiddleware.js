@@ -1,5 +1,5 @@
-const jwt = require("jsonwebtoken");
-const User = require("../models/User"); 
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 /**
  * Auth middleware
  * @param {Array<string>} allowedRoles (Optional) - Pass roles allowed to access this route
@@ -12,14 +12,14 @@ const doAuthenticate = (allowedRoles = []) => {
   return async (req, res, next) => {
     try {
       const token =
-        req.header("Authorization")?.replace("Bearer ", "") ||
-        req.header("x-auth-token") ||
+        req.header('Authorization')?.replace('Bearer ', '') ||
+        req.header('x-auth-token') ||
         req.cookies?.token;
 
       if (!token) {
         return res.status(401).json({
           success: false,
-          message: "Access denied. No token provided.",
+          message: 'Access denied. No token provided.',
         });
       }
 
@@ -32,7 +32,7 @@ const doAuthenticate = (allowedRoles = []) => {
       if (!user) {
         return res.status(401).json({
           success: false,
-          message: "Invalid token. User not found.",
+          message: 'Invalid token. User not found.',
         });
       }
 
@@ -40,31 +40,37 @@ const doAuthenticate = (allowedRoles = []) => {
       if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
         return res.status(403).json({
           success: false,
-          message: `Access denied. Allowed roles: ${allowedRoles.join(", ")}`,
+          message: `Access denied. Allowed roles: ${allowedRoles.join(', ')}`,
         });
       }
 
       // Attach user to request for controller access
       req.user = {
-  id: user._id,
-  name: user.name,
-  email: user.email,
-  role: user.role,
-};
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      };
 
       next();
     } catch (error) {
-      console.error("Auth middleware error:", error);
+      console.error('Auth middleware error:', error);
 
-      if (error.name === "JsonWebTokenError") {
-        return res.status(401).json({ success: false, message: "Invalid token." });
+      if (error.name === 'JsonWebTokenError') {
+        return res
+          .status(401)
+          .json({ success: false, message: 'Invalid token.' });
       }
 
-      if (error.name === "TokenExpiredError") {
-        return res.status(401).json({ success: false, message: "Token expired." });
+      if (error.name === 'TokenExpiredError') {
+        return res
+          .status(401)
+          .json({ success: false, message: 'Token expired.' });
       }
 
-      res.status(500).json({ success: false, message: "Server error in authentication." });
+      res
+        .status(500)
+        .json({ success: false, message: 'Server error in authentication.' });
     }
   };
 };

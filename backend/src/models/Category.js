@@ -37,10 +37,10 @@ const categorySchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    userId:{
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       required,
-    }
+    },
   },
   { timestamps: true }
 );

@@ -5,7 +5,7 @@ const express = require('express');
 const { createCategory } = require('../controllers/Admin/categories');
 // const { Cloudinary } = require('../cloudinary');
 const { upload } = require('../middleware/uploadToCloudinary');
-const  doAuthenticate  = require( "../middleware/authMiddleware");
+const doAuthenticate = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
