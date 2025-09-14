@@ -1,6 +1,6 @@
 const slugify = require('slugify');
-const { deleteImage } = require('../../config/cloudinaryConfig');
-const Category = require('../../models/Category');
+const { deleteImage } = require('../config/cloudinaryConfig');
+const Category = require('../models/Category');
 
 // Add Category
 exports.createCategory = async (req, res) => {
@@ -82,6 +82,63 @@ exports.getCategoryById = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch category',
+      error: error.message,
+    });
+  }
+};
+
+// Get Categories by Filter
+
+// Get all categories
+// GET /api/category
+// Filter by name
+// GET /api/category?name=Electronics
+// Filter by slug
+// GET /api/category?slug=home-appliances
+// Filter by parent category
+// GET /api/category?parentCategory=64ef3d...
+// Filter by userId
+// GET /api/category?userId=64ef3d...
+// Combine filters
+// GET /api/category?name=phone&userId=64ef3d...
+exports.getCategories = async (req, res) => {
+  try {
+    // Extract filters from query params
+    const { name, slug, parentCategory, userId } = req.query;
+
+    let filter = {};
+
+    if (name) {
+      filter.name = { $regex: new RegExp(name, 'i') }; // case-insensitive search
+    }
+
+    if (slug) {
+      filter.slug = slug; // exact match (you can also use regex if needed)
+    }
+
+    if (parentCategory) {
+      filter.parentCategory = parentCategory;
+    }
+
+    if (userId) {
+      filter.userId = userId;
+    }
+
+    // Fetch categories with applied filters
+    const categories = await Category.find(filter).sort({
+      sortOrder: 1,
+      createdAt: -1,
+    }); // sort by order first, then latest
+
+    res.status(200).json({
+      success: true,
+      count: categories.length,
+      categories,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch categories',
       error: error.message,
     });
   }
@@ -172,6 +229,43 @@ exports.updateCategory = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to update category',
+      error: error.message,
+    });
+  }
+};
+
+// Delete Category by ID
+exports.deleteCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find and delete
+    const category = await Category.findByIdAndDelete(id);
+
+    if (!category) {
+      return res.status(404).json({
+        success: false,
+        message: 'Category not found',
+      });
+    }
+
+    // Delete image from Cloudinary (if exists)
+    if (category.image?.publicId) {
+      try {
+        await deleteImage(category.image.publicId);
+      } catch (err) {
+        console.error('Failed to delete image from Cloudinary:', err.message);
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Category deleted successfully',
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete category',
       error: error.message,
     });
   }
