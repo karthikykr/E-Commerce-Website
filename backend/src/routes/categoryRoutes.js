@@ -1,19 +1,28 @@
 const express = require('express');
-// const { adminAuth, logAdminAction } = require('../middleware/adminAuth');
-// const categoryValidator = require('../validators/categories');
-// const categoryController = require('../controllers/adminCategories');
-const { createCategory } = require('../controllers/Admin/categories');
-// const { Cloudinary } = require('../cloudinary');
 const { upload } = require('../middleware/uploadToCloudinary');
 const doAuthenticate = require('../middleware/authMiddleware');
+const {
+  createCategory,
+  getCategoryById,
+  updateCategory,
+} = require('../controllers/Admin/categories');
 
 const router = express.Router();
 
 router.post(
-  '/addcategory',
+  '/category',
   doAuthenticate(['admin']),
   upload([{ name: 'image', maxCount: 1 }]),
   createCategory
+);
+
+router.get('/category/:id', doAuthenticate(), getCategoryById);
+
+router.patch(
+  '/category/:id',
+  doAuthenticate(['admin']),
+  upload([{ name: 'image', maxCount: 1 }]),
+  updateCategory
 );
 
 // @route   GET /api/admin/categories

@@ -13,10 +13,6 @@ const upload = (fields = []) => {
     Upload.fields(fields),
     async (req, res, next) => {
       try {
-        if (!req.files || Object.keys(req.files).length === 0) {
-          return res.status(400).json({ message: 'No files uploaded' });
-        }
-
         // Loop through all uploaded fields
         for (const field in req.files) {
           for (const file of req.files[field]) {
@@ -43,3 +39,20 @@ const upload = (fields = []) => {
 };
 
 module.exports = { upload };
+
+// for mutiple images
+
+// router.post(
+//   '/addsite',
+//   cloudinaryUpload([
+//     { name: 'siteImages', maxCount: 10 },
+//     { name: 'documents', maxCount: 5 }
+//   ]),
+//   addSite
+// );
+
+// const siteImgs = req.files.siteImages;  // array of files
+// siteImgs.forEach(file => console.log(file.cloudinary));
+
+// const docs = req.files.documents;       // array of files
+// docs.forEach(file => console.log(file.cloudinary));
