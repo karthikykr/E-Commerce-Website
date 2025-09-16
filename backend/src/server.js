@@ -11,6 +11,7 @@ dotenv.config();
 
 const authRoutes = require('./routes/authRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
+const productRoutes = require('./routes/productRoutes');
 
 // Connect to MongoDB (with error handling)
 if (process.env.MONGODB_URI) {
@@ -45,6 +46,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api', categoryRoutes);
+app.use('/api', productRoutes);
 
 // Routes
 // app.use('/api/auth', require('./routes/auth'));

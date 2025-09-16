@@ -8,9 +8,9 @@ exports.createCategory = async (req, res) => {
     const { name, description, parentCategory, sortOrder } = req.body;
     const userId = req.user.id;
 
-    //Check if category already exists by name (case-insensitive)
+    //Check if category already exists by name
     const existingCategory = await Category.findOne({
-      name: { $regex: new RegExp('^' + name + '$', 'i') }, // case-insensitive match
+      name: { $regex: new RegExp('^' + name + '$', 'i') },
     });
 
     if (existingCategory) {
@@ -31,7 +31,7 @@ exports.createCategory = async (req, res) => {
     }
 
     // Generate slug from name
-    const slug = slugify(name, { lower: true, strict: true });
+    const slug = slugify(name, { lower: true, strict: true, trim: true });
 
     // Create new category
     const category = new Category({
@@ -64,7 +64,7 @@ exports.getCategoryById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Find category by ID and populate parent category (if needed)
+    // Find category by ID
     const category = await Category.findById(id);
 
     if (!category) {
@@ -109,11 +109,11 @@ exports.getCategories = async (req, res) => {
     let filter = {};
 
     if (name) {
-      filter.name = { $regex: new RegExp(name, 'i') }; // case-insensitive search
+      filter.name = { $regex: new RegExp(name, 'i') };
     }
 
     if (slug) {
-      filter.slug = slug; // exact match (you can also use regex if needed)
+      filter.slug = slug;
     }
 
     if (parentCategory) {
@@ -128,7 +128,7 @@ exports.getCategories = async (req, res) => {
     const categories = await Category.find(filter).sort({
       sortOrder: 1,
       createdAt: -1,
-    }); // sort by order first, then latest
+    });
 
     res.status(200).json({
       success: true,
