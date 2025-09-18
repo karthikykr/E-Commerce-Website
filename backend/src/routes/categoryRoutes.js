@@ -31,7 +31,7 @@ router.get(
 );
 
 //Get Ctegory By Filter
-router.get('/fetchcategory', doAuthenticate(), getCategories);
+router.get('/category', doAuthenticate(), getCategories);
 
 // Update the Categories
 router.patch(

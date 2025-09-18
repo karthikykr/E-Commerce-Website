@@ -54,3 +54,19 @@ exports.getAssetsByEntity = async (entityId) => {
     entityId,
   });
 };
+
+exports.deleteAsset = async (assetId, session) => {
+  const asset = await Asset.findByIdAndDelete(assetId).session(session);
+  if (!asset) {
+    console.warn('Asset not found');
+    return;
+  }
+
+  if (asset.publicId) {
+    try {
+      await deleteImage(asset.publicId);
+    } catch (err) {
+      console.error('Failed to delete image from Cloudinary:', err.message);
+    }
+  }
+};
