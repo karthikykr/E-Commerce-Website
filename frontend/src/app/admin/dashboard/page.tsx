@@ -54,13 +54,13 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!isLoading) {
-      if (!user) {
-        router.push('/auth/login');
-      }
-    }
-  }, [user, router, isLoading]);
+  // useEffect(() => {
+  //   if (!isLoading) {
+  //     if (!user) {
+  //       router.push('/auth/login');
+  //     }
+  //   }
+  // }, [user, router, isLoading]);
 
   useEffect(() => {
     if (user) {

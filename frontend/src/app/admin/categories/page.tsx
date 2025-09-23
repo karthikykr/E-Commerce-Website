@@ -40,15 +40,15 @@ export default function AdminCategories() {
   const [sortBy, setSortBy] = useState('sortOrder');
   const [sortOrder, setSortOrder] = useState('asc');
 
-  useEffect(() => {
-    if (!isLoading) {
-      if (!user) {
-        router.push('/auth/login');
-      } else if (!isAdmin) {
-        router.push('/');
-      }
-    }
-  }, [user, router, isLoading, isAdmin]);
+  // useEffect(() => {
+  //   if (!isLoading) {
+  //     if (!user) {
+  //       router.push('/auth/login');
+  //     } else if (!isAdmin) {
+  //       router.push('/');
+  //     }
+  //   }
+  // }, [user, router, isLoading, isAdmin]);
 
   useEffect(() => {
     if (user && isAdmin) {

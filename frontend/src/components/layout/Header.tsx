@@ -6,13 +6,13 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { useCart } from '@/contexts/CartContext';
-import { useWishlist } from '@/contexts/WishlistContext';
+// import { useCart } from '@/contexts/CartContext';
+// import { useWishlist } from '@/contexts/WishlistContext';
 
 export const Header = () => {
   const { user, logout } = useAuth();
-  const { cartCount } = useCart();
-  const { wishlistCount } = useWishlist();
+  // const { cartCount } = useCart();
+  // const { wishlistCount } = useWishlist();
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -159,11 +159,11 @@ export const Header = () => {
                 />
               </svg>
               {/* Cart Badge - Enhanced visibility */}
-              {cartCount > 0 && (
+              {/* {cartCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 bg-gradient-to-r from-orange-600 to-red-600 text-white text-xs rounded-full h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center animate-pulse shadow-lg font-bold min-w-[20px] sm:min-w-[24px] border-2 border-white">
                   {cartCount > 99 ? '99+' : cartCount}
                 </span>
-              )}
+              )} */}
             </Link>
 
             {/* Wishlist Icon - Enhanced mobile touch target */}
@@ -184,11 +184,11 @@ export const Header = () => {
                   d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                 />
               </svg>
-              {wishlistCount > 0 && (
+              {/* {wishlistCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center shadow-lg font-bold min-w-[20px] sm:min-w-[24px] border-2 border-white">
                   {wishlistCount > 99 ? '99+' : wishlistCount}
                 </span>
-              )}
+              )} */}
             </Link>
 
             {/* Auth Section */}
