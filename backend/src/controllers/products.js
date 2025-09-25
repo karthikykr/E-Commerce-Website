@@ -11,43 +11,63 @@ const {
 
 // Add product
 exports.addProduct = async (req, res) => {
-  const {
-    name,
-    description,
-    price,
-    discount,
-    weight,
-    numberOfUnits,
-    category,
-    stock,
-    status,
-    productInfo,
-  } = req.body;
-
-  const userId = req.user.id;
-
   try {
+    // First, parse the wrapped 'data' from frontend (as discussed previously)
+    let bodyData = req.body;
+    if (req.body.data) {
+      try {
+        bodyData = JSON.parse(req.body.data);
+      } catch (parseError) {
+        const error = new Error('Invalid data format');
+        error.statusCode = 400;
+        throw error;
+      }
+    }
+
+    // Destructure other fields from bodyData
+    const {
+      description,
+      price,
+      discount,
+      weight,
+      numberOfUnits,
+      category,
+      stock,
+      status,
+      productInfo,
+    } = bodyData;
+
+    // Extract and validate name separately (your suggested approach)
+    const productName = bodyData.name ? bodyData.name.trim() : null;  // Store in a new variable, trim whitespace
+
+    if (typeof productName !== 'string' || !productName) {
+      const error = new Error('Product name is required and must be a valid string');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    // Now generate slug using the validated productName variable
+    const slug = slugify(productName, { lower: true, strict: true, trim: true });
+
+    const userId = req.user.id;
+
     await withTransaction(async (session) => {
-      // 1. Check if product already exists
+      // 1. Check if product already exists (use productName here)
       const existingProduct = await Product.findOne(
-        { name: { $regex: new RegExp('^' + name + '$', 'i') } },
+        { name: { $regex: new RegExp('^' + productName + '$', 'i') } },
         null,
         { session }
       );
 
       if (existingProduct) {
-        // throw an error to rollback transaction
-        const error = new Error(`Product with name "${name}" already exists`);
+        const error = new Error(`Product with name "${productName}" already exists`);
         error.statusCode = 400;
         throw error;
       }
 
-      // 2. Generate slug
-      const slug = slugify(name, { lower: true, strict: true, trim: true });
-
-      // 3. Save product
+      // 2. Save product (use productName and slug)
       const newProduct = new Product({
-        name,
+        name: productName,  // Use the validated variable
         slug,
         description,
         price,
@@ -62,7 +82,7 @@ exports.addProduct = async (req, res) => {
 
       const savedProduct = await newProduct.save({ session });
 
-      // 4. Handle product images
+      // 3. Handle product images (unchanged)
       if (req.files?.productImage?.length > 0) {
         await createAssetsHandler({
           files: req.files.productImage,
@@ -72,7 +92,7 @@ exports.addProduct = async (req, res) => {
         });
       }
 
-      // 5. Save product details
+      // 4. Save product details (unchanged)
       if (productInfo && typeof productInfo === 'object') {
         await new ProductInfo({
           productId: savedProduct._id,
@@ -95,7 +115,6 @@ exports.addProduct = async (req, res) => {
     });
   } catch (error) {
     console.error('Error adding product:', error);
-
     return res.status(error.statusCode || 500).json({
       success: false,
       message: error.message || 'Something went wrong',

@@ -18,19 +18,19 @@ export default function CustomerDashboard() {
     totalSpent: 0,
   });
 
-  // Redirect if not authenticated or not a customer
-  useEffect(() => {
-    if (!isLoading) {
-      if (!user) {
-        router.push('/auth/login');
-        return;
-      }
-      if (user.role === 'admin') {
-        router.push('/admin/dashboard');
-        return;
-      }
-    }
-  }, [user, isLoading, router]);
+  // // Redirect if not authenticated or not a customer
+  // useEffect(() => {
+  //   if (!isLoading) {
+  //     if (!user) {
+  //       router.push('/auth/login');
+  //       return;
+  //     }
+  //     if (user.role === 'admin') {
+  //       router.push('/admin/dashboard');
+  //       return;
+  //     }
+  //   }
+  // }, [user, isLoading, router]);
 
   // Show loading while checking authentication
   if (isLoading) {
