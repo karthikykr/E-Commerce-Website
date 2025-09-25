@@ -39,15 +39,15 @@ export default function AdminOrders() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (!isLoading) {
-      if (!user) {
-        router.push('/auth/login');
-      } else if (user.role !== 'admin') {
-        router.push('/');
-      }
-    }
-  }, [user, router, isLoading]);
+  // useEffect(() => {
+  //   if (!isLoading) {
+  //     if (!user) {
+  //       router.push('/auth/login');
+  //     } else if (user.role !== 'admin') {
+  //       router.push('/');
+  //     }
+  //   }
+  // }, [user, router, isLoading]);
 
   useEffect(() => {
     if (user && user.role === 'admin') {

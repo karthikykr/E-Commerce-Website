@@ -1,0 +1,49 @@
+{
+  "name": "gruhapaaka-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Gruhapaaka homemade food products application",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "start-safe": "node start-server.js",
+    "build": "echo 'No build step required for Node.js'",
+    "seed": "node src/scripts/seedData.js",
+    "reset-db": "node src/scripts/resetDatabase.js",
+    "test-connection": "node test-connection.js",
+    "test-api": "node api-test.js",
+    "check-mongodb": "node check-mongodb.js",
+    "setup-db": "node setup-database.js",
+    "create-admin": "node create-admin.js",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "axios": "^1.10.0",
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^2.7.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-validator": "^7.2.1",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.0.3",
+    "morgan": "^1.10.0",
+    "multer": "^2.0.2",
+    "sharp": "^0.34.3",
+    "slugify": "^1.6.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.6.2"
+  },
+  "keywords": [
+    "express",
+    "mongodb",
+    "ecommerce",
+    "api"
+  ],
+  "author": "",
+  "license": "ISC"
+}

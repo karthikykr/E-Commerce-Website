@@ -76,17 +76,17 @@ export default function HomePageContentAdmin() {
     'sections'
   );
 
-  useEffect(() => {
-    if (!isLoading) {
-      if (!user) {
-        router.push('/auth/login');
-      } else if (user.role !== 'admin') {
-        router.push('/');
-      } else {
-        fetchContent();
-      }
-    }
-  }, [user, router, isLoading]);
+  // useEffect(() => {
+  //   if (!isLoading) {
+  //     if (!user) {
+  //       router.push('/auth/login');
+  //     } else if (user.role !== 'admin') {
+  //       router.push('/');
+  //     } else {
+  //       fetchContent();
+  //     }
+  //   }
+  // }, [user, router, isLoading]);
 
   const fetchContent = async () => {
     try {

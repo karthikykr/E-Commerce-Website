@@ -7,7 +7,7 @@ import React, {
   useEffect,
   ReactNode,
 } from 'react';
-import { useRouter, usePathname } from 'next/navigation'; // Add usePathname for current route check
+import { useRouter, usePathname } from 'next/navigation';
 import axios from 'axios';
 
 interface UserData {
@@ -31,15 +31,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const pathname = usePathname(); // Get current route
+  const pathname = usePathname();
 
   // Restore user from localStorage on mount
   useEffect(() => {
-    if (typeof window === 'undefined' || !localStorage) {
-      console.warn('localStorage is not available');
-      setLoading(false);
-      return;
-    }
+    if (typeof window === 'undefined') return;
 
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
@@ -54,17 +50,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.removeItem('user');
       }
     }
+
     setLoading(false);
   }, []);
 
+  // Optional: Protect routes based on role
   useEffect(() => {
     if (!loading && user) {
-      const targetPath = user.role === 'admin' ? '/admin/dashboard' : '/';
-      if (pathname !== targetPath) {
-        router.push(targetPath);
+      if (pathname.startsWith('/admin') && user.role !== 'admin') {
+        router.push('/'); // normal users can't access admin routes
+      }
+      if (pathname === '/login' || pathname === '/register') {
+        // Redirect logged-in users away from login/register
+        router.push(user.role === 'admin' ? '/admin/dashboard' : '/');
       }
     }
-  }, [loading, user]);
+  }, [loading, user, pathname]);
 
   const register = async (name: string, email: string, password: string) => {
     try {
@@ -77,17 +78,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const { token, user: userData } = res.data;
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
-      console.log('Registered and set localStorage'); // Debug log
       setUser({ ...userData, token });
 
-      // Conditional redirect based on role
-      if (userData.role === 'admin') {
-        router.push('/admin/dashboard');
-      } else {
-        router.push('/');
-      }
+      router.push(userData.role === 'admin' ? '/admin/dashboard' : '/');
     } catch (error: any) {
-      console.error('Registration failed:', error);
       throw new Error(error.response?.data?.message || 'Registration failed');
     }
   };
@@ -102,17 +96,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const { token, user: userData } = res.data;
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
-      console.log('Logged in and set localStorage'); // Debug log
       setUser({ ...userData, token });
 
-      // Conditional redirect based on role
-      if (userData.role === 'admin') {
-        router.push('/admin/dashboard');
-      } else {
-        router.push('/');
-      }
+      router.push(userData.role === 'admin' ? '/admin/dashboard' : '/');
     } catch (error: any) {
-      console.error('Login failed:', error);
       throw new Error(error.response?.data?.message || 'Login failed');
     }
   };
@@ -131,8 +118,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
   return context;
 };
