@@ -85,13 +85,8 @@ A modern, full-stack e-commerce platform for authentic homemade food products bu
    cd frontend
    npm run dev
    ```
-6.   **Format Code**:  
-   ```bash 
-   cd frontend | backend
-   npm run format
 
-
-7. **Access the Application**
+6. **Access the Application**
    - 🌐 Frontend: http://localhost:3000
    - 🔧 Backend API: http://localhost:5000
 

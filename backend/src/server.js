@@ -10,8 +10,6 @@ const connectDB = require('./config/database');
 dotenv.config();
 
 const authRoutes = require('./routes/authRoutes');
-const categoryRoutes = require('./routes/categoryRoutes');
-const productRoutes = require('./routes/productRoutes');
 
 // Connect to MongoDB (with error handling)
 if (process.env.MONGODB_URI) {
@@ -45,8 +43,6 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.use('/api/auth', authRoutes);
-app.use('/api', categoryRoutes);
-app.use('/api', productRoutes);
 
 // Routes
 // app.use('/api/auth', require('./routes/auth'));
@@ -67,7 +63,7 @@ app.use('/api/banners', require('./routes/banners'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/admin/products', require('./routes/adminProducts'));
 app.use('/api/admin/orders', require('./routes/adminOrders'));
-// app.use('/api/admin/categories', require('./routes/adminCategories'));
+app.use('/api/admin/categories', require('./routes/adminCategories'));
 app.use(
   '/api/admin/homepage-content',
   require('./routes/adminHomePageContent')
@@ -108,4 +104,5 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
