@@ -19,9 +19,9 @@
       }
     ],
     "paths": {
-      "@/*": ["../old-frontend-1/src/*"]
+      "@/*": ["./src/*"]
     }
   },
-  "include": ["../old-frontend-1/next-env.d.ts", "../old-frontend-1/**/*.ts", "../old-frontend-1/**/*.tsx", "../old-frontend-1/.next/types/**/*.ts"],
-  "exclude": ["../old-frontend-1/node_modules"]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
 }
