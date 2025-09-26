@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
-import { Header } from '@/compoenents/layout/Header';
+import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { useDispatch, useSelector } from 'react-redux';
 import { register, clearError } from '@/redux/slices/authSlice';
