@@ -85,7 +85,7 @@ exports.addProduct = async (req, res) => {
         category,
         stock,
         status,
-        userId: userId,
+        userId,
       });
 
       const savedProduct = await newProduct.save({ session });

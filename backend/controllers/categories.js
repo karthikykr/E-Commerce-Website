@@ -41,7 +41,7 @@ exports.createCategory = async (req, res) => {
       image: imageData || '',
       parentCategory: parentCategory || null,
       sortOrder: sortOrder || 0,
-      userId: userId,
+      userId,
     });
 
     await category.save();
