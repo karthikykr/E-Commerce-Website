@@ -14,15 +14,17 @@ export default function LoginPage() {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const dispatch = useDispatch<AppDispatch>();
-  const { user, isLoading, error } = useSelector((state: RootState) => state.auth);
+  const { user, isLoading, error, isInitialized } = useSelector((state: RootState) => state.auth); // NEW: Add isInitialized
   const router = useRouter();
 
   useEffect(() => {
+    if (!isInitialized) return;
+
     if (!isLoading && user) {
       console.log('User already logged in', user);
       if (user.role === 'admin') {
         console.log('Redirecting logged-in user to dashboard');
-        //router.push('/admin/dashboard');
+        router.push('/admin/dashboard');
       } else {
         console.log('Redirecting logged-in customer to home');
         router.push('/');
@@ -31,12 +33,24 @@ export default function LoginPage() {
     return () => {
       dispatch(clearError());
     };
-  }, [user, isLoading, router, dispatch]);
+  }, [user, isLoading, isInitialized, router, dispatch]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     dispatch(login({ email, password }));
   };
+
+  // NEW: Show loading until initialized
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Initializing...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100">
