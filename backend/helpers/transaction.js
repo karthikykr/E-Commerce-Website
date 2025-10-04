@@ -10,7 +10,7 @@ exports.withTransaction = async (operation) => {
     try {
       await session.startTransaction();
       useTransaction = true;
-    } catch (err) {
+    } catch {
       console.warn(
         '⚠ Transactions not supported. Running without transaction.'
       );

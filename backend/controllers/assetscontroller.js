@@ -1,5 +1,5 @@
 const path = require('path');
-
+const { deleteImage } = require('../config/cloudinaryConfig');
 const Asset = require('../models/Asset');
 
 const getFileType = (file) => {

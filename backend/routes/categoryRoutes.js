@@ -50,7 +50,7 @@ router.patch(
 // Delete Category By Id
 router.delete(
   '/category/:id',
-  doAuthenticate(),
+  doAuthenticate(['admin']),
   validateObjectId('id'),
   validateResult,
   deleteCategory

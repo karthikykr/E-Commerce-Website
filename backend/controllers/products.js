@@ -17,7 +17,7 @@ exports.addProduct = async (req, res) => {
     if (req.body.data) {
       try {
         bodyData = JSON.parse(req.body.data);
-      } catch (parseError) {
+      } catch {
         const error = new Error('Invalid data format');
         error.statusCode = 400;
         throw error;
@@ -85,7 +85,7 @@ exports.addProduct = async (req, res) => {
         category,
         stock,
         status,
-        userId: userId,
+        userId,
       });
 
       const savedProduct = await newProduct.save({ session });
