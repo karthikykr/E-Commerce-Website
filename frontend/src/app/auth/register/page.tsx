@@ -24,7 +24,7 @@ export default function RegistrationPage() {
       console.log('User already logged in:', user);
       if (user.role === 'admin') {
         console.log('Redirecting logged-in admin to dashboard');
-        //router.push('admin/dashboard');
+       router.push('/admin/dashboard');
       } else {
         console.log('Redicting logged-in costomer to home');
         router.push('/');

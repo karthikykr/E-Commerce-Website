@@ -23,7 +23,7 @@ export default function LoginPage() {
     if (!isLoading && user) {
       console.log('User already logged in', user);
       if (user.role === 'admin') {
-        console.log('Redirecting logged-in user to dashboard');
+        console.log('Redirecting logged-in admin to dashboard');
         router.push('/admin/dashboard');
       } else {
         console.log('Redirecting logged-in customer to home');

@@ -101,38 +101,66 @@ exports.getCategoryById = async (req, res) => {
 // GET /api/category?userId=64ef3d...
 // Combine filters
 // GET /api/category?name=phone&userId=64ef3d...
+// search
+// GET /api/category?search=phone
+// pagination
+// GET /api/category?search=phone&parentCategory=123&page=2&limit=10
+
+
 exports.getCategories = async (req, res) => {
   try {
-    // Extract filters from query params
-    const { name, slug, parentCategory, userId } = req.query;
+    const {
+      name,
+      slug,
+      parentCategory,
+      userId,
+      search,
+      page = 1,
+      limit,
+      sortBy = 'sortOrder',    // default sort field
+      sortOrder = 'asc'        // default sort order
+    } = req.query;
 
     let filter = {};
 
-    if (name) {
-      filter.name = { $regex: new RegExp(name, 'i') };
+    if (name) filter.name = { $regex: new RegExp(name, 'i') };
+    if (slug) filter.slug = slug;
+    if (parentCategory) filter.parentCategory = parentCategory;
+    if (userId) filter.userId = userId;
+
+    if (search) {
+      filter.$or = [
+        { name: { $regex: new RegExp(search, 'i') } },
+        { slug: { $regex: new RegExp(search, 'i') } },
+        { description: { $regex: new RegExp(search, 'i') } }
+      ];
     }
 
-    if (slug) {
-      filter.slug = slug;
-    }
+    const pageNumber = parseInt(page, 10);
+    const sortOption = {};
+    sortOption[sortBy] = sortOrder === 'asc' ? 1 : -1;
 
-    if (parentCategory) {
-      filter.parentCategory = parentCategory;
-    }
+    let categories;
+    const total = await Category.countDocuments(filter);
 
-    if (userId) {
-      filter.userId = userId;
-    }
+    if (limit) {
+      const limitNumber = parseInt(limit, 10);
+      const skip = (pageNumber - 1) * limitNumber;
 
-    // Fetch categories with applied filters
-    const categories = await Category.find(filter).sort({
-      sortOrder: 1,
-      createdAt: -1,
-    });
+      categories = await Category.find(filter)
+        .sort(sortOption)
+        .skip(skip)
+        .limit(limitNumber);
+    } else {
+      categories = await Category.find(filter).sort(sortOption);
+    }
 
     res.status(200).json({
       success: true,
       count: categories.length,
+      total,
+      page: limit ? pageNumber : 1,
+      totalPages: limit ? Math.ceil(total / parseInt(limit, 10)) : 1,
       categories,
     });
   } catch (error) {
@@ -143,6 +171,7 @@ exports.getCategories = async (req, res) => {
     });
   }
 };
+
 
 //Update Category
 exports.updateCategory = async (req, res) => {
